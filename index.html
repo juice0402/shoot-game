@@ -57,7 +57,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .prog{height:12px;background:var(--panel);border:2px solid var(--edge);margin:6px 0}
 .prog i{display:block;height:100%;background:var(--go)}
 .lockbox .btn3{margin-top:6px;width:100%}
-.finger{position:absolute;z-index:4;pointer-events:none;display:flex;flex-direction:column;align-items:center;animation:tap 1s ease-in-out infinite}
+.finger{position:absolute;z-index:4;translate:-50% 0;pointer-events:none;display:flex;flex-direction:column;align-items:center;animation:tap 1s ease-in-out infinite}
 .finger span{font-size:30px;line-height:1;filter:drop-shadow(0 2px 0 #000)}
 .finger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
 @keyframes tap{50%{transform:translateY(6px)}}
@@ -793,7 +793,7 @@ let save=loadSave();setShip(save.cur);
 const hangar=$('hangar'),sortie=$('sortie'),bay=$('bay'),edCv=$('editor'),ed=edCv.getContext('2d');
 const SS=112,SC=56;
 const ssCv=document.createElement('canvas');ssCv.width=SS;ssCv.height=SS;const ssg=ssCv.getContext('2d');
-const FINGERURL=paint(16,20,[{m:'hull',r:2,p:[[5,0],[8,0],[8,9],[13,9],[15,12],[15,19],[3,19],[1,13],[3,10],[5,10]]},{m:'hull',r:1,p:[[8,10],[9,10],[9,14],[8,14]]}],{}).img.toDataURL();
+const FINGERURL=paint(16,20,[{m:'yel',r:2,p:[[5,0],[8,0],[8,9],[13,9],[15,12],[15,19],[3,19],[1,13],[3,10],[5,10]]},{m:'gold',r:1,p:[[8,10],[9,10],[9,14],[8,14]]}],{}).img.toDataURL();
 let EV={dpr:1,k:1,ox:0,oy:0,W:1,H:1,css:1},noteT=0,view=save.cur,swipe=null,swipeAt=0;
 const used=t=>save.load.reduce((n,v)=>n+(v&&v.t===t?1:0),0);
 const avail=t=>save.owned[t]-used(t);
@@ -838,7 +838,7 @@ function renderSlots(){
   });
   /* はじめての人：指のマークで「ここをタップ」（1回目だけ） */
   const f=$('finger'),first=SHIPS[view].slots.findIndex((_,i)=>!save.load[i]);
-  if(!save.tut&&own&&first>=0&&$('sheetBg').hidden){const [x,y]=slotCss(first);f.style.left=(x-30)+'px';f.style.top=(y+22)+'px';f.hidden=false;}else f.hidden=true;
+  if(!save.tut&&own&&first>=0&&$('sheetBg').hidden){const [x,y]=slotCss(first);f.style.left=x+'px';f.style.top=(y+20)+'px';f.hidden=false;}else f.hidden=true;
 }
 function renderEquip(){
   const own=haveShip(view),sh=SHIPS[view],pg=shipProg(view);
@@ -877,6 +877,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheetBg.hidden)close
 function shortEff(t){const m=MODS[t];return m.eff||m.desc;}
 function openList(i){
   const s=SLOTS[i],cur=save.load[i];
+  if(!save.tut){save.tut=1;persist();}/* 指の案内は1回だけ */
   const sh=openSheet(s.name+'につける装備',cur?'いま：'+MODS[cur.t].name:null);
   const list=TYPES.filter(t=>save.owned[t]>0);
   if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていないよ。ショップで買ってね'));
@@ -909,7 +910,7 @@ function openAim(i){
     b.addEventListener('click',()=>{v.d=d;persist();draw();drawEditor();});grid.appendChild(b);});};
   draw();sh.appendChild(grid);
   sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効くよ':'向いた方へ攻撃するよ'));
-  const row=el('div','sbtns'),ch=el('button','btn3','ほかの装備にかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
+  const row=el('div','sbtns'),ch=el('button','btn3','装備をかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
   ch.addEventListener('click',()=>{sheetOn=null;openList(i);});
   off.addEventListener('click',()=>{save.load[i]=null;persist();closeSheet();toast(SLOTS[i].name+'の'+m.name+'を外したよ');renderEquip();});
   row.append(ch,off);sh.appendChild(row);
