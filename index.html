@@ -590,7 +590,7 @@ Object.assign(PAS,{
   critd:{name:'会心ダメージ',c:'#ffcd48',max:5,desc:'会心のダメージ＋20%'},
   range:{name:'射程アップ',c:'#bfe9ff',max:5,desc:'射程が10%のびる'},
   knock:{name:'ノックバック',c:'#b8bfdc',max:5,desc:'当たった敵を押し返す力＋25%'},
-  multi:{name:'多弾',c:'#ff6a7a',max:3,desc:'すべての武器の弾の数＋1'},
+  multi:{name:'多弾',c:'#ff6a7a',max:3,desc:'弾を撃つ武器の弾の数＋1'},
   iframe:{name:'無敵時間',c:'#e3e5ff',max:5,desc:'被弾したあとの無敵時間＋15%'},
   skillg:{name:'必殺チャージ',c:'#a98bff',max:5,desc:'必殺ゲージのたまる速さ＋12%'},
   evade:{name:'回避',c:'#e6dcff',max:5,desc:'敵の攻撃を4%の確率でかわす'},
@@ -1838,7 +1838,7 @@ function openLabDetail(id){
   const o=LABK[id],lv=save.lab[id],mx=lv>=o.max,pr=labPrice(o,lv);
   const s=openSheet(o.name,'研究所','#ffd23f',()=>renderLab());
   const top=el('div','dtop'),img=el('img');img.alt='';img.src=LICON[id];
-  const info=el('div');info.append(el('p',null,o.per+'。'+(o.max>1?'1レベルごとに上がる':'1回だけ')));top.append(img,info);s.appendChild(top);
+  const info=el('div');info.append(el('p',null,o.per),el('p','dim',o.max>1?'1レベルごとに＋'+o.u+(o.unit==='/秒'?'/秒':o.unit):'1回だけ'));top.append(img,info);s.appendChild(top);
   const ul=el('ul','statl'),row=(a,b)=>{const li=el('li');li.append(el('span',null,a),el('b',null,b));ul.appendChild(li);};
   row('レベル',lv+' / '+o.max);row('いまの効果',labEff(o,lv));if(!mx)row('次の効果',labEff(o,lv+1));s.appendChild(ul);
   const buy=el('button','buybig');buy.type='button';
@@ -3051,6 +3051,8 @@ function items12(dt){
     else{c.vy=Math.min(40,c.vy+90*dt);if(c.vy<0||c.y<GH*0.62)c.y+=c.vy*dt;}
     if(Math.hypot(R.x-c.x,R.y-c.y)<18){c.dead=true;R.chestQ++;SFX.play('coin');}}
 }
+/* 画面に残った宝箱を全部受け取る（クリアの直前）。受け取った数を返す */
+function grabChests(){let n=0;for(const c of R.CH)if(!c.dead){c.dead=true;R.chestQ++;n++;}return n;}
 function ringDots(g,x,y,r,c,a,step,rot){const n=Math.max(8,Math.ceil(TAU*r/step));g.fillStyle=c;
   for(let i=0;i<n;i++){const an=rot+i/n*TAU;g.globalAlpha=a*((i%3)?0.5:1);px2(g,x+Math.cos(an)*r,y+Math.sin(an)*r);}g.globalAlpha=1;}
 function draw12Under(g,px,py){
@@ -3121,7 +3123,7 @@ function update(dt){
   moveEB(dt);contact();gems(dt);items12(dt);parts(dt);parts2(dt);stars(dt);
   [R.E,R.B,R.M,R.S,R.EB,R.G,R.P,R.A,R.FX,R.W,R.MN,R.GV,R.Z,R.L,R.X,R.Q,R.PD,R.RG,R.RH,R.HL,R.C,R.TU,R.TR,R.ES,R.HO,R.MT,R.SH,R.CH,R.TC].forEach(compact);
   if(R.hp<=0){endRun(false,false);return;}
-  if(R.t>=RUN_LEN){R.t=RUN_LEN;endRun(true,false);return;}
+  if(R.t>=RUN_LEN){R.t=RUN_LEN;if(grabChests()){openChest();return;}endRun(true,false);return;}/* 残った宝箱は終わる前に受け取る（#12 の点検） */
   if(R.chestQ>0)openChest();else if(R.pending>0)openLevelUp();/* 宝箱が先 */
 }
 
@@ -3345,31 +3347,34 @@ function openLevelUp(){
 function renderLvUp(fresh){
   overlay.textContent='';
   const wrap=el('div','cards');
-  lvChoices.forEach(o=>{const b=cardEl(o);o.btn=b;b.disabled=fresh||o.used||(banMode&&!!o.evo);if(banMode&&!o.evo)b.classList.add('banpick');
+  lvChoices.forEach(o=>{const b=cardEl(o);o.btn=b;const nb=!!o.evo||o.key==='f';b.disabled=fresh||o.used||(banMode&&nb);if(banMode&&!nb)b.classList.add('banpick');
     b.addEventListener('click',()=>pickChoice(o));wrap.appendChild(b);});
   const lv=R.lv-R.pending+1,used=lvChoices.some(o=>o.used);
   overlay.append(el('h2',null,'レベルアップ'),el('p','sub',banMode?'除外する強化をえらぶ（この出撃で二度と出ない）':R.pick>1?'Lv '+lv+' ・ 覚醒：2つえらぶ':used?'覚醒：あと1つえらぶ':'Lv '+lv+' ・ 1つえらぶ'),wrap);
   const acts=lvActs();if(acts)overlay.appendChild(acts);
   overlay.appendChild(buildSummary());
   overlay.hidden=false;
-  if(fresh)setTimeout(()=>{if(!lvChoices)return;lvChoices.forEach(o=>{if(o.btn&&!o.used&&!(banMode&&o.evo))o.btn.disabled=false;});},350);
+  if(fresh)setTimeout(()=>{if(!lvChoices)return;lvChoices.forEach(o=>{if(o.btn&&!o.used&&!(banMode&&(o.evo||o.key==='f')))o.btn.disabled=false;});},350);
 }
 /* えらび直し・スキップ・除外（研究所で買った回数だけ。買っていないときはボタンを出さない） */
 function lvActs(){const L=R.lab;if(!(L.r_reroll||L.r_skip||L.r_ban))return null;const row=el('div','lvacts');
   const mk=(on,label,n,fn,pressed)=>{if(!on)return;const b=el('button');b.type='button';b.append(document.createTextNode(label),el('span','num',String(n)));
     b.disabled=n<=0&&!pressed;if(pressed!=null)b.setAttribute('aria-pressed',pressed?'true':'false');b.addEventListener('click',fn);row.appendChild(b);};
-  mk(L.r_reroll,'えらび直し',R.rr,doReroll);mk(L.r_skip,'スキップ',R.sk,doSkip);mk(L.r_ban,'除外',R.bn,toggleBan,banMode);return row;}
+  mk(L.r_reroll,'えらび直し',R.rr,doReroll);mk(L.r_skip,'スキップ',R.sk,doSkip);mk(L.r_ban,'除外',R.bn,toggleBan,banMode);
+  if(L.r_skip&&lvChoices&&lvChoices.some(o=>o.used)){const b=row.children[L.r_reroll?1:0];if(b)b.disabled=true;}/* 覚醒で1つ取ったあとはスキップできない（#12 の点検） */
+  return row;}
 function doReroll(){if(!R||R.state!=='lvup'||!lvChoices||R.rr<=0)return;R.rr--;banMode=false;SFX.play('reroll');
   const keep=lvChoices.filter(o=>o.used);lvChoices=keep.concat(buildChoices(new Set(keep.map(o=>o.key)))).slice(0,3+keep.length);renderLvUp(false);}
-function doSkip(){if(!R||R.state!=='lvup'||!lvChoices||R.sk<=0)return;R.sk--;banMode=false;
+function doSkip(){if(!R||R.state!=='lvup'||!lvChoices||R.sk<=0||lvChoices.some(o=>o.used))return;R.sk--;banMode=false;
   R.gold+=10+2*R.lv;R.xp=Math.min(R.xp+R.need*0.1,R.need*0.999);/* スキップ：お金（10＋レベル×2）と、次のレベルまでの経験値の10% */
   SFX.play('coin');lvChoices=null;R.lvupN++;R.pending--;if(R.pending>0)openLevelUp();else resume();}
 function toggleBan(){if(!R||R.state!=='lvup'||!lvChoices)return;if(!banMode&&R.bn<=0)return;banMode=!banMode;renderLvUp(false);}
 function pickChoice(o){if(!R||R.state!=='lvup'||o.used)return;
-  if(banMode){if(o.evo||!lvChoices)return;R.ban.add(o.key);R.bn--;banMode=false;const i=lvChoices.indexOf(o);
+  if(banMode){if(o.evo||o.key==='f'||!lvChoices)return;/* 進化と修理は除外できない */R.ban.add(o.key);R.bn--;banMode=false;const i=lvChoices.indexOf(o);
     lvChoices[i]=oneChoice(new Set(lvChoices.map(q=>q.key)));renderLvUp(false);return;}
   o.used=true;o.fn();calcCS();
-  if(--R.pick>0){if(o.btn)o.btn.disabled=true;const sb=overlay.querySelector('.sub');if(sb)sb.textContent='覚醒：あと1つえらぶ';return;}/* オメガの覚醒 */
+  if(--R.pick>0){if(o.btn)o.btn.disabled=true;const sb=overlay.querySelector('.sub');if(sb)sb.textContent='覚醒：あと1つえらぶ';
+    const acts=overlay.querySelector('.lvacts');if(acts&&R.lab.r_skip){const b=acts.children[R.lab.r_reroll?1:0];if(b)b.disabled=true;}return;}/* オメガの覚醒（1つ取ったあとはスキップできない） */
   lvChoices=null;banMode=false;R.lvupN++;R.pending--;if(R.pending>0)openLevelUp();else resume();}
 let chestShown=null;
 function openChest(){
@@ -3409,7 +3414,7 @@ function endRun(clear,retreat){
   rc.fastBoss+=R.fastBoss;if(R.kills>rc.bestKills)rc.bestKills=R.kills;if(clear&&R.hp>=R.maxHp/2)rc.halfClear++;
   rc.meleeK+=R.meleeK;rc.evos+=R.evoN;
   /* #12：実績の記録と図鑑（出会った敵・たおした数） */
-  rc.kills+=R.kills;rc.bestLv=Math.max(rc.bestLv,R.lv);rc.chests+=R.chestN;rc.spTotal+=R.spN;rc.bestSpc=Math.max(rc.bestSpc,R.spcN);rc.nodmg+=R.nodmg||0;
+  rc.kills+=R.kills;rc.bestLv=Math.max(rc.bestLv,R.lv-(R.lab.r_lv||0));/* 先行訓練の分は数えない（#12 の点検） */rc.chests+=R.chestN;rc.spTotal+=R.spN;rc.bestSpc=Math.max(rc.bestSpc,R.spcN);rc.nodmg+=R.nodmg||0;
   for(const k in R.seenE)if(BOOK_E.some(b=>b.k===k))save.book.e[k]=(save.book.e[k]||0)+(R.kE[k]||0);
   if(clear)rc.stageMax=Math.max(rc.stageMax,R.stage);/* ステージ5（#13）まではオメガの条件は満たされない */
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
