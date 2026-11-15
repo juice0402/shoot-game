@@ -36,6 +36,12 @@ h1 small{font-size:11px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .gold b{font-size:11px;font-weight:400}
 .gold small{color:var(--dim);font-size:12px}
 .shopbtn{flex:none;padding:5px 10px;background:var(--panel);border:3px solid var(--go);color:var(--go);font-size:14px}
+.shiprow{display:flex;align-items:center;gap:6px;background:var(--panel);border:3px solid var(--edge);padding:3px 6px}
+.shiprow p{flex:1;min-width:0;margin:0;text-align:center;line-height:1.25}
+.shiprow b{display:block;font-weight:400;font-size:16px}
+.shiprow small{display:block;font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shiprow button{width:44px;height:40px;background:var(--panel-2);border:3px solid var(--edge);font-size:16px}
+.sub.unl{color:var(--go)}
 .bay{flex:1;min-height:200px;position:relative;background:var(--deep);border:3px solid var(--edge);overflow:hidden;touch-action:none}
 #editor{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
 .bayhint{position:absolute;left:8px;right:8px;top:5px;margin:0;font-size:11px;line-height:1.4;color:var(--dim);pointer-events:none;text-align:center}
@@ -70,7 +76,7 @@ h1 small{font-size:11px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .shopx>*{width:100%;max-width:460px;margin-inline:auto}
 .shead{display:flex;align-items:center;gap:8px}
 .shead h2{flex:1;margin:0;font-weight:400;font-size:22px;letter-spacing:.08em}
-.stabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .stabs button{padding:5px 2px;background:var(--panel);border:3px solid var(--edge);font-size:14px}
 .stabs button[aria-selected="true"]{border-color:var(--go);color:var(--go);background:var(--panel-2)}
 .sgrid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px;align-content:start;padding:2px}
@@ -169,6 +175,11 @@ h1 small{font-size:11px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
     <button id="shopBtn" class="shopbtn" type="button">ショップ</button>
   </header>
 
+  <div class="shiprow">
+    <button id="shipPrev" type="button" aria-label="前の機体">◀</button>
+    <p><b id="shipName">スタンダード</b><small id="shipSkill"></small></p>
+    <button id="shipNext" type="button" aria-label="次の機体">▶</button>
+  </div>
   <div class="bay" id="bay">
     <canvas id="editor" aria-label="シップの装備画面。場所をタップでえらぶ。装備をドラッグして動かす"></canvas>
     <p class="bayhint">装備を船までドラッグ ・ 丸いつまみを回すと向きが変わる</p>
@@ -297,16 +308,36 @@ const SUP={
   strike:{name:'空爆',ic:'撃',c:'#ffd23f',max:5,first:'敵が集まっている所に、上から光の柱を落とす',more:'威力と範囲がアップ、落ちるのが早くなる'},
   barrier:{name:'バリア',ic:'障',c:'#c4ffe3',max:3,first:'敵の攻撃を1回ふせぐ。しばらくすると張りなおす',more:'張りなおすのが早くなる'},
 };
-/* 装備の場所（自機の絵 64×80 の中心からのずれ） */
-const SLOTS=[
-  {name:'機首',x:0,y:-34,out:0},
-  {name:'左肩',x:-14,y:-10,out:7},
-  {name:'右肩',x:14,y:-10,out:1},
-  {name:'左翼',x:-25,y:8,out:6},
-  {name:'右翼',x:25,y:8,out:2},
-  {name:'左尾',x:-12,y:25,out:5},
-  {name:'右尾',x:12,y:25,out:3},
-];
+/* 機体（6機）。slots＝装備の場所（機体の絵の中心からのずれ・out＝外向き）。数字は 11/15 の案（名前は仮） */
+const SL=(name,x,y,out)=>({name,x,y,out});
+const SHIPS={
+  standard:{name:'スタンダード',c:'#4588f2',hp:1,spd:1,mag:1,rate:1,pow:1,gold:1,price:0,
+    desc:'バランス型。こまったときの1台',skill:'がんばり：やられそうなとき1回だけ HP1 でたえる',
+    start:[{t:'laser',s:1,d:0},{t:'laser',s:2,d:0}],
+    slots:[SL('機首',0,-34,0),SL('左肩',-14,-10,7),SL('右肩',14,-10,1),SL('左翼',-25,8,6),SL('右翼',25,8,2),SL('左尾',-12,25,5),SL('右尾',12,25,3)]},
+  rapid:{name:'ラピッド',c:'#ffcd48',hp:0.8,spd:1.05,mag:1,rate:1.25,pow:1,gold:1,price:800,
+    desc:'前に撃つのが得意。HPは低め',skill:'連射：すべての武器の発射が25%速い',
+    start:[{t:'gatling',s:0,d:0}],unlock:{k:'clears',n:1,txt:'1回クリアする'},
+    slots:[SL('機首',0,-34,0),SL('左前',-10,-18,7),SL('右前',10,-18,1),SL('左翼',-22,8,6),SL('右翼',22,8,2),SL('尾',0,26,4)]},
+  fortress:{name:'フォートレス',c:'#5dffb0',hp:1.6,spd:0.85,mag:1,rate:1,pow:1,gold:1,price:1200,
+    desc:'とてもかたい。動きはおそい',skill:'重装甲：体当たりで受けるダメージ40%へる',
+    start:[{t:'shield',s:0,d:0}],unlock:{k:'bosses',n:5,txt:'大型の敵を合計5体たおす'},
+    slots:[SL('機首',0,-32,0),SL('左肩',-16,-12,7),SL('右肩',16,-12,1),SL('左翼',-30,4,6),SL('右翼',30,4,2),SL('背中',0,8,4),SL('左尾',-16,26,5),SL('右尾',16,26,3)]},
+  collector:{name:'コレクター',c:'#ffd84a',hp:1,spd:1,mag:1.5,rate:1,pow:1,gold:1.25,price:1000,
+    desc:'経験値とお金を集めるのが得意',skill:'集金：吸い寄せ＋50%・お金＋25%',
+    start:[{t:'magnet',s:6,d:4}],unlock:{k:'goldTotal',n:5000,txt:'合計5000Gかせぐ'},
+    slots:[SL('機首',0,-30,0),SL('左腕',-22,-18,7),SL('右腕',22,-18,1),SL('左翼',-22,12,6),SL('右翼',22,12,2),SL('左尾',-12,25,5),SL('右尾',12,25,3)]},
+  blade:{name:'ブレード',c:'#a98bff',hp:0.9,spd:1.2,mag:1,rate:1,pow:1,gold:1,price:1500,blade:1.4,
+    desc:'速い。近くで戦うのが得意',skill:'刃：近接の剣と回転ノコの威力＋40%',
+    start:[{t:'sword',s:1,d:7},{t:'sword',s:2,d:1}],unlock:{k:'wmax',n:8,txt:'近接の剣か回転ノコをLv8にする'},
+    slots:[SL('機首',0,-34,0),SL('左肩',-12,-12,7),SL('右肩',12,-12,1),SL('左刃',-26,-10,7),SL('右刃',26,-10,1),SL('左尾',-12,24,5),SL('右尾',12,24,3)]},
+  carrier:{name:'キャリア',c:'#18b0b4',hp:1.1,spd:0.95,mag:1,rate:1,pow:1,gold:1,price:2000,carrier:1,
+    desc:'支援の味方といっしょに戦う',skill:'母艦：はじめから子機つき・レベルアップで支援が出やすい',
+    start:[{t:'laser',s:0,d:0}],unlock:{k:'sup5',n:3,txt:'支援を3つ最大レベル（Lv5）にする'},
+    slots:[SL('機首',0,-36,0),SL('左肩',-16,-10,7),SL('右肩',16,-10,1),SL('左翼',-28,10,6),SL('右翼',28,10,2),SL('左尾',-17,28,5),SL('右尾',17,28,3)]},
+};
+const SHIP_IDS=Object.keys(SHIPS);
+let SLOTS=SHIPS.standard.slots;
 const KIND={
   bug:{hp:4,spd:46*U,dmg:6,r:6.5*U,xp:1,col:['#ff3b4f','#fff36b','#ff8a5c']},
   tank:{hp:26,spd:27*U,dmg:12,r:9.5*U,xp:3,col:['#ff7a1a','#fff36b','#b84a0e']},
@@ -442,6 +473,57 @@ const SHIP_PARTS={
     {m:'glass',mir:1,p:[[31.5,13],[29,18],[28.5,27],[29.5,32],[31.5,34]]},
   ]},
 };
+Object.assign(SHIP_PARTS,{
+  rapid:{w:64,h:80,spec:[[30,20],[30,21],[31,22]],flames:[[28,35,70,10]],parts:[
+    {m:'yel',mir:1,r:2,p:[[27,26],[6,50],[2,58],[10,58],[27,46]]},
+    {m:'blue',mir:1,r:1.5,p:[[25,52],[16,66],[18,70],[27,62]]},
+    {m:'metal',mir:1,r:1.5,p:[[8,40],[10,36],[12,40],[12,56],[8,56]]},
+    {m:'blue',mir:1,r:1.2,p:[[26,30],[12,46],[13,48],[26,36]]},
+    {m:'hull',mir:1,r:5,p:[[31.5,0],[29,10],[27,24],[26,44],[27,64],[31.5,70]]},
+    {m:'blue',mir:1,r:1.2,p:[[31.5,46],[27,52],[27,55],[31.5,50]]},
+    {m:'metal',mir:1,r:2,p:[[27,62],[31.5,62],[31.5,72],[27,72]]},
+    {m:'glass',mir:1,p:[[31.5,16],[29.5,21],[29,30],[30,36],[31.5,38]]},
+  ]},
+  fortress:{w:72,h:80,spec:[[34,22],[34,23],[33,24]],flames:[[18,25,72,6],[46,53,72,6],[31,40,73,8]],parts:[
+    {m:'green',mir:1,r:3,p:[[22,24],[2,32],[0,58],[6,64],[22,62]]},
+    {m:'steel',mir:1,r:2.5,p:[[2,30],[10,26],[12,30],[12,62],[2,62]]},
+    {m:'yel',mir:1,r:1.2,p:[[3,44],[11,44],[11,48],[3,48]]},
+    {m:'metal',mir:1,r:2,p:[[16,58],[26,58],[26,72],[16,72]]},
+    {m:'steel',mir:1,r:7,p:[[35.5,4],[28,10],[22,22],[20,44],[22,64],[30,70],[35.5,70]]},
+    {m:'green',mir:1,r:2,p:[[35.5,44],[24,50],[24,54],[35.5,49]]},
+    {m:'metal',mir:1,r:2,p:[[30,64],[35.5,64],[35.5,74],[30,74]]},
+    {m:'glass',mir:1,r:3,p:[[35.5,16],[31,20],[30,30],[32,34],[35.5,35]]},
+  ]},
+  collector:{w:64,h:80,spec:[[30,24],[31,24],[29,25]],flames:[[20,24,68,7],[39,43,68,7]],parts:[
+    {m:'blue',mir:1,r:2,p:[[10,10],[6,14],[6,30],[12,36],[16,32],[12,26],[12,16]]},
+    {m:'hull',mir:1,r:1,p:[[6,8],[11,8],[11,13],[6,13]]},
+    {m:'gold',mir:1,r:2.5,p:[[24,36],[4,44],[2,54],[10,58],[26,54]]},
+    {m:'metal',mir:1,r:2,p:[[19,56],[25,56],[25,67],[19,67]]},
+    {m:'hull',r:7,f:g=>{E(g,31.5,40,17,24);}},
+    {m:'blue',r:2,f:g=>{g.beginPath();g.ellipse(31.5,46,17,6,0,0,Math.PI);g.fill();}},
+    {m:'glass',r:4,f:g=>E(g,31.5,28,7,9)},
+    {m:'yel',r:1.2,f:g=>E(g,31.5,56,4,3)},
+  ]},
+  blade:{w:64,h:80,spec:[[30,22],[30,23]],flames:[[22,26,68,8],[37,41,68,8]],parts:[
+    {m:'purple',mir:1,r:2,p:[[26,40],[4,18],[2,22],[16,46],[26,58]]},
+    {m:'hull',mir:1,r:1.2,p:[[4,18],[1,12],[8,22]]},
+    {m:'purple',mir:1,r:1.5,p:[[24,54],[12,66],[14,70],[26,62]]},
+    {m:'metal',mir:1,r:2,p:[[21,56],[27,56],[27,68],[21,68]]},
+    {m:'hull',mir:1,r:5,p:[[31.5,0],[29,14],[27,30],[26,50],[28,64],[31.5,68]]},
+    {m:'yel',mir:1,r:1.2,p:[[31.5,44],[27,50],[27,53],[31.5,48]]},
+    {m:'glass',mir:1,p:[[31.5,16],[29.5,22],[29,30],[30,35],[31.5,37]]},
+  ]},
+  carrier:{w:72,h:84,spec:[[35,10],[35,11],[34,12]],flames:[[14,20,74,7],[51,57,74,7],[30,41,76,8]],parts:[
+    {m:'green',mir:1,r:2.5,p:[[24,30],[2,40],[0,64],[8,70],[24,66]]},
+    {m:'teal',mir:1,r:1.5,p:[[4,46],[18,46],[18,58],[4,58]]},
+    {m:'metal',mir:1,r:2,p:[[12,62],[22,62],[22,76],[12,76]]},
+    {m:'hull',mir:1,r:7,p:[[35.5,2],[28,10],[24,26],[22,50],[24,70],[35.5,76]]},
+    {m:'metal',mir:1,r:1.5,p:[[35.5,34],[28,36],[28,62],[35.5,62]]},
+    {m:'yel',r:1,f:g=>{RC(g,35,38,2,4);RC(g,35,46,2,4);RC(g,35,54,2,4);}},
+    {m:'metal',mir:1,r:2,p:[[29,70],[35.5,70],[35.5,78],[29,78]]},
+    {m:'glass',mir:1,r:3,p:[[35.5,8],[32,12],[31,22],[35.5,26]]},
+  ]},
+});
 /* 炎：白→黄→オレンジ→赤の段（ゆらゆら4コマ） */
 function flameFrames(w,h,list,extra){
   const cols=['#fffff0','#ffec8c','#ffb032','#f0601e','#aa2828'];
@@ -613,7 +695,8 @@ function planet(r,palH,bands,ring,seed){
   g.putImageData(im,0,0);return c;
 }
 /* 絵は最初に1回だけ作ってキャッシュ（毎フレーム作らない） */
-const SHIP=makeShip('standard');
+const SHIPSPR={};SHIP_IDS.forEach(k=>{SHIPSPR[k]=makeShip(k);});
+const shipSil=k=>{const s=SHIPSPR[k],c=document.createElement('canvas');c.width=s.w;c.height=s.h;const g=c.getContext('2d');g.drawImage(s.img,0,0);g.globalCompositeOperation='source-in';g.fillStyle='#1d2052';g.fillRect(0,0,s.w,s.h);return c;};
 const ESPR={};['bug','tank','shooter','boss','boss2'].forEach(k=>{const P=ENEMY_PARTS[k];ESPR[k]=paint(P.w,P.h,P.parts,{spec:P.spec,flash:1,ice:1});});
 function glow(rad,rgb,a){
   const s=rad*2+1,c=document.createElement('canvas');c.width=s;c.height=s;const g=c.getContext('2d');
@@ -653,9 +736,14 @@ const PLANETS=[planet(56,['#120c2a','#22184a','#3a2a6e','#5a4496','#8a74c4'],5,[
   planet(40,['#0a1a1a','#123232','#1e5050','#347474','#62a0a0'],3,null,12)];
 
 /* ---------- save ---------- */
+/* 持っている装備は全機体で共通（数を持つ形：どの機体も、持っている数までつけられる）。つけ方は機体ごとに覚える */
 const KEY='shoot-proto-v1';
+const emptyLoad=id=>SHIPS[id].slots.map(()=>null);
+const startLoad=id=>{const l=emptyLoad(id);SHIPS[id].start.forEach(v=>{l[v.s]={t:v.t,d:v.d};});return l;};
 function freshSave(){const owned={};TYPES.forEach(t=>{owned[t]=0;});owned.laser=2;
-  return {gold:300,owned,load:[null,{t:'laser',d:0},{t:'laser',d:0},null,null,null,null],best:null};}
+  const ships={};SHIP_IDS.forEach(id=>{ships[id]={have:id==='standard',eq:id==='standard'?startLoad(id):emptyLoad(id)};});
+  return {v:2,gold:300,owned,ships,cur:'standard',best:null,rec:{clears:0,bosses:0,goldTotal:0,wmax:{},sup5:[]}};}
+const cleanLoad=(id,arr)=>SHIPS[id].slots.map((_,i)=>{const v=Array.isArray(arr)?arr[i]:null;return v&&MODS[v.t]&&Number.isInteger(v.d)&&v.d>=0&&v.d<8?{t:v.t,d:v.d}:null;});
 function loadSave(){
   const s=freshSave();
   try{
@@ -664,15 +752,26 @@ function loadSave(){
       if(o&&typeof o==='object'){
         if(Number.isFinite(o.gold))s.gold=Math.max(0,Math.floor(o.gold));
         if(o.owned)TYPES.forEach(t=>{if(Number.isFinite(o.owned[t]))s.owned[t]=clamp(Math.floor(o.owned[t]),0,99);});
-        if(Array.isArray(o.load))s.load=SLOTS.map((_,i)=>{const v=o.load[i];return v&&MODS[v.t]&&Number.isInteger(v.d)&&v.d>=0&&v.d<8?{t:v.t,d:v.d}:null;});
+        if(o.ships&&typeof o.ships==='object')SHIP_IDS.forEach(id=>{const v=o.ships[id];if(v&&typeof v==='object'){s.ships[id].have=id==='standard'||!!v.have;s.ships[id].eq=cleanLoad(id,v.eq);}});
+        else if(Array.isArray(o.load))s.ships.standard.eq=cleanLoad('standard',o.load);   /* 試作4のセーブ：今の装備をスタンダード機へ */
+        if(SHIPS[o.cur]&&s.ships[o.cur].have)s.cur=o.cur;
+        if(Array.isArray(o.seen))s.seen=o.seen.filter(k=>SHIPS[k]);
         if(o.best&&Number.isFinite(o.best.t))s.best={t:o.best.t,kills:o.best.kills|0,clear:!!o.best.clear};
+        const r=o.rec;if(r&&typeof r==='object'){
+          ['clears','bosses','goldTotal'].forEach(k=>{if(Number.isFinite(r[k]))s.rec[k]=Math.max(0,Math.floor(r[k]));});
+          if(r.wmax)TYPES.forEach(t=>{if(Number.isFinite(r.wmax[t]))s.rec.wmax[t]=clamp(r.wmax[t]|0,0,WMAX);});
+          if(Array.isArray(r.sup5))s.rec.sup5=r.sup5.filter(k=>SUP[k]).filter((k,i,a)=>a.indexOf(k)===i);}
       }}
   }catch(e){}
-  TYPES.forEach(t=>{let n=0;s.load=s.load.map(v=>{if(v&&v.t===t){n++;if(n>s.owned[t])return null;}return v;});});
+  SHIP_IDS.forEach(id=>{const sh=s.ships[id];TYPES.forEach(t=>{let n=0;sh.eq=sh.eq.map(v=>{if(v&&v.t===t){n++;if(n>s.owned[t])return null;}return v;});});});
   return s;
 }
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
-let save=loadSave();
+function persist(){try{const o=Object.assign({},save);delete o.load;localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
+/* 解放の条件と進み */
+function shipProg(id){const u=SHIPS[id].unlock;if(!u)return {ok:true,cur:0,n:0};const r=save.rec;
+  const cur=u.k==='wmax'?Math.max(r.wmax.sword||0,r.wmax.saw||0):u.k==='sup5'?r.sup5.length:r[u.k];return {ok:cur>=u.n,cur:Math.min(cur,u.n),n:u.n};}
+function setShip(id){save.cur=id;SLOTS=SHIPS[id].slots;save.load=save.ships[id].eq;}
+let save=loadSave();setShip(save.cur);
 
 /* ---------- hangar ---------- */
 const hangar=$('hangar'),sortie=$('sortie'),bay=$('bay'),edCv=$('editor'),ed=edCv.getContext('2d');
@@ -710,7 +809,7 @@ function handlePos(){
 }
 function drawEditor(){
   ssg.clearRect(0,0,SS,SS);
-  ssg.drawImage(SHIP.fl[0],SC-SHIP.cx,SC-SHIP.cy);ssg.drawImage(SHIP.img,SC-SHIP.cx,SC-SHIP.cy);
+  const SHIP=SHIPSPR[save.cur];ssg.drawImage(SHIP.fl[0],SC-SHIP.cx,SC-SHIP.cy);ssg.drawImage(SHIP.img,SC-SHIP.cx,SC-SHIP.cy);
   save.load.forEach((v,i)=>{if(!v||i===liftSlot)return;const m=MSPR[v.t][v.d];ssg.drawImage(m.img,SC+SLOTS[i].x-m.cx,SC+SLOTS[i].y-m.cy);});
   const g=ed,{W,H,k,ox,oy,dpr}=EV;
   g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;
@@ -794,8 +893,11 @@ function renderEquip(){
   const any=save.load.some(Boolean),btn=$('launchBtn');
   btn.disabled=!any;btn.textContent=any?'出撃する':'装備をつけてね';
 }
+function switchShip(step){const own=SHIP_IDS.filter(id=>save.ships[id].have);if(own.length<2){toast('ほかの機体はショップの「機体」で買えるよ');return;}
+  const i=own.indexOf(save.cur);setShip(own[(i+step+own.length)%own.length]);sel=0;persist();renderAll();}
 function renderAll(){
   $('goldNum').textContent=save.gold;
+  const sh=SHIPS[save.cur];$('shipName').textContent=sh.name;$('shipName').style.color=sh.c;$('shipSkill').textContent=sh.skill;
   const b=save.best;
   $('bestLine').textContent=b?'さいこう記録：'+fmt(b.t)+' 生存・'+b.kills+'体'+(b.clear?'（クリア）':''):'さいこう記録：まだなし';
   renderEquip();
@@ -804,10 +906,11 @@ function renderAll(){
 
 /* ---------- shop ---------- */
 let shopCat='all',shopSel='laser',shopNote='';
-const SHOP_TABS=[['all','すべて'],['atk','攻撃'],['def','防御'],['sup','補助']];
-function shopList(){return TYPES.filter(t=>shopCat==='all'||MODS[t].cat===shopCat);}
+const SHOP_TABS=[['all','すべて'],['ship','機体'],['atk','攻撃'],['def','防御'],['sup','補助']];
+function shopList(){return shopCat==='ship'?SHIP_IDS:TYPES.filter(t=>shopCat==='all'||MODS[t].cat===shopCat);}
 function renderShop(){
   $('goldNum2').textContent=save.gold;
+  if(shopCat==='ship'){renderShipShop();return;}
   const tabs=$('shopTabs');tabs.textContent='';
   SHOP_TABS.forEach(([k,label])=>{const b=el('button',null,label);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',shopCat===k?'true':'false');
     b.addEventListener('click',()=>{shopCat=k;const l=shopList();if(!l.includes(shopSel))shopSel=l[0];shopNote='';renderShop();});tabs.appendChild(b);});
@@ -838,6 +941,33 @@ function renderShop(){
     shopNote=m.name+'を買ったよ！格納庫でドラッグしてつけてね';renderAll();});
   row.append(own,buy);dt.appendChild(row);
   dt.appendChild(el('p','snote',shopNote));
+}
+function buyShip(id){const sh=SHIPS[id];if(save.ships[id].have||!shipProg(id).ok||save.gold<sh.price)return;
+  save.gold-=sh.price;save.ships[id].have=true;sh.start.forEach(v=>{if(save.owned[v.t]<sh.start.filter(w=>w.t===v.t).length)save.owned[v.t]++;});
+  save.ships[id].eq=startLoad(id);persist();shopNote=sh.name+'を手に入れた！格納庫の ◀ ▶ で切りかえてね';renderAll();}
+function renderShipShop(){
+  const tabs=$('shopTabs');tabs.textContent='';
+  SHOP_TABS.forEach(([k,label])=>{const b=el('button',null,label);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',shopCat===k?'true':'false');
+    b.addEventListener('click',()=>{shopCat=k;const l=shopList();if(!l.includes(shopSel))shopSel=l[0];shopNote='';renderShop();});tabs.appendChild(b);});
+  if(!SHIPS[shopSel])shopSel='standard';
+  const grid=$('shopGrid');grid.textContent='';
+  SHIP_IDS.forEach(id=>{const sh=SHIPS[id],st=save.ships[id],pg=shipProg(id),b=el('button','sitem');b.type='button';b.style.setProperty('--c',sh.c);
+    b.setAttribute('aria-pressed',shopSel===id?'true':'false');
+    const img=el('img');img.alt='';img.src=pg.ok||st.have?SHIPSPR[id].img.toDataURL():shipSil(id).toDataURL();
+    b.append(img,el('span',null,sh.name),el('small',st.have?'short':save.gold<sh.price||!pg.ok?'short':null,st.have?'持っている':pg.ok?sh.price+'G':'まだ'));
+    b.addEventListener('click',()=>{shopSel=id;shopNote='';renderShop();});grid.appendChild(b);});
+  const id=shopSel,sh=SHIPS[id],st=save.ships[id],pg=shipProg(id),dt=$('shopDetail');dt.textContent='';dt.style.setProperty('--c',sh.c);
+  const top=el('div','dtop'),img=el('img');img.alt='';img.src=(pg.ok||st.have?SHIPSPR[id].img:shipSil(id)).toDataURL();
+  const info=el('div');info.append(el('b',null,sh.name),el('span','cat','機体'),el('p',null,sh.desc+'。'+sh.skill+'。装備の場所 '+sh.slots.length+'か所'));
+  top.append(img,info);dt.appendChild(top);
+  const row=el('div','dbuy'),own=el('span','own');
+  if(sh.unlock)own.append(document.createTextNode('解放：'+sh.unlock.txt+' '),el('b','num',pg.cur+'/'+pg.n));else own.textContent='はじめから持っている';
+  const buy=el('button','buybig');buy.type='button';
+  if(st.have){buy.disabled=true;buy.textContent='持っている';}
+  else if(!pg.ok){buy.disabled=true;buy.textContent='まだ解放されていない';}
+  else if(save.gold>=sh.price){buy.append(el('span','num',String(sh.price)),document.createTextNode('G で買う'));buy.addEventListener('click',()=>buyShip(id));}
+  else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(sh.price-save.gold)),document.createTextNode('G'));}
+  row.append(own,buy);dt.appendChild(row);dt.appendChild(el('p','snote',shopNote));
 }
 function openShop(t){if(t)shopSel=t;shopNote='';renderShop();$('shopSheet').hidden=false;}
 function closeShop(){$('shopSheet').hidden=true;renderAll();}
@@ -916,6 +1046,7 @@ $('rotL').addEventListener('click',()=>{const v=save.load[sel];if(!v)return;v.d=
 $('rotR').addEventListener('click',()=>{const v=save.load[sel];if(!v)return;v.d=(v.d+1)%8;persist();renderEquip();});
 $('unequip').addEventListener('click',()=>{const v=save.load[sel];if(!v)return;save.load[sel]=null;persist();toast(SLOTS[sel].name+'の'+MODS[v.t].name+'を外したよ');renderEquip();});
 $('shopBtn').addEventListener('click',()=>openShop());
+$('shipPrev').addEventListener('click',()=>switchShip(-1));$('shipNext').addEventListener('click',()=>switchShip(1));
 $('shopClose').addEventListener('click',closeShop);
 $('debugGold').addEventListener('click',()=>{save.gold+=1000;persist();shopNote='試作用に1000Gふやしたよ';renderAll();});
 $('launchBtn').addEventListener('click',()=>startRun());
@@ -940,9 +1071,9 @@ function setupCanvas(){
 window.addEventListener('resize',()=>{if(R)fitCanvas();});
 
 const xpNeed=lv=>Math.round(6+lv*4+lv*lv*0.6);
-const dmgMul=()=>1+0.1*R.pas.power;
+const dmgMul=()=>(1+0.1*R.pas.power)*R.sh.pow;
 function stat(t){
-  const lv=R.tlv[t]||1,c=1-0.08*R.pas.clock,m=dmgMul(),p=Math.pow;
+  const lv=R.tlv[t]||1,c=(1-0.08*R.pas.clock)/R.sh.rate,m=dmgMul()*(R.sh.blade&&(t==='sword'||t==='saw')?R.sh.blade:1),p=Math.pow;
   switch(t){
     case 'laser':return {cd:0.5*p(0.9,lv-1)*c,dmg:(6+2*(lv-1)+(lv>=8?6:0))*m,n:lv>=6?3:lv>=3?2:1,pierce:lv>=7?2:lv>=4?1:0,spd:400*U};
     case 'gatling':return {cd:0.12*p(0.96,lv-1)*(lv>=3?0.88:1)*(lv>=6?0.88:1)*c,dmg:(2.6+0.6*(lv-1))*m,n:lv>=5?2:1,pierce:lv>=8?1:0,spd:420*U,spread:0.13};
@@ -972,13 +1103,14 @@ function startRun(){
   const cnt=t=>mods.filter(m=>m.t===t).length;
   const bonus={hp:15*cnt('armor'),speed:0.1*cnt('booster'),magnet:0.3*cnt('magnet'),regen:0.3*cnt('repair'),gold:0.1*cnt('coin')};
   const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,GH),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
-  const maxHp=BASE_HP+bonus.hp;
-  R={t:0,hp:maxHp,maxHp,x:GW/2,y:Math.round(GH*0.78),inv:0,hurtFx:0,lv:1,xp:0,need:xpNeed(1),kills:0,bossKills:0,
+  const sh=SHIPS[save.cur],maxHp=Math.round(BASE_HP*sh.hp)+bonus.hp;
+  R={sh,spr:SHIPSPR[save.cur],guts:save.cur==='standard',t:0,hp:maxHp,maxHp,x:GW/2,y:Math.round(GH*0.78),inv:0,hurtFx:0,lv:1,xp:0,need:xpNeed(1),kills:0,bossKills:0,
     E:[],B:[],EB:[],M:[],G:[],P:[],S:[],A:[],D:[],FX:[],W:[],MN:[],GV:[],Z:[],L:[],mods,tlv,bonus,
     pas:{magnet:0,speed:0,armor:0,clock:0,power:0,regen:0,xp:0,gold:0},sup:{wing:0,drone:0,strike:0,barrier:0},
     wingT:0,strikeT:0,bar:false,barCd:0,
     acc:0,pending:0,state:'play',bossAt:[150,270],bossN:0,waveAt:60,target:null,stars,X:[],neb:rand(0,1024),pl:{i:(Math.random()*PLANETS.length)|0,x:rand(40,GW-160),y:rand(-40,GH*0.4)}};
   sdrag=null;keys.clear();hc={};last=performance.now();
+  if(sh.carrier){R.sup.drone=1;}
   cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);hud();
 }
 
@@ -1054,12 +1186,13 @@ function hurt(d){
   if(R.inv>0)return;
   if(R.bar){R.bar=false;R.barCd=Math.max(5,14-3*(R.sup.barrier-1));R.inv=0.6;burst(R.x,R.y,14,['#c4ffe3','#5dffb0','#ffffff']);return;}
   R.hp=Math.max(0,R.hp-d);R.inv=0.55;R.hurtFx=0.18;burst(R.x,R.y,10,['#ff2d6f','#ffffff']);
+  if(R.hp<=0&&R.guts){R.guts=false;R.hp=1;R.inv=1.2;showBanner('がんばり！ HP1 でたえた');}
 }
 function gainXp(v){R.xp+=v*(1+0.1*R.pas.xp);while(R.xp>=R.need){R.xp-=R.need;R.lv++;R.need=xpNeed(R.lv);R.pending++;}}
 
 /* update steps */
 function movePlayer(dt){
-  const spd=185*U*(1+0.12*R.pas.speed+R.bonus.speed);let kx=0,ky=0;
+  const spd=185*U*R.sh.spd*(1+0.12*R.pas.speed+R.bonus.speed);let kx=0,ky=0;
   if(keys.has('ArrowLeft')||keys.has('a'))kx-=1;if(keys.has('ArrowRight')||keys.has('d'))kx+=1;
   if(keys.has('ArrowUp')||keys.has('w'))ky-=1;if(keys.has('ArrowDown')||keys.has('s'))ky+=1;
   if(kx||ky){const l=Math.hypot(kx,ky);R.x+=kx/l*spd*dt;R.y+=ky/l*spd*dt;}
@@ -1302,10 +1435,10 @@ function moveEB(dt){
 function contact(){
   if(R.inv>0)return;
   near(R.x,R.y,18,e=>{const dx=e.x-R.x,dy=e.y-R.y,rr=e.r+7.5;
-    if(dx*dx+dy*dy<=rr*rr){hurt(e.dmg);const d=Math.hypot(dx,dy)||1;e.kx+=dx/d*140*U;e.ky+=dy/d*140*U;return true;}});
+    if(dx*dx+dy*dy<=rr*rr){hurt(e.dmg*(save.cur==='fortress'?0.6:1));const d=Math.hypot(dx,dy)||1;e.kx+=dx/d*140*U;e.ky+=dy/d*140*U;return true;}});
 }
 function gems(dt){
-  const mag=36*U*(1+0.4*R.pas.magnet+R.bonus.magnet),damp=Math.pow(0.05,dt);
+  const mag=36*U*R.sh.mag*(1+0.4*R.pas.magnet+R.bonus.magnet),damp=Math.pow(0.05,dt);
   for(const g of R.G){if(g.dead)continue;
     const dx=R.x-g.x,dy=R.y-g.y,d=Math.hypot(dx,dy)||1;
     if(g.pull||d<mag){g.pull=true;g.sp+=460*U*dt;const st=Math.min(g.sp*dt,d);g.x+=dx/d*st;g.y+=dy/d*st;}
@@ -1401,7 +1534,7 @@ function draw(){
     g.globalAlpha=1;}
   const blink=R.inv>0&&((R.t*16|0)%2===0);
   if(!blink&&R.state!=='over'){
-    drawShipAt(g,SHIP,R.mods,px,py,R.t);
+    drawShipAt(g,R.spr,R.mods,px,py,R.t);
     if(R.bar){const n=72;g.fillStyle='#c4ffe3';
       for(let i=0;i<n;i++){const an=i/n*TAU;g.globalAlpha=((i+((R.t*10)|0))%3===0)?0.95:0.45;px2(g,px+Math.cos(an)*44,py+Math.sin(an)*46);}
       g.globalAlpha=1;}
@@ -1469,7 +1602,7 @@ function buildChoices(){
     fn:()=>{R.pas[k]++;if(k==='armor'){R.maxHp+=20;R.hp=Math.min(R.maxHp,R.hp+20);}}});});
   Object.keys(SUP).forEach(k=>{const s=SUP[k],lv=R.sup[k];if(lv>=s.max)return;
     const desc=lv===0?s.first:(lv+1===s.max&&s.last)?s.last:s.more;
-    pool.push({w:lv===0?1.3:1.1,c:s.c,icon:SICON[k]?{img:SICON[k]}:{ch:s.ic},name:s.name,tag:lv?'支援':'支援・新',lv,max:s.max,desc,
+    pool.push({w:(lv===0?1.3:1.1)*(R.sh.carrier?2:1),c:s.c,icon:SICON[k]?{img:SICON[k]}:{ch:s.ic},name:s.name,tag:lv?'支援':'支援・新',lv,max:s.max,desc,
       fn:()=>{R.sup[k]++;if(k==='wing'&&lv===0)R.wingT=1.5;if(k==='strike'&&lv===0)R.strikeT=1;if(k==='barrier'&&lv===0)R.bar=true;}});});
   const out=[];
   while(out.length<3&&pool.length){let tot=0;pool.forEach(o=>{tot+=o.w;});let r=Math.random()*tot,i=0;
@@ -1523,8 +1656,14 @@ function endRun(clear,retreat){
   if(!R||R.state==='over')return;
   R.state='over';sdrag=null;
   const gk=Math.floor(R.kills/2),gt=Math.floor(R.t/2),gb=R.bossKills*50,gc=clear?300:0,base=gk+gt+gb+gc;
-  const gi=Math.floor(base*(0.15*R.pas.gold+R.bonus.gold)),total=base+gi;
+  const gi=Math.floor(base*((1+0.15*R.pas.gold+R.bonus.gold)*R.sh.gold-1)),total=base+gi;
   save.gold+=total;
+  /* 記録（機体の解放に使う） */
+  const rc=save.rec;if(clear)rc.clears++;rc.bosses+=R.bossKills;rc.goldTotal+=total;
+  TYPES.forEach(t=>{if(R.tlv[t]>(rc.wmax[t]||0))rc.wmax[t]=R.tlv[t];});
+  Object.keys(SUP).forEach(k=>{if(R.sup[k]>=SUP[k].max&&!rc.sup5.includes(k))rc.sup5.push(k);});
+  const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
+  if(newly.length){save.seen=(save.seen||[]).concat(newly);}
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
   persist();
@@ -1532,6 +1671,7 @@ function endRun(clear,retreat){
   overlay.append(el('h2',null,clear?'クリア！':retreat?'撤退':'撃墜…'),
     el('p','sub',clear?'5分 生きのびた！':retreat?'とちゅうで格納庫にもどったよ':'組みなおして、また出撃しよう'));
   if(isBest)overlay.appendChild(el('span','tagnew','新記録'));
+  if(newly.length)overlay.appendChild(el('p','sub unl','新しい機体が解放された！ショップの「機体」で買えるよ：'+newly.map(id=>SHIPS[id].name).join('・')));
   const ul=el('ul','stats');
   const row=(k,v,cls)=>{const li=el('li',cls||null);li.append(el('span',null,k),el('b',null,v));ul.appendChild(li);};
   row('生きのびた時間',fmt(R.t));row('撃破',R.kills+'体');row('到達レベル','Lv '+R.lv);
