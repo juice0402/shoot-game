@@ -924,7 +924,7 @@ else window.addEventListener('resize',layoutEditor);
 
 /* ---------- sortie ---------- */
 const stage=$('stage'),cv=$('game'),ctx=cv.getContext('2d'),overlay=$('overlay'),banner=$('banner');
-let GH=500,scale=1,R=null,sdrag=null,raf=0,last=0,nextId=1,grid=null,gCols=0,gRows=0,bannerT=0,hc={};
+let gMaxR=33,GH=500,scale=1,R=null,sdrag=null,raf=0,last=0,nextId=1,grid=null,gCols=0,gRows=0,bannerT=0,hc={};
 const keys=new Set();
 
 function fitCanvas(){
@@ -1010,12 +1010,13 @@ function buildGrid(){
   const c=Math.ceil((GW+PADG*2)/CELL),r=Math.ceil((GH+PADG*2)/CELL);
   if(!grid||c!==gCols||r!==gRows){gCols=c;gRows=r;grid=Array.from({length:c*r},()=>[]);}
   else for(let i=0;i<grid.length;i++)grid[i].length=0;
-  for(const e of R.E){if(e.dead)continue;
+  gMaxR=33;
+  for(const e of R.E){if(e.dead)continue;if(e.r>gMaxR)gMaxR=e.r;
     const cx=clamp(Math.floor((e.x+PADG)/CELL),0,gCols-1),cy=clamp(Math.floor((e.y+PADG)/CELL),0,gRows-1);
     grid[cy*gCols+cx].push(e);}
 }
 function near(x,y,r,fn){
-  const rr=r+33;
+  const rr=r+gMaxR+2;/* 大型の敵（当たり54）もとらえる */
   const x0=clamp(Math.floor((x-rr+PADG)/CELL),0,gCols-1),x1=clamp(Math.floor((x+rr+PADG)/CELL),0,gCols-1);
   const y0=clamp(Math.floor((y-rr+PADG)/CELL),0,gRows-1),y1=clamp(Math.floor((y+rr+PADG)/CELL),0,gRows-1);
   for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++){const cell=grid[cy*gCols+cx];
