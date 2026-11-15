@@ -715,10 +715,10 @@ const MODPARTS={
   chainsaw:[{m:'gold',r:2,p:[[6,12],[17,12],[17,21],[6,21]]},{m:'steel',r:2,p:[[8.5,13],[8.5,2],[11.5,-1],[14.5,2],[14.5,13]]},{m:'yel',r:0.6,f:g=>{for(let y=1;y<12;y+=3){RC(g,7,y,1.5,1.5);RC(g,15.5,y,1.5,1.5);}}},{m:'metal',r:1,p:[[9,15],[14,15],[14,18],[9,18]]}],
   scythe:[MB('purple'),{m:'metal',r:1,p:[[13,16],[11,16],[10,2],[12,2]]},{m:'purple',r:1.5,f:g=>{g.beginPath();g.moveTo(10,1);g.quadraticCurveTo(20,-1,21,10);g.quadraticCurveTo(17,3,10,4.5);g.closePath();g.fill();}}],
   turret:[{m:'steel',r:2,p:[[4,10],[19,10],[19,20],[4,20]]},{m:'blue',r:3,f:g=>E(g,11.5,11,5)},{m:'metal',r:1,p:[[10.5,0],[12.5,0],[12.5,9],[10.5,9]]},{m:'yel',r:1,f:g=>{RC(g,5,17,2,2);RC(g,17,17,2,2);}}],
-  minefield:[{m:'metal',r:1.5,p:[[2,13],[21,13],[21,17],[2,17]]},{m:'steel',r:2,f:g=>{E(g,5.5,9,3.2);E(g,11.5,6,3.2);E(g,17.5,9,3.2);}},{m:'yel',r:0.8,f:g=>{E(g,5.5,9,1);E(g,11.5,6,1);E(g,17.5,9,1);}}],
-  satellite:[MB('steel'),{m:'blue',r:1,mir:1,p:[[1,4],[8,4],[8,10],[1,10]]},{m:'metal',r:0.8,f:g=>{RC(g,4.5,4,1,6);RC(g,18,4,1,6);}},{m:'hull',r:2,f:g=>E(g,11.5,7,3.5)},{m:'glass',r:1,p:[[11,0],[12,0],[12,4],[11,4]]}],
+  minefield:[{m:'metal',r:1.5,p:[[1,15],[22,15],[22,19],[1,19]]},{m:'steel',r:3.5,f:g=>{E(g,5.5,10.5,4);E(g,11.5,6,4);E(g,17.5,10.5,4);}},{m:'metal',r:0.8,f:g=>{RC(g,11,1,1.5,2);RC(g,5,5.5,1.5,2);RC(g,17,5.5,1.5,2);}},{m:'yel',flat:'#ffd84a',noSeam:1,f:g=>{E(g,5.5,10.5,1.3);E(g,11.5,6,1.3);E(g,17.5,10.5,1.3);}}],
+  satellite:[MB('blue'),{m:'blue',r:1,mir:1,p:[[1,4],[8,4],[8,10],[1,10]]},{m:'metal',r:0.8,f:g=>{RC(g,4.5,4,1,6);RC(g,18,4,1,6);}},{m:'hull',r:2,f:g=>E(g,11.5,7,3.5)},{m:'glass',r:1,p:[[11,0],[12,0],[12,4],[11,4]]}],
   micro:[{m:'yel',r:2,p:[[4,6],[19,6],[19,19],[4,19]]},{m:'metal',r:1,f:g=>{for(let i=0;i<3;i++)for(let j=0;j<2;j++)E(g,7.5+i*4,9.5+j*5,1.6);}},{m:'hull',r:1,f:(g,poly)=>{poly([[6,6],[7.5,2],[9,6]]);poly([[10,6],[11.5,2],[13,6]]);poly([[14,6],[15.5,2],[17,6]]);}}],
-  emp:[MB('teal'),{m:'hull',r:1,p:[[10.5,3],[12.5,3],[12.5,15],[10.5,15]]},{m:'glass',r:1,f:g=>{E(g,11.5,12,5,1.5);E(g,11.5,8,4,1.3);}},{m:'teal',r:2,f:g=>E(g,11.5,3,3)}],
+  emp:[MB('blue'),{m:'metal',r:1,p:[[10.5,4],[12.5,4],[12.5,15],[10.5,15]]},{m:'teal',r:1,f:g=>{E(g,11.5,13,5.5,1.6);E(g,11.5,9,4.2,1.4);}},{m:'lime',r:2.5,f:g=>E(g,11.5,3.5,3.6)},{m:'hull',r:1,p:[[10,2],[13,2],[11.5,5]]}],
 };
 /* 敵（赤・オレンジ・ピンク） */
 const ENEMY_PARTS={
@@ -1514,13 +1514,13 @@ function fire(dt){
 const CAP={PD:90,TU:10,RG:24,Q:160,HL:40,MN:80,B:1400};
 /* 強さ：D＝威力の倍率（g の d と火力アップ・刃をかけたもの）、F＝連射の倍率（g の r）、c＝機体と強化の連射 */
 const STAT6={
-  pulse:(lv,c,D,F)=>({cd:0.85/F*c,dmg:4*D,n:lv>=7?6:lv>=5?5:lv>=3?4:3,gap:0.06,spd:430*U,l8:lv>=8}),
-  rail:(lv,c,D)=>{const chg=lv>=7?0.5:lv>=4?0.65:0.8;return {cd:(0.9+chg)*c,chg:chg*c,dmg:30*D,pierce:lv>=8?7:lv>=5?5:lv>=3?4:3,spd:1500*U};},
+  pulse:(lv,c,D,F)=>({cd:0.75/F*c,dmg:5*D,n:lv>=7?6:lv>=5?5:lv>=3?4:3,gap:0.06,spd:430*U,l8:lv>=8}),
+  rail:(lv,c,D)=>{const chg=lv>=7?0.5:lv>=4?0.65:0.8;return {cd:(0.6+chg)*c,chg:chg*c,dmg:30*D,pierce:lv>=8?7:lv>=5?5:lv>=3?4:3,spd:1500*U};},
   sniper:(lv,c,D,F)=>({cd:1.4/F*c,dmg:32*D,n:lv>=6?2:1,far:400*U}),
   fan:(lv,c,D,F)=>({cd:0.8/F*c,dmg:3.5*D,n:[5,5,6,6,7,8,8,9][lv-1],spread:0.7+(lv>=4?0.15:0)+(lv>=7?0.15:0),spd:380*U,l8:lv>=8}),
   ricochet:(lv,c,D,F)=>({cd:0.75/F*c,dmg:5*D,n:lv>=7?3:lv>=4?2:1,bnc:lv>=8?7:lv>=6?6:lv>=5?5:lv>=2?4:3,spd:330*U}),
   splitter:(lv,c,D,F)=>({cd:0.9/F*c,dmg:8*D,k:lv>=7?5:lv>=3?4:3,gen2:lv>=6,spd:330*U}),
-  needle:(lv,c,D,F)=>({cd:0.12/F*c,dmg:1.6*D,n:lv>=6?2:1,vul:lv>=7?0.05:lv>=4?0.04:0.03,vmax:lv>=8?0.4:0.3,spd:540*U}),
+  needle:(lv,c,D,F)=>({cd:0.12/F*c,dmg:2*D,n:lv>=6?2:1,vul:lv>=7?0.05:lv>=4?0.04:0.03,vmax:lv>=8?0.4:0.3,spd:540*U}),
   acid:(lv,c,D,F)=>({cd:1.0/F*c,dmg:5*D,tick:2*D,r:18*U*(lv>=3?1.2:1)*(lv>=6?1.2:1),life:lv>=7?3:lv>=4?2.5:2,spd:300*U}),
   grenade:(lv,c,D,F)=>({cd:1.3/F*c,dmg:18*D,rad:22*U*(lv>=4?1.2:1)*(lv>=7?1.2:1),n:lv>=6?3:lv>=3?2:1,dist:120*U}),
   cluster:(lv,c,D,F)=>({cd:2.4/F*c,dmg:24*D,sub:9*D,k:[6,6,8,8,9,10,10,12][lv-1],rad:30*U,srad:14*U,dist:150*U}),
@@ -1539,9 +1539,9 @@ const STAT6={
   whip:(lv,c,D,F)=>({cd:1.2/F*c,dmg:16*D,len:82*U*(lv>=3?1.12:1)*(lv>=6?1.12:1),sweep:Math.PI*0.75,dur:0.2,pass:lv>=8?3:lv>=5?2:1}),
   chainsaw:(lv,c,D,F)=>({cd:0.12/F*c,dmg:2.6*D,len:26*U*(lv>=3?1.15:1)*(lv>=5?1.15:1),w:5*U,l8:lv>=8}),
   scythe:(lv,c,D)=>({cd:(lv>=5?2.1:lv>=3?2.5:3.0)*c,dmg:34*D,R:58*U*(lv>=3?1.12:1)*(lv>=6?1.12:1),dur:0.42,l8:lv>=8}),
-  turret:(lv,c,D,F)=>{const life=lv>=6?12:lv>=2?10:8,max=lv>=7?4:lv>=5?3:lv>=3?2:1;return {cd:Math.max(2.2,life/max)*c,dmg:5*D,fcd:0.4/F*c,life,max,range:160*U};},
+  turret:(lv,c,D,F)=>{const life=lv>=6?12:lv>=2?10:8,max=lv>=7?4:lv>=5?3:lv>=3?2:1;return {cd:Math.max(2.2,life/max)*c,dmg:7*D,fcd:0.4/F*c,life,max,range:160*U};},
   minefield:(lv,c,D,F)=>({cd:10/F*c,dmg:20*D,rad:20*U*(lv>=5?1.2:1),n:[8,8,9,10,10,12,12,14][lv-1]}),
-  satellite:(lv,c,D,F)=>({dmg:6*D,fcd:0.55/F*c,n:lv>=7?4:lv>=5?3:lv>=3?2:1,range:230*U}),
+  satellite:(lv,c,D,F)=>({dmg:8*D,fcd:0.5/F*c,n:lv>=7?4:lv>=5?3:lv>=3?2:1,range:230*U}),
   micro:(lv,c,D,F)=>({cd:2.0/F*c,dmg:6*D,n:[8,8,10,10,12,12,14,16][lv-1],rad:12*U}),
   emp:(lv,c,D)=>({cd:(lv>=7?4:lv>=4?5:6)*c,dmg:4*D,R:110*U*(lv>=2?1.15:1)*(lv>=5?1.15:1),stun:lv>=6?1.6:lv>=3?1.3:1}),
 };
@@ -1551,6 +1551,9 @@ function toughest(n){const out=[];for(const e of R.E){if(e.dead||e.y<0||e.y>GH||
 /* 近い順に n 体（マイクロミサイルの的を分ける） */
 function closest(x,y,n,maxD){const a=[];for(const e of R.E){if(e.dead||e.y<-6)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<maxD*maxD)a.push([d,e]);}
   a.sort((p,q)=>p[0]-q[0]);return a.slice(0,n).map(p=>p[1]);}
+/* 向いた方（前 ±0.6）でいちばん近い敵：グレネードとクラスターの落ちる所 */
+function ahead(x,y,a,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;
+  if(d<bd&&Math.abs(angDiff(Math.atan2(dy,dx),a))<0.6){bd=d;best=e;}}return best;}
 function nearestEx(x,y,maxD,skip){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6||skip.has(e.id))continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<bd){bd=d;best=e;}}return best;}
 const capPush=(arr,o,cap)=>{if(arr.length>=cap)arr.shift();arr.push(o);};
 function addPD(k,x,y,o){capPush(R.PD,{k,x,y,r:o.r,life:o.life,t:0,dmg:o.tick!=null?o.tick:o.dmg,tk:rand(0,0.12),dead:false},CAP.PD);}
@@ -1575,9 +1578,11 @@ Object.assign(FIRE,{
   needle(m,st,ox,oy,ux,uy){for(let k=0;k<st.n;k++){const off=st.n===2?(k?3:-3):0;
     R.B.push(mkB(ox+ux*14-uy*off,oy+uy*14+ux*off,ux*st.spd,uy*st.spd,st.dmg,0,12,{vul:st.vul,vmax:st.vmax,kb:0.02}));}},
   acid(m,st,ox,oy,ux,uy){R.B.push(mkB(ox+ux*12,oy+uy*12,ux*st.spd,uy*st.spd,st.dmg,0,13,{life:0.75,pd:{tick:st.tick,r:st.r,life:st.life}}));},
-  grenade(m,st,ox,oy,ux,uy){const base=Math.atan2(uy,ux);for(let k=0;k<st.n;k++){const a=base+(k-(st.n-1)/2)*0.32,d=st.dist*rand(0.9,1.1);
+  grenade(m,st,ox,oy,ux,uy){const base=Math.atan2(uy,ux),tg=ahead(ox,oy,base,st.dist*1.5),d0=tg?clamp(Math.hypot(tg.x-ox,tg.y-oy),30*U,st.dist*1.5):st.dist;
+    for(let k=0;k<st.n;k++){const a=base+(k-(st.n-1)/2)*0.32,d=d0*rand(0.92,1.08);
     capPush(R.Q,{k:'lob',x0:ox,y0:oy,x1:ox+Math.cos(a)*d,y1:oy+Math.sin(a)*d,t:0,T:0.55,h:26*U,rad:st.rad,dmg:st.dmg,spr:GREN,dead:false},CAP.Q);}},
-  cluster(m,st,ox,oy,ux,uy){capPush(R.Q,{k:'lob',x0:ox,y0:oy,x1:ox+ux*st.dist,y1:oy+uy*st.dist,t:0,T:0.7,h:34*U,rad:st.rad,dmg:st.dmg,spr:CLUS,big:1,
+  cluster(m,st,ox,oy,ux,uy){const tg=ahead(ox,oy,Math.atan2(uy,ux),st.dist*1.4),d=tg?clamp(Math.hypot(tg.x-ox,tg.y-oy),40*U,st.dist*1.4):st.dist;
+    capPush(R.Q,{k:'lob',x0:ox,y0:oy,x1:ox+ux*d,y1:oy+uy*d,t:0,T:0.7,h:34*U,rad:st.rad,dmg:st.dmg,spr:CLUS,big:1,
     sub:{k:st.k,dmg:st.sub,rad:st.srad},dead:false},CAP.Q);},
   napalm(m,st,ox,oy,ux,uy){capPush(R.Q,{k:'nap',x:ox+ux*12,y:oy+uy*12,vx:ux*st.spd,vy:uy*st.spd,t:0,run:st.run,drop:0,dmg:st.dmg,r:st.r,life:st.life,dead:false},CAP.Q);},
   shockwave(m,st){for(let i=0;i<st.n;i++)ring6({k:'shock',fol:m,x:0,y:0,t:-i*0.2,dur:0.32,R:st.R,dmg:st.dmg,kb:170*U,clear:true});},
@@ -1775,11 +1780,12 @@ function draw6Over(g){
   }
   for(const r of R.RG){if(r.t<0)continue;
     const fade=r.t>r.dur?Math.max(0,1-(r.t-r.dur)/0.15):1,cr=r.noHit?r.R*Math.min(1,r.t/r.dur):(r.cr||0);if(cr<2)continue;
+    const st=Math.max(2.2,cr*TAU/360);/* 大きな輪は点の数を360までにする */
     switch(r.k){
-      case 'shock':arcPix(g,r.x,r.y,0,Math.PI,cr,'#ffffff',fade,2.2);arcPix(g,r.x,r.y,0,Math.PI,cr-3,'#8cc2ff',fade*0.7,2.4);break;
-      case 'halo':arcPix(g,r.x,r.y,0,Math.PI,cr,r.l8?'#ffffff':'#fff6c0',fade,2);arcPix(g,r.x,r.y,0,Math.PI,cr-2,'#ffd84a',fade*0.8,2.2);arcPix(g,r.x,r.y,0,Math.PI,cr-5,'#ec9a1e',fade*0.35,2.6);break;
+      case 'shock':arcPix(g,r.x,r.y,0,Math.PI,cr,'#ffffff',fade,st);arcPix(g,r.x,r.y,0,Math.PI,cr-3,'#8cc2ff',fade*0.7,st*1.2);break;
+      case 'halo':arcPix(g,r.x,r.y,0,Math.PI,cr,r.l8?'#ffffff':'#fff6c0',fade,st);arcPix(g,r.x,r.y,0,Math.PI,cr-2,'#ffd84a',fade*0.8,st*1.1);arcPix(g,r.x,r.y,0,Math.PI,cr-5,'#ec9a1e',fade*0.35,st*1.4);break;
       case 'sonic':for(let j=0;j<3;j++){const rr=cr-j*9;if(rr>4)arcPix(g,r.x,r.y,r.a,r.half,rr,j?'#a8b8ff':'#e6ecff',fade*(1-j*0.25),2);}break;
-      case 'emp':{const n=Math.ceil(TAU*cr/3);g.globalAlpha=fade;for(let i=0;i<n;i++){const a=i/n*TAU,j=((i*5+((R.t*30)|0))%4)-1.5;
+      case 'emp':{const n=Math.min(360,Math.ceil(TAU*cr/3));g.globalAlpha=fade;for(let i=0;i<n;i++){const a=i/n*TAU,j=((i*5+((R.t*30)|0))%4)-1.5;
         g.fillStyle=i%3?'#7ff6ff':'#ffffff';px2(g,r.x+Math.cos(a)*(cr+j),r.y+Math.sin(a)*(cr+j));}g.globalAlpha=1;break;}
       case 'ham':{arcPix(g,r.x,r.y,0,Math.PI,cr,'#e6dcff',fade,2);arcPix(g,r.x,r.y,0,Math.PI,cr-3,'#9a7cff',fade*0.6,2.4);
         if(r.t<0.16){g.save();g.translate(Math.round(r.x),Math.round(r.y));g.rotate(r.a+Math.PI/2);g.fillStyle='#3c2496';g.fillRect(-9,-6,18,10);g.fillStyle='#a98bff';g.fillRect(-8,-5,16,8);
@@ -1855,7 +1861,7 @@ function moveBullets(dt){
       near(b.x,b.y,6,e=>{
         if(b.hits&&b.hits.has(e.id))return;
         if(b.last===e.id)return;
-        const dx=e.x-b.x,dy=e.y-b.y,rr=e.r+(b.k===2?6:3);
+        const dx=e.x-b.x,dy=e.y-b.y,rr=e.r+(b.k===2||b.k===8?6:3);
         if(dx*dx+dy*dy<=rr*rr){
           const kb=b.kb!=null?b.kb:0.12;hit(e,b.dmg,b.vx*kb,b.vy*kb);
           if(b.slowT){e.slow=Math.max(e.slow,b.slowT);e.slowF=Math.min(e.slowF,b.slowF);}
