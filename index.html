@@ -38,7 +38,7 @@ button:disabled{cursor:not-allowed}
 .howbg{position:fixed;inset:0;z-index:70;background:rgba(5,6,15,.82);display:flex;align-items:center;justify-content:center;padding:16px}
 .howbox{width:100%;max-width:400px;background:var(--panel);border:3px solid var(--go);padding:14px;display:flex;flex-direction:column;gap:12px}
 .howcard{display:flex;flex-direction:column;gap:8px;text-align:center}
-.howcard h3{margin:0;font-weight:400;font-size:20px;color:var(--go)}
+.howcard h3{margin:0;font-weight:400;font-size:22px;color:var(--go)}
 .howcard p{margin:0;font-size:15px;line-height:1.6}
 .howno{color:var(--dim);font-size:14px!important}
 .howart{width:100%;aspect-ratio:160/110;image-rendering:pixelated;image-rendering:crisp-edges;border:3px solid var(--edge)}
@@ -1825,10 +1825,10 @@ window.addEventListener('resize',()=>{if(!titleEl.hidden)titleBg();});
 
 /* 遊び方（絵つき4枚・1回目のスタートのときにも出す） */
 const HOWTO=[
-  {t:'指でなぞって動く',d:'画面のどこでも、指でなぞった方へ機体が動くよ。PCは矢印キーでもOK'},
-  {t:'撃つのは自動',d:'つけた装備が、向いた方へ自動で撃つよ。よけることに集中しよう。5分生きのびたらクリア！'},
-  {t:'レベルアップで強くなる',d:'敵をたおすと青い結晶が出るよ。集めてレベルアップしたら、3つから1つえらんで強くなる'},
-  {t:'お金で買って組み合わせる',d:'出撃でかせいだお金で、装備と機体をショップで買えるよ。どこに・どの向きでつけるかは自由！'},
+  {t:'指でなぞって動く'},
+  {t:'撃つのは自動'},
+  {t:'レベルアップで強くなる'},
+  {t:'お金で買って組み合わせる'},
 ];
 let howPage=0,howFirst=false;
 function howArt(i){
@@ -1836,22 +1836,20 @@ function howArt(i){
   g.fillStyle='#05060f';g.fillRect(0,0,160,110);g.drawImage(NEB,0,200,160,110,0,0,160,110);
   const sp=SHIPSPR.standard,DS2=(s,x,y)=>g.drawImage(s.img||s,Math.round(x-(s.w||s.width)/2),Math.round(y-(s.h||s.height)/2));
   const sh=(x,y,k)=>{g.save();g.translate(x,y);g.scale(k,k);g.drawImage(sp.fl[0],-sp.cx,-sp.cy);g.drawImage(sp.img,-sp.cx,-sp.cy);g.restore();};
-  if(i===0){sh(64,60,0.75);g.fillStyle='#ffd23f';for(let k=0;k<5;k++)g.fillRect(88+k*7,74-k*3,4,3);
-    g.drawImage(FINGER.img,118,64,24,30);g.fillStyle='#ffd23f';g.fillRect(122,56,12,3);g.fillRect(131,53,3,9);}
+  if(i===0){sh(64,60,0.75);g.drawImage(FINGER.img,118,64,24,30);}
   if(i===1){sh(80,82,0.62);DS2(ESPR.bug,50,22);DS2(ESPR.bug,110,16);DS2(ESPR.shooter,82,20);
     for(const x of [70,90])for(let y=40;y<64;y+=9){g.fillStyle='#4adcf6';g.fillRect(x,y,3,6);g.fillStyle='#fff';g.fillRect(x+1,y,1,2);}}
   if(i===2){[[40,50],[60,64],[50,82],[76,44]].forEach(([x,y])=>DS2(GEMS,x,y));DS2(GEMB,70,78);
-    g.fillStyle='#14163a';g.fillRect(96,20,56,72);g.strokeStyle='#ffd23f';g.lineWidth=2;g.strokeRect(97,21,54,70);
-    g.fillStyle='#5aa2ff';for(let k=0;k<3;k++){g.fillRect(104,32+k*20,10,10);g.fillStyle=k?'#2e3277':'#ffd23f';g.fillRect(118,35+k*20,26,4);g.fillStyle='#5aa2ff';}
-    g.fillStyle='#ffd23f';g.fillRect(16,30,10,4);g.fillRect(19,24,4,16);}
+    g.fillStyle='#14163a';g.fillRect(96,20,56,72);g.strokeStyle='#2e3277';g.lineWidth=2;g.strokeRect(97,21,54,70);
+    g.fillStyle='#5aa2ff';for(let k=0;k<3;k++){g.fillRect(104,32+k*20,10,10);g.fillStyle=k?'#2e3277':'#ffd23f';g.fillRect(118,35+k*20,26,4);g.fillStyle='#5aa2ff';}}
   if(i===3){sh(52,58,0.7);DS2(MISC.coin,110,22);DS2(MISC.coin,126,30);DS2(MISC.coin,98,32);
-    DS2(MSPR.missile[0],104,66);DS2(MSPR.shield[0],132,66);DS2(MSPR.sword[1],118,92);g.fillStyle='#ffd23f';g.fillRect(84,60,8,3);g.fillRect(84,60,3,3);}
+    DS2(MSPR.missile[0],104,66);DS2(MSPR.shield[0],132,66);DS2(MSPR.sword[1],118,92);}
   return c;
 }
 function renderHowto(){
   const box=$('howCard'),p=HOWTO[howPage];box.textContent='';
   const art=howArt(howPage);art.className='howart';art.setAttribute('aria-hidden','true');
-  box.append(el('p','howno num',(howPage+1)+' / '+HOWTO.length),art,el('h3',null,p.t),el('p',null,p.d));
+  box.append(el('p','howno num',(howPage+1)+' / '+HOWTO.length),art,el('h3',null,p.t));
   const dots=el('div','howdots');HOWTO.forEach((_,k)=>dots.appendChild(el('i',k===howPage?'on':null)));box.appendChild(dots);
   $('howPrev').disabled=howPage===0;
   $('howNext').textContent=howPage<HOWTO.length-1?'次へ':howFirst?'はじめる':'とじる';
