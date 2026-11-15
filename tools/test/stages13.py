@@ -96,7 +96,7 @@ UNITS = r"""
     ok('岩やどり：岩の間は30%・近づくと岩をすてる',Math.abs(d1-3)<1e-6&&!sh&&Math.abs(h1-e.hp-10)<1e-6,d1.toFixed(2)+','+sh);}
   /* 盾持ち：前からは15%・後ろからは100%・爆風（向きなし）は100% */
   {const R=T.R;R.E.length=0;const e=T.addEnemy('guard',240,200);e.fa=Math.PI/2;const h0=e.hp;T.hit(e,10,0,-50);const d1=h0-e.hp;T.hit(e,10,0,50);const d2=h0-d1-e.hp;T.hit(e,10,0,0);const d3=h0-d1-d2-e.hp;
-    ok('盾持ち：前15%・後ろ100%・向きなし100%',Math.abs(d1-1.5)<1e-6&&Math.abs(d2-10)<1e-6&&Math.abs(d3-10)<1e-6,[d1,d2,d3].map(v=>v.toFixed(1)).join(','));}
+    ok('盾持ち：前30%・後ろ100%・向きなし100%',Math.abs(d1-3)<1e-6&&Math.abs(d2-10)<1e-6&&Math.abs(d3-10)<1e-6,[d1,d2,d3].map(v=>v.toFixed(1)).join(','));}
   /* 割れ氷：たおすと氷のかけら2つ */
   {const R=T.R;R.E.length=0;const e=T.addEnemy('splitter',240,200);T.hit(e,1e9,0,0);const n=R.E.filter(o=>o.kind==='shard'&&!o.dead).length;ok('割れ氷：2つに分かれる',n===2,n);}
   /* 岩：こわすとお金（撃破には数えない）・ぶつかると痛くて、こわれる */
@@ -187,7 +187,8 @@ PERF = r"""
   const fill=()=>{while(R.E.length<260){const k=['bug','shard','warp','charger','frost','guard','splitter','hider'][(Math.random()*8)|0];const a=Math.random()*6.28,d=120+Math.random()*250;T.addEnemy(k,R.x+Math.cos(a)*d,R.y+Math.sin(a)*d*0.9);}};
   for(let i=0;i<90;i++){fill();if(R.state!=='play')window.__stepUI();T.update(1/60);T.draw();R.hp=R.maxHp;b.hp=Math.max(b.hp,b.max*0.2);s.hp=s.max;}
   T.addWall(true,100);T.addWall(false,300);
-  const ts=[];for(let i=0;i<300;i++){fill();if(R.state!=='play'){window.__stepUI();R.state='play';}const a=performance.now();T.update(1/60);T.draw();ts.push(performance.now()-a);R.hp=R.maxHp;b.hp=Math.max(b.hp,b.max*0.2);s.hp=s.max;}
+  const more=window.__eb?()=>{while(R.EB.length<320)R.EB.push({x:Math.random()*T.GW,y:Math.random()*T.GH*0.6,vx:(Math.random()-0.5)*60,vy:40+Math.random()*60,dmg:8,big:Math.random()<0.2,slow:Math.random()<0.2?1:0,dead:false});}:()=>{};
+  const ts=[];for(let i=0;i<300;i++){fill();more();if(R.state!=='play'){window.__stepUI();R.state='play';}const a=performance.now();T.update(1/60);T.draw();ts.push(performance.now()-a);R.hp=R.maxHp;b.hp=Math.max(b.hp,b.max*0.2);s.hp=s.max;}
   ts.sort((a,b)=>a-b);return {med:+ts[ts.length>>1].toFixed(2),p95:+ts[Math.floor(ts.length*0.95)].toFixed(2),max:+ts[ts.length-1].toFixed(2),E:R.E.length,EB:R.EB.length,ph:b.ph};}
 """
 
@@ -249,6 +250,11 @@ def main():
         print('重さ（ステージ5・最終ボス・大蛇・敵260体・レーザーの壁・1フレーム update+draw ms 中央/95%/最大）:', perf)
         if perf['p95'] > 16:
             fails += 1; print('NG 重さ')
+        pg.evaluate("()=>{window.__eb=1;}")
+        perf = pg.evaluate(PERF)
+        print('重さ（上に加えて敵の弾320）:', perf)
+        if perf['p95'] > 16:
+            fails += 1; print('NG 重さ（弾）')
         b.close()
     for e in errs[:10]:
         print('ERR', e)

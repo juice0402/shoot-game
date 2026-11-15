@@ -40,7 +40,7 @@ def build(src):
 HELPERS = r"""
 ()=>{
   /* 機体 id で出撃（はじめの武器・list があればそれ）。外から動かすので requestAnimationFrame は止める */
-  window.__go=(id,list,lv)=>{const T=window.__T;window.__HOLD=1;T.save.ships[id].have=true;T.setShip(id);const L=T.save.load;for(let i=0;i<L.length;i++)L[i]=null;
+  window.__go=(id,list,lv)=>{const T=window.__T;window.__HOLD=1;T.save.st=1;/* #13：ステージ1で */T.save.ships[id].have=true;T.setShip(id);const L=T.save.load;for(let i=0;i<L.length;i++)L[i]=null;
     if(list)list.forEach((v,i)=>{const t=typeof v==='string'?v:v.t;L[typeof v==='string'?i:v.s]={t,d:typeof v==='string'?0:(v.d||0)};T.save.owned[t]=Math.max(T.save.owned[t],9);});
     else T.SHIPS[id].start.forEach(v=>{L[v.s]={t:v.t,d:v.d};T.save.owned[v.t]=Math.max(T.save.owned[v.t],9);});
     T.startRun();const R=T.R;if(lv)for(const t in lv)R.tlv[t]=lv[t];return R;};
@@ -169,7 +169,7 @@ UNLOCK = r"""
   /* アルケミスト：進化1回 */
   R=window.__go('standard',['laser','cooler'],{laser:8});T.evolve('laser');T.endRun(false,true);ok('アルケミスト 解放（進化1回）',pg('alchemist').ok&&T.save.rec.evos===1,T.save.rec.evos);
   /* オメガ：ステージ5（いまはクリアしてもステージ1） */
-  for(let i=0;i<3;i++){R=window.__go('standard',['laser']);T.endRun(true,false);}ok('オメガ いまは解放されない（クリアはステージ1）',!pg('omega').ok&&T.save.rec.stageMax===1,T.save.rec.stageMax);
+  for(let i=0;i<3;i++){R=window.__go('standard',['laser']);T.endRun(true,false);}ok('オメガ ステージ1のクリアでは解放されない',!pg('omega').ok&&T.save.rec.stageMax===1,T.save.rec.stageMax);
   T.save.rec.stageMax=5;ok('オメガ ステージ5のクリアで解放（しくみ）',pg('omega').ok,'');T.save.rec.stageMax=1;
   /* 値段どおりに買える・はじめの武器がもらえる */
   const buy=[];for(const id of ['marksman','bomber','phantom','vanguard','alchemist']){const s=T.SHIPS[id],t=s.start[0].t;T.save.gold=s.price-1;const no=T.buyShip(id);T.save.gold=s.price;const own0=T.save.owned[t];const yes=T.buyShip(id);
@@ -180,7 +180,7 @@ UNLOCK = r"""
   T.persist();const s2=T.loadSave();ok('記録がセーブに残る',['fastBoss','bestKills','halfClear','meleeK','evos','stageMax'].every(k=>s2.rec[k]===T.save.rec[k])&&s2.ships.bomber.have,JSON.stringify(s2.rec));
   /* 古いセーブ（#10 まで：新しい記録と機体がない） */
   localStorage.setItem(T.KEY,JSON.stringify({v:2,gold:500,owned:{laser:2},ships:{standard:{have:true,eq:[null,{t:'laser',d:0}]},rapid:{have:true,eq:[]}},cur:'rapid',evo:{laser:1,sword:1},rec:{clears:2,bosses:3,goldTotal:900,wmax:{},sup5:[]}}));
-  const s3=T.loadSave();ok('古いセーブ：壊れずに読める・進化の回数は進化させた武器から',s3.cur==='rapid'&&s3.ships.rapid.have&&!s3.ships.omega.have&&s3.rec.evos===2&&s3.rec.meleeK===0&&s3.rec.stageMax===0&&s3.ships.vanguard.eq.length===7,JSON.stringify(s3.rec));
+  const s3=T.loadSave();ok('古いセーブ：壊れずに読める・進化の回数は進化させた武器から',s3.cur==='rapid'&&s3.ships.rapid.have&&!s3.ships.omega.have&&s3.rec.evos===2&&s3.rec.meleeK===0&&s3.rec.stageMax===1/* #13：クリアしていればステージ1クリアあつかい */&&s3.ships.vanguard.eq.length===7,JSON.stringify(s3.rec));
   localStorage.setItem(T.KEY,'{bad json');const s4=T.loadSave();ok('こわれたセーブ：はじめから',s4.cur==='standard'&&s4.rec.evos===0,'');
   localStorage.removeItem(T.KEY);
   return res;}

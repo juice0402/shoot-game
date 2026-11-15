@@ -40,7 +40,7 @@ def build(src):
 
 
 HELPERS = r"""
-()=>{window.__go=(list,lv)=>{const T=window.__T;window.__HOLD=1;T.setShip('standard');const L=T.save.load;for(let i=0;i<L.length;i++)L[i]=null;
+()=>{window.__go=(list,lv)=>{const T=window.__T;window.__HOLD=1;T.save.st=1;T.setShip('standard');const L=T.save.load;for(let i=0;i<L.length;i++)L[i]=null;
   list.forEach((t,i)=>{L[i]={t,d:0};});T.startRun();const R=T.R;if(lv)for(const t in lv)R.tlv[t]=lv[t];R.need=1e9;return R;};}
 """
 
