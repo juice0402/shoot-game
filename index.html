@@ -311,15 +311,15 @@ const CATS={atk:'攻撃',def:'防御',sup:'補助'};
 /* rate = [威力, 連射, 射程] 1〜5 / eff = 補助・防御の効き目 */
 const MODS={
   laser:{name:'レーザー',cat:'atk',c:'#4cc9ff',price:200,rate:[2,4,4],desc:'向いた方へビームを連射する',
-    up:{2:'威力と連射がアップ',3:'ビームが2本になる',4:'敵を1体つらぬく',5:'威力と連射がアップ',6:'ビームが3本になる',7:'2体つらぬく',8:'威力が大きくアップ'}},
+    up:{2:'威力と連射がアップ',3:'ビームが2本になる',4:'弾が2体まで当たる',5:'威力と連射がアップ',6:'ビームが3本になる',7:'弾が3体まで当たる',8:'威力が大きくアップ'}},
   gatling:{name:'ガトリング',cat:'atk',c:'#7d9cff',price:250,rate:[1,5,3],desc:'小さな弾をばらまくように高速で連射する',
-    up:{2:'威力アップ',3:'連射アップ',4:'威力アップ',5:'2列で撃つ',6:'連射アップ',7:'威力アップ',8:'弾が1体つらぬく'}},
+    up:{2:'威力アップ',3:'連射アップ',4:'威力アップ',5:'2列で撃つ',6:'連射アップ',7:'威力アップ',8:'弾が2体まで当たる'}},
   mine:{name:'機雷',cat:'atk',c:'#8ea0c8',price:280,rate:[4,1,2],desc:'向いた方へ機雷をまく。敵が近づくと爆発する',
     up:{2:'威力と速さがアップ',3:'2個ずつまく',4:'威力アップ',5:'爆発が大きくなる',6:'威力と速さがアップ',7:'3個ずつまく',8:'威力が大きくアップ'}},
   shotgun:{name:'散弾砲',cat:'atk',c:'#e8c07a',price:300,rate:[4,2,1],desc:'近くの敵に散弾をまとめて撃ちこむ。よくはじき飛ばす',
-    up:{2:'威力と連射がアップ',3:'弾が7発になる',4:'届く距離がのびる',5:'威力と連射がアップ',6:'弾が9発になる',7:'届く距離がさらにのびる',8:'弾が1体つらぬく'}},
+    up:{2:'威力と連射がアップ',3:'弾が7発になる',4:'届く距離がのびる',5:'威力と連射がアップ',6:'弾が9発になる',7:'届く距離がさらにのびる',8:'弾が2体まで当たる'}},
   freeze:{name:'冷凍砲',cat:'atk',c:'#bfe9ff',price:320,rate:[2,3,4],desc:'当たった敵をこおらせて、動きを遅くする',
-    up:{2:'威力と連射がアップ',3:'こおる時間がのびる',4:'2発ずつ撃つ',5:'もっと遅くする',6:'威力と連射がアップ',7:'1体つらぬく',8:'威力が大きくアップ'}},
+    up:{2:'威力と連射がアップ',3:'こおる時間がのびる',4:'2発ずつ撃つ',5:'もっと遅くする',6:'威力と連射がアップ',7:'弾が2体まで当たる',8:'威力が大きくアップ'}},
   missile:{name:'追撃ミサイル',cat:'atk',c:'#ffd23f',price:350,rate:[3,2,5],desc:'近くの敵を追いかけて爆発する',
     up:{2:'威力と発射の速さがアップ',3:'2発ずつ撃つ',4:'爆発が大きくなる',5:'3発ずつ撃つ',6:'威力と発射の速さがアップ',7:'爆発がさらに大きくなる',8:'4発ずつ撃つ'}},
   flame:{name:'火炎放射',cat:'atk',c:'#6af0ff',price:380,rate:[3,5,1],desc:'青い炎をふき出して、近くの敵をまとめて焼く',
@@ -339,12 +339,12 @@ const MODS={
   /* 射撃 */
   pulse:{name:'パルス砲',cat:'atk',c:'#5ce1ff',price:260,rate:[2,4,3],desc:'3発ずつ、短い弾をまとめて撃つ',
     g:{d:{2:30,3:20,4:30,5:20,6:30,7:20,8:40},r:{2:15,6:15}},up:{3:'1回に4発撃つ',5:'1回に5発撃つ',7:'1回に6発撃つ'}},
-  rail:{name:'レールガン',cat:'atk',c:'#9fd0ff',price:450,rate:[5,1,5],desc:'ためてから、敵を3体つらぬく速い弾を撃つ',
-    g:{d:{2:35,3:20,5:30,6:35,7:20,8:40}},up:{3:'4体つらぬく',4:'ためる時間が0.65秒に',5:'5体つらぬく',7:'ためる時間が0.5秒に',8:'7体つらぬく'}},
+  rail:{name:'レールガン',cat:'atk',c:'#9fd0ff',price:450,rate:[5,1,5],desc:'ためてから、4体まで当たる速い弾を撃つ',
+    g:{d:{2:35,3:20,5:30,6:35,7:20,8:40}},up:{3:'5体まで当たる',4:'ためる時間が0.65秒に',5:'6体まで当たる',7:'ためる時間が0.5秒に',8:'8体まで当たる'}},
   sniper:{name:'狙撃砲',cat:'atk',c:'#e3e8ff',price:400,rate:[5,2,5],desc:'体力のいちばん多い敵をねらう。遠いほど強い',
     g:{d:{2:30,3:30,4:20,5:30,7:20,8:40},r:{2:10,4:15,5:10,7:15}},up:{6:'体力の多い2体をねらう'}},
   fan:{name:'扇レーザー',cat:'atk',c:'#5dffb0',price:340,rate:[2,3,3],desc:'扇の形に細いレーザーを5本撃つ',
-    g:{d:{2:30,3:20,4:30,5:20,6:20,7:30,8:30},r:{2:15,5:10}},up:{3:'6本になる',4:'扇が広がる',5:'7本になる',6:'8本になる',7:'扇がさらに広がる',8:'9本になる'}},
+    g:{d:{2:30,3:20,4:30,5:20,6:20,7:30,8:30},r:{2:25}},up:{3:'6本になる',4:'扇が広がる',5:'7本になる',6:'8本になる',7:'扇がさらに広がる',8:'9本になる'}},
   ricochet:{name:'はね返り弾',cat:'atk',c:'#ffd84a',price:300,rate:[2,3,4],desc:'敵と画面のふちで3回はね返る弾',
     g:{d:{3:30,5:20,6:20,8:30},r:{3:10}},up:{2:'はねる回数が4回に',4:'2発ずつ撃つ',5:'はねる回数が5回に',6:'はねる回数が6回に',7:'3発ずつ撃つ',8:'はねる回数が7回に'}},
   splitter:{name:'分裂弾',cat:'atk',c:'#c39bff',price:330,rate:[3,3,3],desc:'当たると小さな弾3つに分かれる',
@@ -356,8 +356,8 @@ const MODS={
   /* 爆発 */
   grenade:{name:'グレネード砲',cat:'atk',c:'#ffcd48',price:320,rate:[4,2,2],desc:'弧をえがいて前に落ち、爆発する',
     g:{d:{2:25,4:20,5:25,7:20,8:30},r:{5:15}},up:{3:'2発ずつ投げる',4:'爆発の大きさ ＋20%',6:'3発ずつ投げる',7:'爆発の大きさ ＋20%'}},
-  cluster:{name:'クラスター爆弾',cat:'atk',c:'#fff2a8',price:420,rate:[4,1,3],desc:'大きく爆発したあと、子爆弾を6つまく',
-    g:{d:{2:30,4:30,5:20,6:20,7:30,8:30},r:{4:15,7:15}},up:{3:'子爆弾が8つに',5:'子爆弾が9つに',6:'子爆弾が10に',8:'子爆弾が12に'}},
+  cluster:{name:'クラスター爆弾',cat:'atk',c:'#fff2a8',price:420,rate:[4,1,3],desc:'大きく爆発したあと、子爆弾を6個まく',
+    g:{d:{2:30,4:30,5:20,6:20,7:30,8:30},r:{4:15,7:15}},up:{3:'子爆弾が8個に',5:'子爆弾が9個に',6:'子爆弾が10個に',8:'子爆弾が12個に'}},
   napalm:{name:'ナパーム',cat:'atk',c:'#4c9dff',price:380,rate:[3,2,3],desc:'通った所に青い炎の帯を残す',
     g:{d:{2:30,4:20,5:30,7:20,8:40},r:{5:15}},up:{3:'炎の帯の長さ ＋25%',4:'炎が2.4秒残る',6:'炎の帯の長さ ＋25%',7:'炎が3秒残る'}},
   shockwave:{name:'衝撃波砲',cat:'atk',c:'#8cc2ff',price:360,rate:[2,2,2],desc:'まわりに衝撃波の輪。敵を押し返し、弾を消す',
@@ -406,7 +406,7 @@ const MODS={
   shield:{name:'シールド',cat:'def',c:'#5dffb0',price:300,eff:'向いた側の弾を消す・敵をはじく',desc:'向いた側に盾を張る。弾を消して、敵をはじく',
     up:{2:'盾が広くなる',3:'はじく威力がアップ',4:'盾がさらに広くなる',5:'盾が大きくなる',6:'はじく回数がふえる',7:'はじく威力がアップ',8:'いちばん大きな盾'}},
   reflector:{name:'反射板',cat:'def',c:'#e3e5ff',price:350,eff:'敵の弾をはね返して当てる',desc:'向いた側に板を張る。敵の弾をはね返し、さわった敵を押しもどす',
-    up:{2:'板が広くなる',3:'はね返す威力がアップ',4:'はね返す弾が速くなる',5:'板が大きくなる',6:'はね返した弾がつらぬく',7:'はね返す威力がアップ',8:'いちばん大きな板'}},
+    up:{2:'板が広くなる',3:'はね返す威力がアップ',4:'はね返す弾が速くなる',5:'板が大きくなる',6:'はね返した弾が2体まで当たる',7:'はね返す威力がアップ',8:'いちばん大きな板'}},
   magnet:{name:'吸引装置',cat:'sup',c:'#5aa2ff',price:180,passive:true,eff:'吸いよせる距離 ＋30%',desc:'経験値の結晶を遠くから吸いよせる'},
   booster:{name:'ブースター',cat:'sup',c:'#ff9f43',price:200,passive:true,eff:'動く速さ ＋10%',desc:'機体が速く動けるようになる'},
   coin:{name:'集金装置',cat:'sup',c:'#ffcf5a',price:250,passive:true,eff:'かせぐお金 ＋10%',desc:'出撃でかせぐお金がふえる'},
@@ -874,6 +874,13 @@ const EBS=['#ff2d6f','#ff5c94'].map(c=>paint(13,13,[
   {m:'epink',flat:'#ffffff',noSeam:1,f:g=>E(g,6,6,2.3)},
 ],{ol:'#2a0010'}));
 const EBG=glow(16,'255,45,111',.45);
+/* 大きい敵の弾（大型の敵が撃つ）：衝撃波砲では消えない */
+const EBB=['#ff2d6f','#ff5c94'].map(c=>paint(19,19,[
+  {m:'epink',flat:c,noSeam:1,f:g=>E(g,9,9,9.2)},
+  {m:'epink',flat:'#ffb8d0',noSeam:1,f:g=>E(g,9,9,6.2)},
+  {m:'epink',flat:'#ffffff',noSeam:1,f:g=>E(g,9,9,3.4)},
+],{ol:'#2a0010'}));
+const EBGB=glow(22,'255,45,111',.45);
 const MISC={};Object.keys(MISC_PARTS).forEach(k=>{const [w,h,p,o]=MISC_PARTS[k];MISC[k]=paint(w,h,p,o);});
 const GEMS=MISC.gem,GEMB=MISC.gemb,GRAV=MISC.grav,DRONE=MISC.drone,MINE=[MISC.mine,MISC.mineoff];
 const SAWS=[9,12].map(r=>{const w=r*2+1,c=r;return [0,Math.PI/6].map(rot=>paint(w,w,[
@@ -1324,7 +1331,7 @@ function startRun(){
   const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,GH),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
   const sh=SHIPS[save.cur],maxHp=Math.round(BASE_HP*sh.hp)+bonus.hp;
   R={sh,spr:SHIPSPR[save.cur],guts:save.cur==='standard',t:0,hp:maxHp,maxHp,x:GW/2,y:Math.round(GH*0.78),inv:0,hurtFx:0,lv:1,xp:0,need:xpNeed(1),kills:0,bossKills:0,
-    E:[],B:[],EB:[],M:[],G:[],P:[],S:[],A:[],D:[],FX:[],W:[],MN:[],GV:[],Z:[],L:[],Q:[],PD:[],RG:[],HL:[],TU:[],TR:[],mods,tlv,bonus,
+    E:[],B:[],EB:[],M:[],G:[],P:[],S:[],A:[],D:[],FX:[],W:[],MN:[],GV:[],Z:[],L:[],Q:[],PD:[],RG:[],RH:[],HL:[],TU:[],TR:[],mods,tlv,bonus,
     pas:{magnet:0,speed:0,armor:0,clock:0,power:0,regen:0,xp:0,gold:0},sup:{wing:0,drone:0,strike:0,barrier:0},
     wingT:0,strikeT:0,bar:false,barCd:0,
     acc:0,pending:0,state:'play',bossAt:[150,270],bossN:0,waveAt:60,target:null,stars,X:[],neb:rand(0,1024),pl:{i:(Math.random()*PLANETS.length)|0,x:rand(40,GW-160),y:rand(-40,GH*0.4)}};
@@ -1339,7 +1346,7 @@ function pickKind(t){const r=Math.random();if(t>=70&&r<0.1)return 'shooter';if(t
 function addEnemy(kind,x,y){
   const k=KIND[kind],mul=kind==='boss'?1+R.t/150:1+R.t/110;
   const e={id:nextId++,kind,x,y,vx:0,vy:0,kx:0,ky:0,hp:k.hp*mul,max:k.hp*mul,r:k.r,dmg:k.dmg,
-    spd:k.spd+(kind==='bug'?Math.min(25,R.t/11)*U:0),flash:0,dead:false,fire:rand(1.2,2.4),stopY:rand(GH*0.12,GH*0.38),shield:-9,refl:-9,slow:0,slowF:1,vul:0,son:0,sonV:0,stun:0,reap:-1};
+    spd:k.spd+(kind==='bug'?Math.min(25,R.t/11)*U:0),flash:0,dead:false,fire:rand(1.2,2.4),stopY:rand(GH*0.12,GH*0.38),shield:-9,refl:-9,slow:0,slowF:1,vul:0,son:0,sonV:0,stun:0,reapNow:false};
   R.E.push(e);return e;
 }
 function spawnOne(){
@@ -1399,7 +1406,7 @@ function killed(e){
   R.kills++;const k=KIND[e.kind];
   if(e.kind==='boss'){for(let i=0;i<10;i++)addGem(e.x+rand(-30,30),e.y+rand(-20,20),3,true,rand(-68,68),rand(-68,27));R.bossKills++;showBanner('大型の敵をたおした！');SFX.play('boss');
     addX(e.x,e.y,EXPL.b,0.8);for(let i=0;i<5;i++)addX(e.x+rand(-60,60),e.y+rand(-45,45),EXPL.m,rand(0.4,0.7));}
-  else{SFX.play('kill');addGem(e.x,e.y,k.xp*(e.reap===R.t?1.2:1),k.xp>=3);/* 大鎌で倒すと経験値＋20% */addX(e.x,e.y,e.kind==='bug'?EXPL.s:EXPL.m,e.kind==='bug'?0.36:0.5);}
+  else{SFX.play('kill');addGem(e.x,e.y,k.xp*(e.reapNow?1.2:1),k.xp>=3);/* 大鎌で倒すと経験値＋20% */addX(e.x,e.y,e.kind==='bug'?EXPL.s:EXPL.m,e.kind==='bug'?0.36:0.5);}
   burst(e.x,e.y,e.kind==='boss'?50:e.kind==='tank'?16:8,k.col);
 }
 function hurt(d){
@@ -1421,7 +1428,7 @@ function movePlayer(dt){
   R.x=clamp(R.x,PMX,GW-PMX);R.y=clamp(R.y,PMY,GH-PMY);
 }
 const PMX=26,PMY=34;/* 自機が画面のはしで止まる位置 */
-function shootAt(e,spd,off){spd*=U;const a=Math.atan2(R.y-e.y,R.x-e.x)+off;R.EB.push({x:e.x,y:e.y+e.r*0.6,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg:8,dead:false});}
+function shootAt(e,spd,off,big){spd*=U;const a=Math.atan2(R.y-e.y,R.x-e.x)+off;R.EB.push({x:e.x,y:e.y+e.r*0.6,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg:8,big:!!big,dead:false});}
 function moveEnemies(dt){
   const damp=Math.pow(0.03,dt),lerp=Math.min(1,dt*3);
   for(const e of R.E){
@@ -1437,7 +1444,7 @@ function moveEnemies(dt){
       e.fire-=dt*sf;if(e.fire<=0&&e.y>0&&e.y<GH){e.fire=rand(2,3);shootAt(e,92,0);}
     }else{
       tx=clamp(dx*0.6,-e.spd*1.5,e.spd*1.5);ty=(GH*0.2-e.y)*0.8;
-      e.fire-=dt*sf;if(e.fire<=0){e.fire=2.4;for(let k=-2;k<=2;k++)shootAt(e,85,k*0.28);}
+      e.fire-=dt*sf;if(e.fire<=0){e.fire=2.4;for(let k=-2;k<=2;k++)shootAt(e,85,k*0.28,true);}
     }
     tx*=sf;ty*=sf;
     e.vx+=(tx-e.vx)*lerp;e.vy+=(ty-e.vy)*lerp;e.kx*=damp;e.ky*=damp;if(e.stun>0){e.vx=0;e.vy=0;}
@@ -1511,7 +1518,7 @@ function fire(dt){
 }
 /* ---------- 試作6：攻撃の装備30種（撃ち方・当たり・効果）docs/design/parts.md ---------- */
 /* 数の上限（重くならないように）：PD 酸の水たまり・炎の帯／TU 砲台／RG 輪／Q 投げた弾・魚雷・球／HL 追尾レーザー／MN 機雷 */
-const CAP={PD:90,TU:10,RG:24,Q:160,HL:40,MN:80,B:1400};
+const CAP={PD:90,TU:10,RG:48,RH:16,Q:160,HL:40,MN:80,B:1400};
 /* 強さ：D＝威力の倍率（g の d と火力アップ・刃をかけたもの）、F＝連射の倍率（g の r）、c＝機体と強化の連射 */
 const STAT6={
   pulse:(lv,c,D,F)=>({cd:0.75/F*c,dmg:5*D,n:lv>=7?6:lv>=5?5:lv>=3?4:3,gap:0.06,spd:430*U,l8:lv>=8}),
@@ -1600,10 +1607,10 @@ Object.assign(FIRE,{
   twin(m,st,ox,oy,ux,uy){m.side=(m.side||1)*-1;const a=Math.atan2(uy,ux);
     for(const sd of st.both?[-1,1]:[m.side])R.S.push({m,k:'tw',t:0,dur:st.dur,a:a+sd*0.42,rev:sd<0,sweep:st.sweep,range:st.range,dmg:st.dmg,hits:new Set(),done:false,dead:false});},
   lance(m,st,ox,oy,ux,uy){R.S.push({m,k:'ln',t:0,dur:st.dur,a:Math.atan2(uy,ux),len:st.len,w:st.w,dmg:st.dmg,tip:st.tip,tipDone:false,hits:new Set(),done:false,dead:false});},
-  hammer(m,st,ox,oy,ux,uy){const cx=ox+ux*10*U,cy=oy+uy*10*U;
+  hammer(m,st,ox,oy,ux,uy){const cx=ox,cy=oy;/* 円の衝撃は機体の横（つけた場所）が中心 */
     near(cx,cy,st.rad,e=>{const dx=e.x-cx,dy=e.y-cy,d=Math.hypot(dx,dy)||1;if(d>st.rad+e.r)return;
       e.stun=Math.max(e.stun,e.kind==='boss'?st.stun*0.3:st.stun);hit(e,st.dmg,dx/d*90*U,dy/d*90*U);});
-    ring6({k:'ham',x:cx,y:cy,a:Math.atan2(uy,ux),t:0,dur:0.3,R:st.rad,dmg:0,noHit:true});burst(cx,cy,8,['#e6dcff','#9a7cff','#ffffff']);},
+    capPush(R.RH,{k:'ham',x:cx,y:cy,a:Math.atan2(uy,ux),t:0,dur:0.3,R:st.rad,dmg:0,noHit:true,dead:false},CAP.RH);burst(cx,cy,8,['#e6dcff','#9a7cff','#ffffff']);},
   whip(m,st,ox,oy,ux,uy){R.S.push({m,k:'wh',t:0,dur:st.dur*st.pass,pd:st.dur,pass:st.pass,pi:0,a:Math.atan2(uy,ux),sweep:st.sweep,len:st.len,dmg:st.dmg,prev:null,hits:new Set(),done:false,dead:false});},
   chainsaw(m,st,ox,oy,ux,uy){const x0=ox+ux*8,y0=oy+uy*8,L=st.len;let any=false;
     near(x0+ux*L/2,y0+uy*L/2,L/2+st.w,e=>{const dx=e.x-x0,dy=e.y-y0,pr=clamp(dx*ux+dy*uy,0,L),qx=dx-ux*pr,qy=dy-uy*pr;
@@ -1670,12 +1677,13 @@ function melee6(dt){
         const rel=angDiff(Math.atan2(dy,dx),s.a);if(rel<lo||rel>hi)return;s.hits.add(e.id);hit(e,s.dmg,dx/d*110*U,dy/d*110*U);});
       if(p>=1)s.done=true;continue;}
     else if(s.k==='sc'){near(ox,oy,s.R,e=>{if(s.hits.has(e.id))return;const dx=e.x-ox,dy=e.y-oy,d=Math.hypot(dx,dy)||1;if(d>s.R+e.r)return;
-        const rel=((Math.atan2(dy,dx)-s.a)%TAU+TAU)%TAU;if(rel>p*TAU+0.2&&d>14)return;s.hits.add(e.id);e.reap=R.t;hit(e,s.dmg,dx/d*120*U,dy/d*120*U);});}
+        const rel=((Math.atan2(dy,dx)-s.a)%TAU+TAU)%TAU;if(rel>p*TAU+0.2&&d>14)return;s.hits.add(e.id);e.reapNow=true;hit(e,s.dmg,dx/d*120*U,dy/d*120*U);e.reapNow=false;});}
     if(p>=1)s.done=true;
   }
 }
 /* 輪（衝撃波・光の輪・音波・電磁パルス・ハンマーの見た目） */
 function rings6(dt){
+  for(const r of R.RH){r.t+=dt;if(r.t>r.dur+0.15)r.dead=true;}
   for(const r of R.RG){
     r.t+=dt;if(r.t<0)continue;if(r.t>r.dur+0.15){r.dead=true;continue;}
     if(r.fol&&r.t<=r.dur){const [x,y]=modPos(r.fol);r.x=x;r.y=y;}
@@ -1688,7 +1696,7 @@ function rings6(dt){
       if(r.slowT){e.slow=Math.max(e.slow,r.slowT);e.slowF=Math.min(e.slowF,r.slowF);}
       if(r.son){e.son=2;e.sonV=Math.max(e.sonV,r.son);}
       hit(e,r.dmg,dx/d*r.kb||0,dy/d*r.kb||0);});
-    if(r.clear)for(const b of R.EB){if(b.dead)continue;const dx=b.x-r.x,dy=b.y-r.y;if(dx*dx+dy*dy<=cr*cr){b.dead=true;spark(b.x,b.y,r.k==='emp'?'#c0fbff':'#d0e4ff');}}
+    if(r.clear)for(const b of R.EB){if(b.dead||(r.k==='shock'&&b.big))continue;const dx=b.x-r.x,dy=b.y-r.y;if(dx*dx+dy*dy<=cr*cr){b.dead=true;spark(b.x,b.y,r.k==='emp'?'#c0fbff':'#d0e4ff');}}
   }
 }
 /* 投げた弾・魚雷・プラズマ球・ナパーム */
@@ -1778,7 +1786,7 @@ function draw6Over(g){
       for(let i=0;i<6;i++){const a=R.t*4+i*TAU/6,rr=q.r+2+((i+((R.t*14)|0))%3);px2(g,q.x+Math.cos(a)*rr,q.y+Math.sin(a)*rr);}}
     else if(q.k==='nap'){g.fillStyle='#2f7fb8';px3(g,q.x-q.vx*0.02,q.y-q.vy*0.02);g.fillStyle='#6af0ff';px3(g,q.x,q.y);g.fillStyle='#ffffff';g.fillRect(Math.round(q.x),Math.round(q.y),1,1);}
   }
-  for(const r of R.RG){if(r.t<0)continue;
+  for(const r of R.RG.concat(R.RH)){if(r.t<0)continue;
     const fade=r.t>r.dur?Math.max(0,1-(r.t-r.dur)/0.15):1,cr=r.noHit?r.R*Math.min(1,r.t/r.dur):(r.cr||0);if(cr<2)continue;
     const st=Math.max(2.2,cr*TAU/360);/* 大きな輪は点の数を360までにする */
     switch(r.k){
@@ -2030,7 +2038,7 @@ function update(dt){
   buildGrid();separate();
   fire(dt);support(dt);moveBullets(dt);moveMissiles(dt);slashes(dt);defenses();weaponFx(dt);weapons6(dt);
   moveEB(dt);contact();gems(dt);parts(dt);parts2(dt);stars(dt);
-  [R.E,R.B,R.M,R.S,R.EB,R.G,R.P,R.A,R.FX,R.W,R.MN,R.GV,R.Z,R.L,R.X,R.Q,R.PD,R.RG,R.HL,R.TU,R.TR].forEach(compact);
+  [R.E,R.B,R.M,R.S,R.EB,R.G,R.P,R.A,R.FX,R.W,R.MN,R.GV,R.Z,R.L,R.X,R.Q,R.PD,R.RG,R.RH,R.HL,R.TU,R.TR].forEach(compact);
   if(R.hp<=0){endRun(false,false);return;}
   if(R.t>=RUN_LEN){R.t=RUN_LEN;endRun(true,false);return;}
   if(R.pending>0)openLevelUp();
@@ -2144,9 +2152,9 @@ function draw(){
   for(const x of R.X){const fr=x.f[Math.min(x.f.length-1,Math.floor(x.t/x.dur*x.f.length))];g.drawImage(fr,Math.round(x.x)-(fr.width>>1),Math.round(x.y)-(fr.height>>1));}
   for(const p of R.P){g.globalAlpha=clamp(p.life/p.max*1.4,0,1)*0.9;g.fillStyle=p.c;g.fillRect(Math.round(p.x),Math.round(p.y),p.s,p.s);}
   g.globalAlpha=1;
-  const ebf=EBS[((R.t*8)|0)%2];
-  for(const b of R.EB){g.drawImage(EBG,Math.round(b.x)-16,Math.round(b.y)-16);}
-  for(const b of R.EB)DS(g,ebf,b.x,b.y);
+  const ebf=EBS[((R.t*8)|0)%2],ebb=EBB[((R.t*8)|0)%2];
+  for(const b of R.EB){if(b.big)g.drawImage(EBGB,Math.round(b.x)-22,Math.round(b.y)-22);else g.drawImage(EBG,Math.round(b.x)-16,Math.round(b.y)-16);}
+  for(const b of R.EB)DS(g,b.big?ebb:ebf,b.x,b.y);
   if(R.state!=='over'){const w=40,r=R.hp/R.maxHp;g.fillStyle='#060a1c';g.fillRect(px-21,py+45,w+2,6);g.fillStyle='#2a1030';g.fillRect(px-20,py+46,w,4);
     g.fillStyle=r>0.35?'#5dffb0':'#ff2d6f';g.fillRect(px-20,py+46,Math.ceil(w*r),4);}
   const boss=R.E.find(e=>e.kind==='boss');
