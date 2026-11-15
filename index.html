@@ -3496,7 +3496,7 @@ function showTitle(){
   hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
   titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
 }
-function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(achText(got));}
+function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
 function renderSnd(){const b=$('sndBtn');b.textContent=save.snd===false?'音 OFF':'音 ON';b.setAttribute('aria-pressed',save.snd===false?'false':'true');}
 $('sndBtn').addEventListener('click',()=>{save.snd=save.snd===false;persist();renderSnd();SFX.unlock();SFX.play('btn');});
 $('startBtn').addEventListener('click',()=>{SFX.play('start');if(!save.howto)openHowto(true);else toHangarFromTitle();});
