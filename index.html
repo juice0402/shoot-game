@@ -1001,6 +1001,7 @@ const BLET=paint(5,5,[{m:'gold',r:1.5,f:g=>E(g,2,2,2)}],{});
 const ORBC={};
 /* 試作6の防御・補助・進化が出す物（盾・ドローン・お金・太陽・ブラックホール）と、Lv8 の明るい絵 */
 const SDC={},sdSpr=(r,l8)=>{const k=r+(l8?'b':'');if(!SDC[k]){const w=r*2+1;SDC[k]=paint(w,w,[{m:'green',r:Math.max(1.5,r*0.35),b:l8?0.18:0,p:[[r,0],[w-1,r*0.5],[w-1-r*0.2,r*1.3],[r,w-1],[r*0.2,r*1.3],[0,r*0.5]]},{m:'hull',r:1,f:g=>E(g,r,r*0.85,Math.max(1,r*0.28))}],{});}return SDC[k];};
+[7,8,9,11].forEach(r=>{sdSpr(r,false);sdSpr(r,true);});/* 出撃中に描き始めて止まらないよう、先に作っておく */
 const GSHD=paint(11,13,[{m:'ice',r:2,p:[[5,0],[10,2],[9.5,8],[5,12],[0.5,8],[0,2]]},{m:'hull',r:1,p:[[4,3],[6,3],[6,8],[4,8]]}],{});
 const CDRN=paint(13,11,[{m:'metal',r:1,mir:1,p:[[0,2],[4,2],[4,4],[0,4]]},{m:'teal',r:2.5,f:g=>E(g,6,5.5,4)},{m:'hull',r:1,f:g=>E(g,6,5,1.4)},{m:'metal',r:0.8,f:g=>{RC(g,3,8.5,1.5,2.5);RC(g,8,8.5,1.5,2.5);}}],{});
 const COIN7=paint(8,8,[{m:'gold',r:2,f:g=>E(g,3.5,3.5,3.6)},{m:'yel',r:1,p:[[3,1.5],[4,1.5],[4,5.5],[3,5.5]]}],{});
@@ -1009,7 +1010,7 @@ const SAWB=[0,Math.PI/8].map(rot=>paint(33,33,[{m:'steel',r:3,f:g=>star(g,16,16,
 const mineParts=(body,light)=>[{m:body==='gold'?'gold':'metal',r:1,f:g=>{RC(g,6,0,2,3);RC(g,6,11,2,3);RC(g,0,6,3,2);RC(g,11,6,3,2);}},{m:body,r:2.5,f:g=>E(g,6.5,6.5,5)},{m:'yel',flat:light,noSeam:1,f:g=>RC(g,6,6,2,2)}];
 const GMINE=[paint(14,14,mineParts('gold','#ffffff'),{}),paint(14,14,mineParts('gold','#a06a0a'),{})];
 const MINE8=[paint(14,14,mineParts('steel','#8cf0ff'),{}),paint(14,14,mineParts('steel','#5a6688'),{})];
-const SUNC={},sunSpr=r=>{const k=Math.max(6,Math.round(r));if(!SUNC[k]){const w=k*2+1;SUNC[k]=paint(w,w,[{m:'yel',r:Math.min(9,k*0.7),b:0.12,f:g=>E(g,k,k,k)},{m:'hull',r:Math.min(5,k*0.35),noSeam:1,f:g=>E(g,k-k*0.22,k-k*0.22,k*0.4)}],{ol:'#a06a0a'});}return SUNC[k];};
+const SUNC={},sunSpr=r=>{const k=Math.max(6,Math.round(r));if(!SUNC[k]){const w=k*2+1;SUNC[k]=paint(w,w,[{m:'yel',r:Math.min(12,k*0.8),b:0.1,f:g=>E(g,k,k,k)},{m:'yel',flat:'#ffffff',noSeam:1,f:g=>E(g,k-k*0.3,k-k*0.32,Math.max(1.5,k*0.13))}],{ol:'#b8600e'});}return SUNC[k];};
 const BHS=paint(25,25,[{m:'purple',r:3,f:g=>E(g,12,12,12)},{m:'purple',flat:'#060a1c',noSeam:1,f:g=>E(g,12,12,8)}],{ol:'#1f0f52'});
 const GREN8=paint(9,9,[{m:'yel',r:2.5,b:0.15,f:g=>E(g,4,4.5,4)},{m:'hull',r:1,p:[[3,0],[5,0],[5,1.5],[3,1.5]]}],{});
 const BLET8=paint(5,5,[{m:'yel',r:1.5,f:g=>E(g,2,2,2)}],{});
@@ -1460,9 +1461,10 @@ const CSK={
 };
 function csMul(s,key,v){if(!key||v===1)return;if(typeof key==='string'){if(s[key]!=null)s[key]*=v;}else for(const q of key)if(s[q]!=null)s[q]*=v;}
 function applyCS(k,s){const cs=R.cs;csMul(s,k.a,cs.area);csMul(s,k.u,cs.dur);csMul(s,k.g,cs.range);csMul(s,k.s,cs.bspd);if(k.n&&s[k.n]!=null)s[k.n]+=cs.multi;}
-function stat(t){const s=stat0(t);if(s){const k=R.evo[t]&&EVO[t]?EVO[t].k:CSK[t];if(k)applyCS(k,s);}return s;}
+const csk=t=>R.evo[t]&&EVO[t]?EVO[t].k:CSK[t];
+function stat(t){const s=stat0(t);if(s){const k=csk(t);if(k)applyCS(k,s);}return s;}
 function stat0(t){
-  const lv=R.tlv[t]||1,c=(1-0.08*R.pas.clock)/R.sh.rate/R.cs.rate,m=dmgMul()*(MODS[t].cat==='atk'?R.cs.mdmg:1)*(R.sh.blade&&(t==='sword'||t==='saw'||MODS[t].melee)?R.sh.blade:1),p=Math.pow;
+  const k=csk(t),lv=R.tlv[t]||1,c=(1-0.08*R.pas.clock)/R.sh.rate/R.cs.rate,m=dmgMul()*(k&&k.n?R.cs.mdmg:1)*/* 多弾装置の威力 −10% は、弾の数がふえる武器だけ */(R.sh.blade&&(t==='sword'||t==='saw'||MODS[t].melee)?R.sh.blade:1),p=Math.pow;
   if(R.evo[t]&&EVO[t]){const s=EVO[t].st(lv,c,GR(t,'d',lv)*m,GR(t,'r',lv));if(lv<WMAX)s.dmg*=0.85;return s;}/* アルケミスト（#11）は Lv6 で進化できる。Lv8 までは少し弱い */
   if(STAT6[t])return STAT6[t](lv,c,GR(t,'d',lv)*m,GR(t,'r',lv));
   switch(t){
@@ -2042,6 +2044,7 @@ const evoLv=()=>R.sh.evoLv||WMAX;
 function evoReady(){const out=[];for(const t in EVO){if(R.evo[t]||R.tlv[t]<evoLv())continue;const p=EVO[t].p;if(R.mods.some(m=>m.t===p))out.push(t);}return out;}
 function evolve(t){R.evo[t]=true;for(const m of R.mods)if(m.t===t){m.cd=0.2;m.bq=0;}
   if(!save.evo)save.evo={};if(!save.evo[t]){save.evo[t]=1;persist();}
+  if(t==='plasma')sunSpr(stat('plasma').sr);/* 太陽の絵は進化したときに作る（レベルアップの画面の間） */
   SFX.play('evo');showBanner(MODS[t].name+'が'+EVO[t].name+'に進化');}
 /* 絵：ブラックホール */
 function drawBH(g,o){const n=40;for(let i=0;i<n;i++){const k=((i/n+R.t*0.6)%1),a=i*2.4-R.t*4,rr=o.r*(1-k)*0.9+10;
@@ -2052,8 +2055,8 @@ function draw10(g,px,py){
   if(R.dodge>0){g.globalAlpha=0.35*R.dodge/0.3;g.drawImage(R.spr.img,px-R.spr.cx-9,py-R.spr.cy);g.drawImage(R.spr.img,px-R.spr.cx+9,py-R.spr.cy);g.globalAlpha=1;}
   for(const m of R.mods){
     if(m.t==='flame'&&R.evo.flame){const st=stat('flame'),f=(R.t*14)|0;/* 3本の炎の腕が回る渦（白 → 水色 → 青） */
-      for(let arm=0;arm<3;arm++)for(let j=0;j<18;j++){const k=j/17,a=R.t*4+arm*TAU/3+k*2.6,rr=st.vR*(0.3+0.7*k),q=(j*5+arm*3+f)%4,x=px+Math.cos(a)*rr,y=py+Math.sin(a)*rr*0.92;
-        const s=Math.round(5-3*k)+(q===0?1:0);g.fillStyle=k<0.2?'#ffffff':k<0.45?'#bff8ff':k<0.7?'#6af0ff':'#2f7fb8';g.fillRect(Math.round(x-s/2),Math.round(y-s/2),s,s);
+      for(let arm=0;arm<3;arm++)for(let j=0;j<22;j++){const k=j/21,a=R.t*4+arm*TAU/3+k*1.5,rr=st.vR*(0.35+0.65*k),q=(j*5+arm*3+f)%4,x=px+Math.cos(a)*rr,y=py+Math.sin(a)*rr*0.92;
+        const s=Math.round(6-3*k)+(q===0?1:0);g.fillStyle=k<0.2?'#ffffff':k<0.45?'#bff8ff':k<0.7?'#6af0ff':'#2f7fb8';g.fillRect(Math.round(x-s/2),Math.round(y-s/2),s,s);
         if(q===1){g.fillStyle='#173690';px2(g,x-Math.sin(a)*4,y+Math.cos(a)*4);}}}
     else if(m.t==='laser'&&R.evo.laser&&R.t-(m.bm==null?-9:m.bm)<0.12){const st=stat('laser'),a=dirAngle(m.d),ux=Math.cos(a),uy=Math.sin(a),ox=px+SLOTS[m.slot].x+ux*14,oy=py+SLOTS[m.slot].y+uy*14,f=((R.t*30)|0)%2;
       for(let k=0;k<st.n;k++){const off=(k-(st.n-1)/2)*(st.w+4);g.save();g.translate(Math.round(ox-uy*off),Math.round(oy+ux*off));g.rotate(a);
@@ -2138,9 +2141,9 @@ function draw6Ship(g,px,py){
       const full=s.k==='sc'?TAU:s.sweep,dir=s.rev?-1:1,a0=s.k==='sc'?s.a:s.a-dir*full/2,ext=full*p,tailL=s.k==='sc'?2.2:1.3;
       const cols=s.k==='st'?['#ffffff','#fff6c0','#c09cff','#6a48e0']:s.k==='gs'?['#ffffff','#e3eaff','#bfd0f0','#7d97cf']:s.k==='tw'?(s.l8?['#ffffff','#ffffff','#dcfffb','#5cffef']:['#ffffff','#dcfffb','#7ff0ff','#18b0b4']):['#ffffff','#e6dcff','#c09cff','#6a48e0'];
       const R0=s.k==='sc'?s.R:s.range,depth=s.k==='st'?0.2:s.k==='gs'?0.45:s.k==='sc'?0.3:0.35;
-      for(let rad=R0,j=0;rad>R0*(1-depth);rad-=s.k==='st'?3:2,j++){
+      for(let rad=R0,j=0;rad>R0*(1-depth);rad-=s.k==='st'?4:2,j++){
         g.globalAlpha=fade*Math.max(0.25,1-j*0.07);g.fillStyle=j===0?cols[0]:j<3?cols[1]:j<6?cols[2]:cols[3];
-        const e1=ext,e0=Math.max(0,ext-tailL),n=Math.max(1,Math.ceil((e1-e0)*rad/1.6));
+        const e1=ext,e0=Math.max(0,ext-tailL),n=Math.max(1,Math.ceil((e1-e0)*rad/(s.k==='st'?2.2:1.6)));
         for(let i=0;i<=n;i++){const an=a0+dir*(e0+(e1-e0)*i/n);px2(g,ox+Math.cos(an)*rad,oy+Math.sin(an)*rad);}}
       g.globalAlpha=1;
       if(s.k==='st'&&p<1){const an=a0+dir*ext;for(let i=0;i<5;i++){const rr=R0*(0.6+0.1*i),x=Math.round(ox+Math.cos(an)*rr),y=Math.round(oy+Math.sin(an)*rr);
@@ -2519,7 +2522,7 @@ function frame(ts){
 function buildChoices(){
   const pool=[];
   TYPES.forEach(t=>{const lv=R.tlv[t],m=MODS[t];
-    if(lv>0&&lv<WMAX)pool.push({w:3,c:m.c,icon:{img:ICON[t]},name:m.name,tag:'武器',lv,max:WMAX,desc:m.up[lv+1],fn:()=>{R.tlv[t]++;}});
+    if(lv>0&&lv<WMAX)pool.push({w:3,c:m.c,icon:{img:ICON[t]},name:m.name,tag:m.cat==='atk'?'武器':CATS[m.cat],lv,max:WMAX,desc:m.up[lv+1],fn:()=>{R.tlv[t]++;}});
   });
   Object.keys(PAS).forEach(k=>{const p=PAS[k],lv=R.pas[k];if(lv<p.max)pool.push({w:1,c:p.c,icon:{img:PICON[k]},name:p.name,tag:'機体',lv,max:p.max,desc:p.desc,
     fn:()=>{R.pas[k]++;if(k==='armor'){R.maxHp+=20;R.hp=Math.min(R.maxHp,R.hp+20);}}});});
