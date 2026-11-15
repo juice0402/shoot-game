@@ -2457,7 +2457,7 @@ function weaponFx(dt){
 /* ---------- 必殺技（#11・docs/design/ships.md） ----------
    ゲージは時間（1秒で1.25）と撃破（小さい敵0.08〜大型の敵8）でたまり、100 で自動で出る（60秒くらいで1回）。エネルギー炉1つで1.2倍
    威力は spDmg：敵の体力ののびと同じく時間でのびる。火力アップなども効く */
-const SPG={max:100,time:1.25,kill:{bug:0.08,shooter:0.15,tank:0.3,boss:8},graze:0.5};
+const SPG={max:100,time:1.25,kill:{bug:0.08,shooter:0.15,tank:0.3,boss:8},graze:0.4};
 const SPGLOW={};SHIP_IDS.forEach(k=>{SPGLOW[k]=glow(110,hex(SHIPS[k].c).join(','),0.42);});
 const spDmg=b=>b*(1+R.t/110)*dmgMul();
 const easeO=t=>1-(1-t)*(1-t),easeIO=t=>t<0.5?2*t*t:1-2*(1-t)*(1-t);
@@ -2468,7 +2468,7 @@ function ebClear(x,y,rad,c,small){for(const b of R.EB){if(b.dead||(small&&b.big)
 function bracket(g,x,y,r,c){g.fillStyle=c;x=Math.round(x);y=Math.round(y);r=Math.round(r);
   for(let i=0;i<4;i++){const sx=i&1?1:-1,sy=i&2?1:-1,cx=x+sx*r,cy=y+sy*r;g.fillRect(sx>0?cx-6:cx,sy>0?cy-1:cy,6,2);g.fillRect(sx>0?cx-1:cx,sy>0?cy-6:cy,2,6);}}
 function snipe(L){if(!L)return;let n=0;for(const e of L){if(e.dead)continue;n++;
-    R.TR.push({x0:R.x,y0:R.y-34,x1:e.x,y1:e.y,t:0,dur:0.35,c:'#bfe9ff',w:3,dead:false});hit(e,spDmg(160),0,-40*U);addX(e.x,e.y,EXPL.m,0.4);}
+    R.TR.push({x0:R.x,y0:R.y-34,x1:e.x,y1:e.y,t:0,dur:0.35,c:'#bfe9ff',w:3,dead:false});hit(e,spDmg(120),0,-40*U);addX(e.x,e.y,EXPL.m,0.4);}
   if(n)SFX.play('spsnipe');}
 function escort(a,dt){
   if(a.out){a.y-=420*U*dt;if(a.y<-40)a.dead=true;return;}
@@ -2510,9 +2510,10 @@ const SPECIAL={
         const lo=Math.min(x0,x1),hi=Math.max(x0,x1);
         for(const e of R.E){if(e.dead||l.hits.has(e.id)||Math.abs(e.y-l.y)>30+e.r||e.x<lo-e.r||e.x>hi+e.r)continue;l.hits.add(e.id);hit(e,spDmg(45),l.dir*120*U,0);}
         for(const b of R.EB)if(!b.dead&&Math.abs(b.y-l.y)<=34&&b.x>=lo-6&&b.x<=hi+6)ebGone(b,'#e6dcff','w');}},
-    draw(g,s){for(const l of s.L){const p=(s.t-l.t0)/0.35;if(p<0||p>1.5||l.x==null)continue;const k=p>1?Math.max(0,1-(p-1)/0.5):1;
-        for(let i=0;i<60;i++){const xx=l.x-l.dir*i*4;if(xx<-8||xx>GW+8)continue;const f=1-i/60,h=Math.max(1,Math.round(16*f));
-          g.globalAlpha=k*f;g.fillStyle=i<3?'#ffffff':i<12?'#e6dcff':i<30?'#a98bff':'#6a48e0';g.fillRect(Math.round(xx)-2,Math.round(l.y)-(h>>1),4,h);}}
+    draw(g,s){for(const l of s.L){const p=(s.t-l.t0)/0.35;if(p<0||p>1.5||l.x==null)continue;const k=p>1?Math.max(0,1-(p-1)/0.5):1,x0=l.dir>0?-40:GW+40,y=Math.round(l.y);
+        /* 通ったあとの線（はじまりほど薄い）と、先の三日月の刃 */
+        const L=Math.abs(l.x-x0),n=Math.ceil(L/6);for(let i=0;i<n;i++){const f=(i+1)/n,x=Math.round(x0+(l.x-x0)*i/n);g.globalAlpha=k*f*0.5;g.fillStyle='#6a48e0';g.fillRect(x,y-4,6,9);g.globalAlpha=k*f;g.fillStyle=f>0.85?'#ffffff':'#c4b0ff';g.fillRect(x,y-1,6,f>0.7?3:2);}
+        if(p<1)for(let j=-26;j<=26;j+=2){const q=j/26,x=Math.round(l.x-l.dir*(1-q*q)*-10-l.dir*q*q*14);g.globalAlpha=k;g.fillStyle=Math.abs(j)<10?'#ffffff':Math.abs(j)<20?'#e6dcff':'#a98bff';g.fillRect(x-(Math.abs(j)<14?2:1),y+j,Math.abs(j)<14?4:3,2);}}
       g.globalAlpha=1;}},
   /* 艦載機発進：6機が8秒間、近い敵を撃つ */
   carrier:{dur:8,start(){const F=[[-40,16],[40,16],[-76,36],[76,36],[-112,56],[112,56]];R.ES.length=0;
