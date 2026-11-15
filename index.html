@@ -1992,7 +1992,8 @@ function shields10(dt){
       if(!m.sp)m.sp=[];m.sp.length=st.n;
       for(let i=0;i<st.n;i++){const a=m.sa+i*TAU/st.n,p=m.sp[i]||(m.sp[i]={});p.x=R.x+Math.cos(a)*orb;p.y=R.y+Math.sin(a)*orb*0.92;p.r=st.r;p.l8=st.l8;
         for(const b of R.EB){if(b.dead)continue;const dx=b.x-p.x,dy=b.y-p.y,rr=st.r+(b.big?8:5);if(dx*dx+dy*dy<=rr*rr){ebGone(b,'#d2ffe8','g');SFX.play('shield');}}}}
-    else if(m.t==='fshield'){const st=stat('fshield');if(m.fh==null){m.fh=st.hp;m.fr=0;m.fg=0;}
+    else if(m.t==='fshield'){const st=stat('fshield');if(m.fh==null){m.fh=st.hp;m.fr=0;m.fg=0;m.fm=st.hp;}
+      if(st.hp>m.fm){if(m.fh>0)m.fh+=st.hp-m.fm;m.fm=st.hp;}/* Lv で耐久の上限がふえたら、ふえた分をいまの耐久に足す */
       if(m.fh<=0){m.fr-=dt;if(m.fr<=0){m.fh=st.hp;m.fg=0;SFX.play('barrier');}continue;}
       if(m.fh<st.hp){m.fg+=dt;if(m.fg>=2.5){m.fg=0;m.fh++;}}/* 割れていなければ2.5秒で1ずつ戻る */
       const a=dirAngle(m.d),lo=(st.R-14)**2,hi=(st.R+6)**2;
@@ -2109,7 +2110,7 @@ function draw6Over(g){
       const nf=q.l8?10:6;if(q.l8)g.fillStyle='#ffffff';for(let i=0;i<nf;i++){const a=R.t*4+i*TAU/nf,rr=q.r+2+((i+((R.t*14)|0))%3);px2(g,q.x+Math.cos(a)*rr,q.y+Math.sin(a)*rr);}}
     else if(q.k==='nap'){g.fillStyle='#2f7fb8';px3(g,q.x-q.vx*0.02,q.y-q.vy*0.02);g.fillStyle='#6af0ff';px3(g,q.x,q.y);g.fillStyle='#ffffff';g.fillRect(Math.round(q.x),Math.round(q.y),1,1);}
   }
-  for(const r of R.RG.concat(R.RH)){if(r.t<0)continue;
+  for(let q=0;q<2;q++)for(const r of q?R.RH:R.RG){if(r.t<0)continue;/* 2つの配列を順に（毎フレーム新しい配列を作らない） */
     const fade=r.t>r.dur?Math.max(0,1-(r.t-r.dur)/0.15):1,cr=r.noHit?r.R*Math.min(1,r.t/r.dur):(r.cr||0);if(cr<2)continue;
     const st=Math.max(2.2,cr*TAU/360);/* 大きな輪は点の数を360までにする */
     switch(r.k){
