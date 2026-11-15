@@ -26,7 +26,7 @@ button:disabled{cursor:not-allowed}
 
 /* ---------- title・遊び方 ---------- */
 #title{position:fixed;inset:0;z-index:30;background:var(--deep);overflow:hidden}
-#titleCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+#titleCv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated;image-rendering:crisp-edges}
 .tbox{position:relative;height:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;justify-content:space-between;
   padding:calc(14vh + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .logo{margin:0;text-align:center;font-family:var(--f-num);font-weight:400;font-size:clamp(30px,10vw,46px);line-height:1.25;letter-spacing:.04em;color:#fff2a8;
@@ -847,7 +847,7 @@ const SFX=(()=>{
     return true;
   }
   /* 最初のタップで音を始める（iPhone の決まり） */
-  function unlock(){if(!init())return;if(ac.state==='suspended')ac.resume().catch(()=>{});}
+  function unlock(){if(!init())return;if(ac.state!=='running'&&ac.state!=='closed')ac.resume().catch(()=>{});}
   const on=()=>save.snd!==false&&ac&&ac.state!=='closed';
   /* 1つの音：type・高さ f0→f1・長さ・大きさ・はじまりの遅れ */
   function tone(type,f0,f1,dur,vol,delay){
@@ -1739,7 +1739,7 @@ function endRun(clear,retreat){
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
   persist();
-  SFX.play(clear?'clear':retreat?'btn':'over');setTimeout(()=>SFX.play('coin'),clear?900:700);
+  if(!retreat){SFX.play(clear?'clear':'over');if(clear)setTimeout(()=>SFX.play('coin'),900);}
   overlay.textContent='';
   overlay.append(el('h2',null,clear?'クリア！':retreat?'撤退':'撃墜…'),
     el('p','sub',clear?'5分 生きのびた！':retreat?'とちゅうで格納庫にもどったよ':'組みなおして、また出撃しよう'));
@@ -1793,7 +1793,7 @@ function titleBg(){
   const r=titleEl.getBoundingClientRect(),h=clamp(Math.round(GW*Math.max(1,r.height)/Math.max(1,r.width)),660,1200);
   tCv.width=GW;tCv.height=h;tg.imageSmoothingEnabled=false;
   const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,h),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
-  TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.58,y:h*0.12},shots:[],cd:0};
+  TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0};
 }
 function titleFrame(ts){
   if(titleEl.hidden){tRaf=0;return;}
@@ -1821,6 +1821,7 @@ $('sndBtn').addEventListener('click',()=>{save.snd=save.snd===false;persist();re
 $('startBtn').addEventListener('click',()=>{SFX.play('start');if(!save.howto)openHowto(true);else toHangarFromTitle();});
 $('howBtn').addEventListener('click',()=>openHowto(false));
 $('toTitle').addEventListener('click',showTitle);
+window.addEventListener('resize',()=>{if(!titleEl.hidden)titleBg();});
 
 /* 遊び方（絵つき4枚・1回目のスタートのときにも出す） */
 const HOWTO=[
@@ -1863,7 +1864,7 @@ $('howNext').addEventListener('click',()=>{
 });
 /* 最初のタップで音を始める・ボタンの音 */
 document.addEventListener('pointerdown',()=>SFX.unlock(),{capture:true});
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;
+document.addEventListener('click',e=>{SFX.unlock();const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='startBtn'||b.id==='sndBtn'||b.classList.contains('buybig'))return;SFX.play('btn');},{capture:true});
 
 document.querySelectorAll('.gname').forEach(e=>{e.textContent=GAME_NAME;});
