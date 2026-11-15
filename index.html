@@ -2292,6 +2292,7 @@ const isMelee=t=>t==='sword'||t==='saw'||!!MODS[t].melee;
 /* #12 狂戦士（近接＋60%・射撃−20%）・一点集中（いちばん高い武器＋40%・ほか−15%） */
 const wMul=t=>{const X=R.spc;let v=1;if(X.fury)v*=isMelee(t)?1.6:MODS[t].cat==='atk'?0.8:1;if(X.one&&R.cs.top&&!MODS[t].passive)v*=t===R.cs.top?1.4:0.85;return v;};
 const BOOM={mine:1,missile:1,grenade:1,cluster:1,torpedo:1,minefield:1,micro:1};
+let LKB=0;/* 弾が1発ずつ当てている間は1（大蛇の同じフレームの印を使わない） */
 let HSRC=0;/* いま当てているのが近接の武器なら1（倒した数を数える） */
 function stat(t){const s=stat0(t);if(s){const k=csk(t);if(k)applyCS(k,s);}return s;}
 function stat0(t){
@@ -2424,7 +2425,7 @@ function addWall(v,pos){R.LZ.push({v,p:pos,t:0,on:0,hit:false,dead:false});SFX.p
 function randWall(other){const v=other?!R.LZ.length||!R.LZ[R.LZ.length-1].v:Math.random()<0.5,aim=Math.random()<0.4;
   addWall(v,v?(aim?clamp(R.x,40,GW-40):rand(50,GW-50)):(aim?clamp(R.y,GH*0.3,GH-40):rand(GH*0.3,GH*0.88)));}
 function walls(dt){for(const w of R.LZ){w.t+=dt;if(w.t>=LZW&&!w.on){w.on=1;SFX.play('lzfire');}
-  if(w.on&&!w.hit&&w.t<LZW+LZON&&R.state==='play'){const dd=w.v?Math.abs(R.x-w.p):Math.abs(R.y-w.p);if(dd<LZH+6){w.hit=true;hurt(16);}}
+  if(w.on&&!w.hit&&w.t<LZW+LZON&&R.state==='play'){const dd=w.v?Math.abs(R.x-w.p):Math.abs(R.y-w.p);if(dd<LZH+2){w.hit=true;hurt(16);}}
   if(w.t>LZW+LZON+0.15)w.dead=true;}}
 const ROCKR=[11,15,21];
 function addRock(x,y,sz,a,spd){const e=addEnemy('rock',x,y);e.sz=sz;e.r=ROCKR[sz]*0.85;e.hp*=[1,2,3.4][sz];e.max=e.hp;e.dmg=[10,14,20][sz];
@@ -2464,6 +2465,7 @@ function showBanner(t,c){banner.textContent=t;banner.style.borderColor=c||'';ban
 function hit(e,amt,kx,ky){
   if(e.dead||e.hide)return;/* まぼろしが消えている間は当たらない */
   if(e.link){e.flash=0.07;e=e.link;if(e.dead)return;}/* 大蛇の体：頭の体力がへる */
+  if(e.segs&&!LKB){if(e.lkT===R.t&&e.lkA===amt)return;e.lkT=R.t;e.lkA=amt;}/* 大蛇：同じフレームの同じ攻撃（ビーム・範囲）は1回だけ。体は頭と同じ id なので、当たり済みの印も1つ（#13 の点検） */
   amt*=1+e.vul+(e.son>0?e.sonV:0);/* ニードル砲の「もろさ」・音波砲 */
   if(e.shell)amt*=0.3;/* 岩やどり：岩をかぶっている間は30% */
   if(e.kind==='guard'){const kl=Math.hypot(kx,ky);if(kl>1e-3&&(kx*Math.cos(e.fa)+ky*Math.sin(e.fa))/kl<-0.35){amt*=0.3;/* 盾持ち：前からは30% */
@@ -2513,6 +2515,7 @@ function hurt(d){
   if(R.hp<=0&&R.revLeft>0){R.revLeft--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('復活装置で HP50% にもどった');}
   if(R.hp<=0&&R.labRev>0){R.labRev--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('予備の機体で HP50% にもどった');}/* 研究所 */
   if(R.hp>0&&R.hp<R.maxHp*0.3&&R.ebLeft>0&&R.ebT<=0){R.ebLeft--;R.ebT=3;R.inv=Math.max(R.inv,3);SFX.play('ebar');}/* 緊急バリア */
+  return true;/* 当たった（霜の弾の遅さに使う） */
 }
 function gainXp(v){R.xp+=v*(1+0.1*R.pas.xp)*R.cs.xp*(R.sh.xp||1);while(R.xp>=R.need){R.xp-=R.need;R.lv++;R.need=xpNeed(R.lv);R.pending++;}}
 
@@ -2640,7 +2643,7 @@ const BIG={
     if(e.lz<=0&&e.y>0){e.lz=9;const v=Math.random()<0.5;addWall(v,v?clamp(R.x,40,GW-40):clamp(R.y,GH*0.35,GH-40));}}},/* 自機のいる列か行をねらう */
   /* 機械の大蛇：画面をくねくね回る。体のあちこちから弾・頭から5方向 */
   snake:{hp:1.2,r:34,init(e){e.trail=[];e.hd=Math.PI/2;e.segs=[];
-      for(let i=10;i>=0;i--){const s=addEnemy('seg',e.x,e.y-(i+1)*26);s.link=e;s.sp=i===10?ESPR.segt:null;if(i===10)s.r=14;e.segs[i]=s;}/* しっぽから先に描く */
+      for(let i=10;i>=0;i--){const s=addEnemy('seg',e.x,e.y-(i+1)*26);s.link=e;s.id=e.id;s.sp=i===10?ESPR.segt:null;if(i===10)s.r=14;e.segs[i]=s;}/* しっぽから先に描く */
       R.E.splice(R.E.indexOf(e),1);R.E.push(e);e.fire=2;e.q=4;},
     ai(e,dt,sf){const px=GW/2+Math.sin(R.t*0.55)*GW*0.36,py=e.y<GH*0.15?GH*0.4:GH*0.36+Math.sin(R.t*0.83+1)*GH*0.24;
       e.hd+=clamp(angDiff(Math.atan2(py-e.y,px-e.x),e.hd),-1.8*dt*sf,1.8*dt*sf);const v=e.spd*3;TX=Math.cos(e.hd)*v;TY=Math.sin(e.hd)*v;e.sp=SNK8[dir8(e.hd)];
@@ -2667,7 +2670,7 @@ function separate(){
       if(d2>0.0001&&d2<md*md){const d=Math.sqrt(d2),p=(md-d)*0.35;e.x+=dx/d*p;e.y+=dy/d*p;}});}
 }
 const modPos=m=>[R.x+SLOTS[m.slot].x+(m.cx||0),R.y+SLOTS[m.slot].y+(m.cy||0)];/* cx・cy＝ファントムの分身のずれ */
-function nearest(x,y,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=e;}}return best;}
+function nearest(x,y,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.hide||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=e;}}return best;}
 /* bullet kinds: 0 laser, 1 ally, 2 flame, 3 freeze, 4 reflected, 5 gatling, 6 pellet */
 function mkB(x,y,vx,vy,dmg,pierce,k,extra){const b={x,y,vx,vy,dmg,pierce:pierce||0,hits:pierce>0?new Set():null,k:k||0,dead:false};return extra?Object.assign(b,extra):b;}
 function jag(pts){
@@ -2697,11 +2700,11 @@ const FIRE={
     R.W.push({m,x:ox,y:oy,ux:Math.cos(a),uy:Math.sin(a),t:0,v0:st.v0,r:st.r,big:st.big,dmg:st.dmg,hits:new Map(),dead:false});}},
   thunder(m,st,ox,oy,ux,uy){
     const base=Math.atan2(uy,ux);let best=null,bd=st.range*st.range;
-    for(const e of R.E){if(e.dead||e.y<-4)continue;const dx=e.x-ox,dy=e.y-oy,d=dx*dx+dy*dy;if(d>=bd)continue;if(Math.abs(angDiff(Math.atan2(dy,dx),base))>1.15)continue;bd=d;best=e;}
+    for(const e of R.E){if(e.dead||e.hide||e.y<-4)continue;const dx=e.x-ox,dy=e.y-oy,d=dx*dx+dy*dy;if(d>=bd)continue;if(Math.abs(angDiff(Math.atan2(dy,dx),base))>1.15)continue;bd=d;best=e;}
     if(!best)return false;
     const chain=[best],pts=[[ox,oy],[best.x,best.y]];let cur=best;
     for(let i=0;i<st.chain;i++){let nx=null,nd=108*108;
-      for(const e of R.E){if(e.dead||chain.includes(e))continue;const dx=e.x-cur.x,dy=e.y-cur.y,d=dx*dx+dy*dy;if(d<nd){nd=d;nx=e;}}
+      for(const e of R.E){if(e.dead||e.hide||chain.includes(e))continue;const dx=e.x-cur.x,dy=e.y-cur.y,d=dx*dx+dy*dy;if(d<nd){nd=d;nx=e;}}
       if(!nx)break;chain.push(nx);pts.push([nx.x,nx.y]);cur=nx;}
     chain.forEach(e=>hit(e,st.dmg,0,0));
     R.Z.push({poly:jag(pts),t:0,dead:false});
@@ -2768,15 +2771,15 @@ const STAT6={
   fshield:lv=>({hp:lv>=8?16:lv>=5?12:lv>=3?10:8,R:lv>=4?58:52,half:(lv>=7?80:lv>=2?66:56)*Math.PI/180,regen:lv>=6?4:6,l8:lv>=8}),
 };
 /* 画面の上で、敵の体力が多い順に n 体 */
-function toughest(n){const out=[];for(const e of R.E){if(e.dead||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;
+function toughest(n){const out=[];for(const e of R.E){if(e.dead||e.hide||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;
   let i=out.length;while(i>0&&out[i-1].hp<e.hp)i--;if(i<n){out.splice(i,0,e);if(out.length>n)out.pop();}}return out;}
 /* 近い順に n 体（マイクロミサイルの的を分ける） */
-function closest(x,y,n,maxD){const a=[];for(const e of R.E){if(e.dead||e.y<-6)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<maxD*maxD)a.push([d,e]);}
+function closest(x,y,n,maxD){const a=[];for(const e of R.E){if(e.dead||e.hide||e.y<-6)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<maxD*maxD)a.push([d,e]);}
   a.sort((p,q)=>p[0]-q[0]);return a.slice(0,n).map(p=>p[1]);}
 /* 向いた方（前 ±0.6）でいちばん近い敵：グレネードとクラスターの落ちる所 */
-function ahead(x,y,a,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;
+function ahead(x,y,a,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.hide||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;
   if(d<bd&&Math.abs(angDiff(Math.atan2(dy,dx),a))<0.6){bd=d;best=e;}}return best;}
-function nearestEx(x,y,maxD,skip){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6||skip.has(e.id))continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<bd){bd=d;best=e;}}return best;}
+function nearestEx(x,y,maxD,skip){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.hide||e.y<-6||skip.has(e.id))continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<bd){bd=d;best=e;}}return best;}
 const capPush=(arr,o,cap)=>{if(arr.length>=cap)arr.shift();arr.push(o);};
 function addPD(k,x,y,o){capPush(R.PD,{k:o.k||k,x,y,r:o.r,life:o.life,t:0,dmg:o.tick!=null?o.tick:o.dmg,tk:rand(0,0.12),dead:false},CAP.PD);}
 const ring6=(o)=>{o.hits=new Set();o.dead=false;capPush(R.RG,o,CAP.RG);};
@@ -3003,7 +3006,7 @@ const EFIRE={
     R.S.push({m,k:'st',t:-0.24,dur:st.dur,a,rev:true,sweep:st.sweep,range:st.range,dmg:st.dmg,hits:new Set(),done:false,dead:false});},
   saw(){return false;},
   flame(m,st,ox,oy,ux,uy){return FIRE.flame(m,st,ox,oy,ux,uy);},
-  thunder(m,st){let first=null,bd=1e12;for(const e of R.E){if(e.dead||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;const d=(e.x-R.x)**2+(e.y-R.y)**2;if(d<bd){bd=d;first=e;}}
+  thunder(m,st){let first=null,bd=1e12;for(const e of R.E){if(e.dead||e.hide||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;const d=(e.x-R.x)**2+(e.y-R.y)**2;if(d<bd){bd=d;first=e;}}
     if(!first)return false;const chain=[first],pts=[[first.x,-8],[first.x,first.y]];let cur=first;
     for(let i=0;i<st.chain;i++){let nx=null,nd=st.jump*st.jump;near(cur.x,cur.y,st.jump,e=>{if(chain.includes(e))return;const d=(e.x-cur.x)**2+(e.y-cur.y)**2;if(d<nd){nd=d;nx=e;}});
       if(!nx)break;chain.push(nx);pts.push([nx.x,nx.y]);cur=nx;}
@@ -3240,7 +3243,7 @@ function moveBullets(dt){
         if(b.last===e.id)return;
         const dx=e.x-b.x,dy=e.y-b.y,rr=e.r+(b.k===2||b.k===8?6:3);
         if(dx*dx+dy*dy<=rr*rr){
-          const kb=b.kb!=null?b.kb:0.12;hit(e,b.dmg,b.vx*kb,b.vy*kb);
+          const kb=b.kb!=null?b.kb:0.12;LKB=1;hit(e,b.dmg,b.vx*kb,b.vy*kb);LKB=0;
           if(b.slowT){e.slow=Math.max(e.slow,b.slowT);e.slowF=Math.min(e.slowF,b.slowF);}
           if(b.k!==2)spark(b.x,b.y,SPK[b.k]||'#ffffff',b.k===1?'g':b.k===6?'y':'w');
           if(b.k>=10&&onHit6(b,e))return true;
@@ -3504,7 +3507,7 @@ function support(dt){
   if(rg>0)R.hp=Math.min(R.maxHp,R.hp+rg*dt);
 }
 /* ---------- #12 新しい支援8種（数字は SUP の v・威力は dmgMul がかかる）・回復の玉・宝箱 ---------- */
-function randOn(skip,minY){for(let k=0;k<12&&R.E.length;k++){const c=R.E[(Math.random()*R.E.length)|0];if(!c.dead&&onScr(c)&&c.y>(minY||12)&&!(skip&&skip.has(c.id)))return c;}return null;}
+function randOn(skip,minY){for(let k=0;k<12&&R.E.length;k++){const c=R.E[(Math.random()*R.E.length)|0];if(!c.dead&&!c.hide&&onScr(c)&&c.y>(minY||12)&&!(skip&&skip.has(c.id)))return c;}return null;}
 function sup12(dt){
   const S=R.sup,mul=dmgMul();
   if(S.thunder>0){R.thT-=dt;if(R.thT<=0){R.thT=SV('thunder','cd');const n=SV('thunder','n'),d=SV('thunder','d')*mul,used=new Set();
@@ -3578,7 +3581,7 @@ function moveEB(dt){
   const ek=R.tstop>0?0:dt*R.cs.eSpd*(1-0.25*(R.snow||0));/* 時間停止・時の加速（#12）・吹雪（#13） */
   for(const b of R.EB){if(b.dead)continue;b.x+=b.vx*ek;b.y+=b.vy*ek;
     if(b.x<-18||b.x>GW+18||b.y<-18||b.y>GH+18){b.dead=true;continue;}
-    const dx=b.x-R.x,dy=b.y-R.y,d2=dx*dx+dy*dy;if(d2<=56){b.dead=true;if(b.slow&&R.inv<=0&&R.spInv<=0)R.chill=2.2;hurt(b.dmg);}
+    const dx=b.x-R.x,dy=b.y-R.y,d2=dx*dx+dy*dy;if(d2<=56){b.dead=true;if(hurt(b.dmg)&&b.slow)R.chill=2.2;}/* 霜の弾：当たったときだけ遅くなる（#13 の点検） */
     else if(R.sh.graze&&!b.gz&&d2<=24*24&&R.ghost<=0){b.gz=1;gaugeAdd(SPG.graze);addPart(b.x,b.y,-dx*2,-dy*2,0.25,'#ffc8ff',2);}}/* かすり：弾のすぐ近くを通るとゲージ */
 }
 function contact(){
@@ -3955,6 +3958,7 @@ function endRun(clear,retreat){
   for(const k in R.seenE)if(BOOK_E.some(b=>b.k===k))save.book.e[k]=(save.book.e[k]||0)+(R.kE[k]||0);
   rc.time+=Math.floor(R.t);
   const opened=clear&&R.stage<STAGES.length&&rc.stageMax<R.stage;/* 次のステージが解放された */
+  const firstEnd=clear&&S.final&&rc.stageMax<R.stage;/* エンディングは、はじめてステージ5をクリアした回だけ（#13 の点検） */
   if(clear)rc.stageMax=Math.max(rc.stageMax,R.stage);/* ステージ5をクリアするとオメガの条件・実績「深淵の先へ」 */
   if(opened)save.st=R.stage+1;
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
@@ -3985,7 +3989,7 @@ function endRun(clear,retreat){
   btns.append(back,shop);
   overlay.append(ul);if(gotl)overlay.appendChild(gotl);overlay.append(btns);overlay.hidden=false;
   };
-  if(clear&&S.final)ending(result);else result();
+  if(firstEnd)ending(result);else result();
 }
 /* エンディング（#13）：ステージ5のクリア。スタッフの代わりに「Thanks for playing」と、これまでの記録 → 結果へ */
 function ending(next){
