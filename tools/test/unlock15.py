@@ -1,7 +1,8 @@
 """はじめの流れとショップの解放のテスト（issue #15）
 使い方: python3 tools/test/unlock15.py [--shots]
 - はじめの案内（本物のクリック・#17 で押す所だけ明るくする形に）：新しいセーブ → 遊び方4枚 → 格納庫。① 機首の「＋」を指でさす → 一覧はレーザー（のこり 1/1）だけ・② 一覧のレーザーをさす →
-  閉じると①にもどる → つける → ③ 出撃をさす（板が開いている間は出さない）→ 出撃で save.tut=1 → もう出ない。前の版のセーブ（装備あり・tut なし）は③から・tut=1 は何も出ない
+  閉じると①にもどる → ③ 向きの板（まだつかない）で前向きの矢印をさす → つく → ④ 出撃をさす（板が開いている間は出さない）→ 出撃で save.tut=1 → もう出ない。
+  前の版のセーブ（装備あり・tut なし）は装備を外して①から（11/16）・tut=1 は何も出ない
 - データ：最初から8こ（攻撃4・防御2・補助2）・のこり61こに条件（記録の名前・22字まで・使わない言葉なし）・条件の数の1つ手前では解放されず、数で解放される（61こ全部）
   ・どの品も、最初の8こから順に解放できる（Lv8・つけてクリアの相手がたどれる）・機体の解放と進化の相手もたどれる
 - ショップ：最初は8こだけ並ぶ・「もうすぐ解放」は3こ（シルエット・条件・棒）と「のこり ○こ」・買えるかの判定（印）は解放ずみだけ・まだの品のくわしくは買えない
@@ -64,14 +65,20 @@ def tutorial(pg):
     ok('一覧を何もえらばずに閉じる → ①にもどる', g['on'] and g['inHole'] and not vis(pg, '#sheetBg'), g)
     pg.locator('#slots .slotb').first.click(); pg.wait_for_timeout(200)
     pg.click('#sheet .irow.tut'); pg.wait_for_timeout(250)
+    # ③ 向きの板（11/16：向きをえらんでからつく）
+    eq = pg.evaluate("()=>window.__T.save.ships.standard.eq[0]")
+    dirs = pg.evaluate("()=>[...document.querySelectorAll('#sheet .dirs button.tut')].map(b=>b.getAttribute('aria-label'))")
+    g = tut_state(pg, "document.querySelector('#sheet .dirs button.tut')")
+    ok('③ 向きの板：まだつかない・前向きの矢印だけ明るい・ほかは押せない', eq is None and dirs == ['上向き'] and g['on'] and g['inHole'] and g['blocked'] == 'blk', [eq, dirs, g])
+    pg.click('#sheet .dirs button.tut'); pg.wait_for_timeout(250)
     eq = pg.evaluate("()=>window.__T.save.ships.standard.eq[0]")
     lb = pg.evaluate("()=>{const b=document.getElementById('launchBtn');return [b.textContent,b.disabled]}")
-    ok('レーザーを機首につける（前向き）', eq == {'t': 'laser', 'd': 0} and lb == ['出撃', False], [eq, lb])
+    ok('前向きをえらぶ → レーザーが機首につく', eq == {'t': 'laser', 'd': 0} and lb == ['出撃', False] and not vis(pg, '#sheetBg'), [eq, lb])
     g = tut_state(pg, "document.getElementById('launchBtn')")
     st = pg.evaluate("()=>{const a=document.getElementById('stsel').getBoundingClientRect(),f=document.getElementById('tfinger').getBoundingClientRect();return [f.bottom>a.top,f.top<a.bottom]}")
-    ok('③ 出撃だけ明るい・指はその上（ステージの所に重ねる）・機体の場所は動かない', g['on'] and g['inHole'] and g['down'] and g['fBot'] <= g['tTop'] + 2 and st == [True, True] and g['blocked'] == 'blk', [g, st])
+    ok('④ 出撃だけ明るい・指はその上（ステージの所に重ねる）・機体の場所は動かない', g['on'] and g['inHole'] and g['down'] and g['fBot'] <= g['tTop'] + 2 and st == [True, True] and g['blocked'] == 'blk', [g, st])
     full = pg.evaluate("()=>{const r=document.querySelector('#slots .slotb.full').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&e.className}")
-    ok('③ の間、つけた装備や他のボタンは押せない', full == 'blk', full)
+    ok('④ の間、つけた装備や他のボタンは押せない', full == 'blk', full)
     pg.click('#launchBtn'); pg.wait_for_timeout(400)
     tut = pg.evaluate("()=>[window.__T.save.tut,JSON.parse(localStorage.getItem(window.__T.KEY)).tut,!document.getElementById('sortie').hidden]")
     ok('出撃 → 案内おわり（tut=1 を保存）', tut == [1, 1, True], tut)
@@ -94,7 +101,7 @@ def tut_state(pg, target):
 
 
 def old_tut(pg):
-    """前の版のセーブ：装備あり・tut なし → ③から。tut=1 → 何も出ない。空き・装備なし・tut なし → ①"""
+    """前の版のセーブ：装備あり・tut なし → 装備を外して①から（11/16）。tut=1 → 何も出ない。空き・装備なし・tut なし → ①"""
     out = {}
     for name, raw in (('装備あり', {'gold': 500, 'owned': {'laser': 2}, 'ships': {'standard': {'have': True, 'eq': [None, {'t': 'laser', 'd': 0}, {'t': 'laser', 'd': 0}]}}, 'howto': 1}),
                       ('tut=1', {'gold': 500, 'owned': {'laser': 2}, 'ships': {'standard': {'have': True, 'eq': [None, {'t': 'laser', 'd': 0}]}}, 'howto': 1, 'tut': 1}),
@@ -102,8 +109,8 @@ def old_tut(pg):
         pg.evaluate("(o)=>{localStorage.setItem(window.__T.KEY,JSON.stringify(o));}", raw); pg.reload(); pg.wait_for_timeout(350)
         pg.click('#startBtn'); pg.wait_for_timeout(250)
         pg.wait_for_timeout(120)
-        out[name] = pg.evaluate("()=>{const d=document.getElementById('tutDim'),dn=document.getElementById('tfinger').classList.contains('down');return [!d.hidden&&!dn,!d.hidden&&dn]}")
-    ok('前の版のセーブ：装備あり → ③から・tut=1 → なし・装備なし → ①', out == {'装備あり': [False, True], 'tut=1': [False, False], '装備なし': [True, False]}, out)
+        out[name] = pg.evaluate("()=>{const d=document.getElementById('tutDim'),dn=document.getElementById('tfinger').classList.contains('down'),s=window.__T.save;return [!d.hidden&&!dn,!d.hidden&&dn,s.ships.standard.eq.filter(Boolean).length,s.owned.laser]}")
+    ok('前の版のセーブ：装備あり → 外して①から（持ち物はそのまま）・tut=1 → なし（装備もそのまま）・装備なし → ①', out == {'装備あり': [True, False, 0, 2], 'tut=1': [False, False, 1, 2], '装備なし': [True, False, 0, 2]}, out)
 
 
 DATA = r"""
@@ -317,12 +324,14 @@ def shots(b, pp, errs, warns):
     p = os.path.join(tmp, 'u15-t1.png'); pg.screenshot(path=p); steps.append(Image.open(p))
     pg.locator('#slots .slotb').first.click(); pg.wait_for_timeout(300)
     p = os.path.join(tmp, 'u15-t2.png'); pg.screenshot(path=p); steps.append(Image.open(p))
-    pg.click('#sheet .irow.tut'); pg.wait_for_timeout(2600)
+    pg.click('#sheet .irow.tut'); pg.wait_for_timeout(300)
     p = os.path.join(tmp, 'u15-t3.png'); pg.screenshot(path=p); steps.append(Image.open(p))
+    pg.click('#sheet .dirs button.tut'); pg.wait_for_timeout(2600)
+    p = os.path.join(tmp, 'u15-t4.png'); pg.screenshot(path=p); steps.append(Image.open(p))
     pg.evaluate("()=>{window.__HOLD=1;const T=window.__T;T.startRun();const R=T.R;R.kills=2200;R.lv=19;R.tlv.laser=8;R.bossKills=1;R.t=260;T.save.rec.bosses=0;T.endRun(false,false);}")
     pg.wait_for_timeout(300)
     p = os.path.join(tmp, 'u15-res.png'); pg.screenshot(path=p); steps.append(Image.open(p))
-    W = sum(i.width for i in steps) + 12 * 3; o = Image.new('RGB', (W, steps[0].height), (255, 255, 255)); x = 0
+    W = sum(i.width for i in steps) + 12 * (len(steps) - 1); o = Image.new('RGB', (W, steps[0].height), (255, 255, 255)); x = 0
     for i in steps:
         o.paste(i, (x, 0)); x += i.width + 12
     o.save(os.path.join(SHOTS, '15-tutorial-result.png'))

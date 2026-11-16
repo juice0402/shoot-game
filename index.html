@@ -2080,19 +2080,22 @@ function renderSlots(){
   });
   tutGuide();
 }
-/* はじめの案内の段（0＝なし・1＝枠をタップ・3＝出撃をタップ。2＝一覧の中は1のまま）。前の版のセーブで装備がついていれば③から */
-function tutStep(){if(save.tut||!haveShip(view))return 0;if(save.load.some(Boolean))return stOpen(save.st||1)?3:0;return TYPES.some(t=>avail(t)>0)?1:0;}
+/* はじめの案内の段（0＝なし・1＝枠をタップ・4＝出撃をタップ。②一覧のレーザー・③向きは板の中で1のまま）。
+   案内がまだのセーブは、格納庫に入るときにスタンダード機の装備を外して①から（tutReset）。つけたあとは④ */
+function tutStep(){if(save.tut||!haveShip(view))return 0;if(save.load.some(Boolean))return stOpen(save.st||1)?4:0;return TYPES.some(t=>avail(t)>0)?1:0;}
 const tutSlot=()=>save.load[0]?SHIPS[view].slots.findIndex((_,i)=>!save.load[i]):0;/* 機首（前に撃つ枠）から */
-/* はじめの案内の見た目：押す所（① 枠・② 一覧のレーザー・③ 出撃）のまわりだけ明るくし、ほかは暗くして押せなくする。
+/* 前の版のセーブ（案内がまだ）：スタンダード機の装備を持ち物にもどして、①（機首の＋）からはじめる（11/16 しょーくん） */
+function tutReset(){if(save.tut||!save.ships.standard.have)return;save.ships.standard.eq=emptyLoad('standard');setShip('standard');view='standard';persist();}
+/* はじめの案内の見た目：押す所（① 枠・② 一覧のレーザー・③ 向きの矢印・④ 出撃）のまわりだけ明るくし、ほかは暗くして押せなくする。
    指は押す所の下（入らなければ上）に置いて、押す所に向かって動かす。毎フレーム場所を合わせる（tut=1 で止まる） */
 const TUTB={d:''};
 function tutGuide(){
   const d=$('tutDim');let tg=null;
   if(!save.tut&&save.load&&!hangar.hidden&&$('shopSheet').hidden&&$('labSheet').hidden&&$('title').hidden&&$('howto').hidden){
     const st=tutStep();
-    if(!sheetBg.hidden){if(st===1)tg=sheet.querySelector('.irow.tut');}
+    if(!sheetBg.hidden){if(st===1)tg=sheet.querySelector('.tut');}
     else if(st===1)tg=$('slots').children[tutSlot()]||null;
-    else if(st===3)tg=$('launchBtn');
+    else if(st===4)tg=$('launchBtn');
   }
   if(!tg){if(!d.hidden)d.hidden=true;TUTB.d='';return;}
   const r=tg.getBoundingClientRect();if(r.width<1){d.hidden=true;return;}
@@ -2168,11 +2171,28 @@ function openList(i){
   });
   const go=el('button','btn3','ショップで装備を買う');go.type='button';go.addEventListener('click',()=>{closeSheet();openShop();});sh.appendChild(go);
 }
+/* 一覧で品をえらぶ → 向きのある品は、向きをえらんでからつける（11/16 しょーくん「必ず向き選択を挟む」）。向きに関係のない品はすぐつける */
 function mountAt(j,t){
   const prev=save.load[j];
   if(avail(t)<=0&&!(prev&&prev.t===t)){toast(MODS[t].name+'はぜんぶつけている');return;}
-  save.load[j]={t,d:prev?prev.d:defaultDir(t,j)};
-  persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけた');renderEquip();
+  if(MODS[t].passive){putMod(j,t,prev?prev.d:defaultDir(t,j));return;}
+  openDir(j,t);
+}
+function putMod(j,t,d){save.load[j]={t,d};persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけた'+(MODS[t].passive?'':'（'+ARROW_NAME[d]+'向き）'));renderEquip();}
+/* 向きをえらぶ板（つける前）。矢印をタップでつける。まんなかは品の絵（いまの向き・はじめは前向きか外向き）。✕ でつけずに閉じる */
+function openDir(j,t){
+  const prev=save.load[j],m=MODS[t],d0=prev?prev.d:defaultDir(t,j),tut=tutStep()===1;
+  const sh=openSheet(SLOTS[j].name+'：'+m.name,'向きをえらぶ',m.c);
+  const grid=el('div','dirs');
+  DIR_GRID.forEach(d=>{
+    if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[t][d0].url;c.appendChild(im);grid.appendChild(c);return;}
+    const b=el('button');b.appendChild(pixIcon('d'+d,4,prev&&prev.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');
+    if(prev)b.setAttribute('aria-pressed',prev.d===d?'true':'false');
+    if(tut&&d===d0)b.classList.add('tut');/* はじめの案内③：前向きの矢印だけ明るく */
+    b.addEventListener('click',()=>putMod(j,t,d));grid.appendChild(b);});
+  sh.appendChild(grid);
+  sh.appendChild(el('p','dim','向いた方へ攻撃する'));
+  const back=el('button','btn3','装備をえらびなおす');back.type='button';back.addEventListener('click',()=>{sheetOn=null;openList(j);});sh.appendChild(back);
 }
 const DIR_GRID=[7,0,1,6,-1,2,5,4,3];
 function openAim(i){
@@ -4219,7 +4239,7 @@ function showTitle(){
   hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
   titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
 }
-function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
+function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;tutReset();view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
 function renderSnd(){const b=$('sndBtn');b.textContent=save.snd===false?'音 OFF':'音 ON';b.setAttribute('aria-pressed',save.snd===false?'false':'true');}
 $('sndBtn').addEventListener('click',()=>{save.snd=save.snd===false;persist();renderSnd();SFX.unlock();SFX.play('btn');});
 $('startBtn').addEventListener('click',()=>{SFX.play('start');if(!save.howto)openHowto(true);else toHangarFromTitle();});

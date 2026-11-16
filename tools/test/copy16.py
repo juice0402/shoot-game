@@ -188,8 +188,10 @@ def screens(pg):
     pg.locator('#slots .slotb').first.click(); pg.wait_for_timeout(200)
     S.scan('一覧（はじめの案内②）')
     pg.click('#sheet .irow.tut'); pg.wait_for_timeout(200)
+    S.scan('向きをえらぶ（はじめの案内③）')
+    pg.click('#sheet .dirs button.tut'); pg.wait_for_timeout(200)
     o = S.scan('格納庫（つけた）')
-    ok('お知らせ：つけたとき「〇〇に〇〇をつけた」', o['toast'].endswith('をつけた'), o['toast'])
+    ok('お知らせ：つけたとき「〇〇に〇〇をつけた（〇向き）」', o['toast'].endswith('をつけた（上向き）'), o['toast'])
     # 装備を持たせて、格納庫の板を1つずつ
     ev("""()=>{const T=window.__T,s=T.save;s.tut=1;s.gold=2000;Object.assign(s.owned,{gatling:1,shotgun:1,sword:1,armor:1,magnet:1,booster:1});s.unl=T.TYPES.filter(t=>T.MODS[t].unlock&&T.isUnl(t));
       T.persist();T.renderAll();}""")

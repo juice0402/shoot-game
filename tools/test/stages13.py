@@ -127,7 +127,7 @@ UNITS = r"""
 # 解放の順番・セーブ・ステージ5のクリアでオメガと実績・古いセーブ
 UNLOCK = r"""
 ()=>{const T=window.__T,res={};const ok=(k,pass,val)=>{res[k]={pass:!!pass,val};};
-  T.save=T.freshSave();T.save.ships.standard.eq[0]={t:'laser',d:0};/* #15：新しいセーブは装備なし → 機首にレーザー */T.setShip('standard');const s=T.save;
+  T.save=T.freshSave();T.save.tut=1;T.save.ships.standard.eq[0]={t:'laser',d:0};/* #15：新しいセーブは装備なし → 機首にレーザー */T.setShip('standard');const s=T.save;
   ok('はじめ：ステージ1だけ',T.stOpen(1)&&!T.stOpen(2)&&s.st===1,'');
   T.toHangarFromTitle();T.stepStage(1);T.renderEquip();const lb=document.getElementById('launchBtn');
   ok('まだのステージ：かぎ・出撃できない',!document.getElementById('stLock').hidden&&lb.disabled&&/解放/.test(document.getElementById('stDesc').textContent),document.getElementById('stDesc').textContent+'／'+lb.textContent);
