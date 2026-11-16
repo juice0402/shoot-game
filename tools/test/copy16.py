@@ -142,7 +142,7 @@ SCAN = r"""
   const vis=e=>!!(e.offsetParent||getComputedStyle(e).position==='fixed')&&getComputedStyle(e).visibility!=='hidden';
   for(const id of ['title','howto','hangar','sheetBg','shopSheet','labSheet','bookSheet','achSheet','sortie']){const e=document.getElementById(id);if(e&&!e.hidden)out.txt.push(e.innerText);}
   for(const e of document.querySelectorAll('body *')){if(e.closest('[hidden]'))continue;const cs=getComputedStyle(e);
-    if(cs.animationName&&cs.animationName!=='none'&&!e.classList.contains('finger'))out.anim.push((e.id||e.className)+':'+cs.animationName);
+    if(cs.animationName&&cs.animationName!=='none'&&!e.classList.contains('tfinger'))out.anim.push((e.id||e.className)+':'+cs.animationName);
     for(const pe of ['::before','::after']){const p=getComputedStyle(e,pe);if(!p.content||p.content==='none'||p.content==='normal'||p.display==='none')continue;
       const dot=parseFloat(p.width)<=16&&parseFloat(p.height)<=16||/50%/.test(p.borderRadius);/* 小さい点・丸い印（文字のない箱は、ボタンの下地なので数えない） */
       if(p.content!=='""'||dot)out.deco.push('擬似要素 '+(e.id||e.className)+pe+' '+p.content.slice(0,10));}

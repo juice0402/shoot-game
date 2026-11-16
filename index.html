@@ -81,17 +81,16 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .prog{height:12px;background:var(--panel);border:2px solid var(--edge);margin:6px 0}
 .prog i{display:block;height:100%;background:var(--go)}
 .lockbox .btn3{margin-top:6px;width:100%}
-.finger{position:absolute;z-index:4;translate:-50% 0;pointer-events:none;display:flex;flex-direction:column;align-items:center;animation:tap 1s ease-in-out infinite}
-.finger span{font-size:30px;line-height:1;filter:drop-shadow(0 2px 0 #000)}
-.finger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
-@keyframes tap{50%{transform:translateY(6px)}}
-/* はじめの案内の②（一覧の中）と③（出撃の上）。動きはつけない */
-.lfinger{flex:none;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;margin:-4px 0 -6px;pointer-events:none}
-.lfinger img{width:32px;height:40px;image-rendering:pixelated;transform:scaleY(-1);filter:drop-shadow(0 -2px 0 #000)}
-.sfinger{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:-8px;pointer-events:none}
-.sfinger img{width:32px;height:40px;image-rendering:pixelated;filter:drop-shadow(0 2px 0 #000)}
-.lfinger b,.sfinger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
-.irow.tut{border-color:var(--go)}
+/* はじめの案内：押す所だけ明るく、ほかは暗くする。ほかの所は押せない。指は押す所に向かって動く */
+.tutdim{position:fixed;inset:0;z-index:65;pointer-events:none}
+.tutdim .hole{position:absolute;box-shadow:0 0 0 200vmax rgba(3,4,10,.72);pointer-events:none}
+.tutdim .blk{position:absolute;pointer-events:auto;touch-action:none}
+.tfinger{position:absolute;display:flex;flex-direction:column;align-items:center;gap:2px;translate:-50% 0;pointer-events:none;--bob:-8px;animation:tbob .8s ease-in-out infinite}
+.tfinger img{width:32px;height:40px;image-rendering:pixelated;filter:drop-shadow(0 2px 0 #000)}
+.tfinger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
+.tfinger.down{flex-direction:column-reverse;--bob:8px}
+.tfinger.down img{transform:scaleY(-1);filter:drop-shadow(0 -2px 0 #000)}
+@keyframes tbob{50%{transform:translateY(var(--bob))}}
 .toast{position:absolute;left:8px;right:8px;bottom:26px;z-index:5;margin:0 auto;width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--scrim);border:2px solid var(--go);color:var(--go);font-size:14px;text-align:center;pointer-events:none}
 .hrow{display:flex;gap:8px}
 /* ステージのえらび方（#13）：出撃の上に1行。左右の矢印は点の絵（#16） */
@@ -367,7 +366,6 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
     <button id="shipPrev" class="navb" type="button" aria-label="前の機体"></button>
     <button id="shipNext" class="navb" type="button" aria-label="次の機体"></button>
     <div class="lockbox" id="lockbox" hidden></div>
-    <div class="finger" id="finger" hidden><span aria-hidden="true"></span><b>ここをタップ</b></div>
     <div class="dots" id="dots"></div>
     <p class="toast" id="note" aria-live="polite" hidden></p>
   </div>
@@ -382,11 +380,11 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
     <div class="stinfo"><p class="stname"><img id="stLock" alt="まだ解放されていない" hidden><small id="stNo">ステージ1</small><b id="stName">星の海</b></p><p class="stdesc" id="stDesc"></p></div>
     <button id="stNext" class="stnav next" type="button" aria-label="次のステージ"></button>
   </div>
-  <div class="lfinger" id="lfinger" hidden><b>ここをタップ</b></div>
   <button id="launchBtn" class="go" type="button">出撃</button>
 </main>
 
 <div id="sheetBg" class="sheetbg" hidden><div id="sheet" class="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="tutDim" class="tutdim" hidden><i class="hole"></i><b class="blk"></b><b class="blk"></b><b class="blk"></b><b class="blk"></b><div class="tfinger" id="tfinger"><b>ここをタップ</b></div></div>
 
 <div id="shopSheet" class="shopx" role="dialog" aria-label="ショップ" hidden>
   <header class="shead">
@@ -2072,9 +2070,7 @@ function drawEditor(){
 }
 function renderSlots(){
   const box=$('slots');box.textContent='';
-  const own=haveShip(view),st=tutStep(),shut=$('sheetBg').hidden,lf=$('lfinger');
-  if(lf.hidden!==(st!==3)){lf.hidden=st!==3;layoutEditor();}/* ③の指は出撃の上の1行：機体の場所が変わるので、先に並べ直す */
-  lf.style.visibility=shut?'':'hidden';/* 板の間は場所だけ残す（機体の絵が動かないように） */
+  const own=haveShip(view);
   if(own)SHIPS[view].slots.forEach((s,i)=>{
     const v=save.load[i],b=el('button','slotb '+(v?'full':'empty'),v?null:'＋');b.type='button';
     const [x,y]=slotCss(i);b.style.left=x+'px';b.style.top=y+'px';
@@ -2082,13 +2078,35 @@ function renderSlots(){
     b.addEventListener('click',()=>{if(performance.now()-swipeAt<350)return;v?openAim(i):openList(i);});
     box.appendChild(b);
   });
-  /* はじめの案内（#15）：① 空いている機首を指でさす（一覧の中は openList）・③ 出撃を指でさす。板が開いている間は出さない */
-  const f=$('finger');
-  if(st===1&&shut){const [x,y]=slotCss(tutSlot());f.style.left=x+'px';f.style.top=(y+20)+'px';f.hidden=false;}else f.hidden=true;
+  tutGuide();
 }
 /* はじめの案内の段（0＝なし・1＝枠をタップ・3＝出撃をタップ。2＝一覧の中は1のまま）。前の版のセーブで装備がついていれば③から */
 function tutStep(){if(save.tut||!haveShip(view))return 0;if(save.load.some(Boolean))return stOpen(save.st||1)?3:0;return TYPES.some(t=>avail(t)>0)?1:0;}
 const tutSlot=()=>save.load[0]?SHIPS[view].slots.findIndex((_,i)=>!save.load[i]):0;/* 機首（前に撃つ枠）から */
+/* はじめの案内の見た目：押す所（① 枠・② 一覧のレーザー・③ 出撃）のまわりだけ明るくし、ほかは暗くして押せなくする。
+   指は押す所の下（入らなければ上）に置いて、押す所に向かって動かす。毎フレーム場所を合わせる（tut=1 で止まる） */
+const TUTB={d:''};
+function tutGuide(){
+  const d=$('tutDim');let tg=null;
+  if(!save.tut&&!hangar.hidden&&$('shopSheet').hidden&&$('labSheet').hidden&&$('title').hidden&&$('howto').hidden){
+    const st=tutStep();
+    if(!sheetBg.hidden){if(st===1)tg=sheet.querySelector('.irow.tut');}
+    else if(st===1)tg=$('slots').children[tutSlot()]||null;
+    else if(st===3)tg=$('launchBtn');
+  }
+  if(!tg){if(!d.hidden)d.hidden=true;TUTB.d='';return;}
+  const r=tg.getBoundingClientRect();if(r.width<1){d.hidden=true;return;}
+  if(d.hidden)d.hidden=false;
+  const P=6,l=Math.round(r.left-P),t=Math.round(r.top-P),w=Math.round(r.width+P*2),h=Math.round(r.height+P*2),W=innerWidth,H=innerHeight;
+  const f=$('tfinger'),fh=f.offsetHeight||64,down=t+h+fh+12>H,key=l+','+t+','+w+','+h+','+W+','+H+','+down;
+  if(key===TUTB.d)return;TUTB.d=key;
+  const [hole,...bk]=d.children,box=(e,x,y,a,b)=>{e.style.left=x+'px';e.style.top=y+'px';e.style.width=Math.max(0,a)+'px';e.style.height=Math.max(0,b)+'px';};
+  box(hole,l,t,w,h);hole.style.borderRadius=getComputedStyle(tg).borderRadius==='50%'?'50%':'0';
+  box(bk[0],0,0,W,t);box(bk[1],0,t+h,W,H-t-h);box(bk[2],0,t,l,h);box(bk[3],l+w,t,W-l-w,h);
+  f.classList.toggle('down',down);
+  f.style.left=clamp(r.left+r.width/2,64,W-64)+'px';f.style.top=(down?t-fh-4:t+h+4)+'px';
+}
+function tutLoop(){tutGuide();if(!save.tut)requestAnimationFrame(tutLoop);else $('tutDim').hidden=true;}
 function renderEquip(){
   const own=haveShip(view),sh=SHIPS[view],pg=shipProg(view);
   $('shipName').textContent=sh.name;$('shipName').style.color=own||pg.ok?sh.c:'var(--dim)';$('shipSkill').textContent=own?sh.desc:'まだ持っていない機体';
@@ -2126,7 +2144,7 @@ function openSheet(title,sub,c,onClose){
   sheet.textContent='';sheet.style.setProperty('--c',c||'var(--edge)');
   const h=el('h3');h.append(el('span',null,title));if(sub)h.append(el('small',null,sub));
   const x=el('button','x');x.appendChild(pixIcon('x',3));x.type='button';x.setAttribute('aria-label','とじる');x.addEventListener('click',closeSheet);h.appendChild(x);
-  sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;$('finger').hidden=true;$('lfinger').style.visibility='hidden';return sheet;
+  sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;return sheet;
 }
 function closeSheet(){if(sheetBg.hidden)return;sheetBg.hidden=true;sheet.textContent='';const f=sheetOn;sheetOn=null;if(f)f();else if(!hangar.hidden)renderSlots();}
 sheetBg.addEventListener('click',e=>{if(e.target===sheetBg)closeSheet();});
@@ -2134,7 +2152,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheetBg.hidden)close
 
 function shortEff(t){const m=MODS[t];return m.eff||m.desc;}
 function openList(i){
-  const s=SLOTS[i],cur=save.load[i],tut=tutStep()===1;let tutAt=null;/* はじめの案内②：一覧の中で、つけられる品（レーザー）を指でさす */
+  const s=SLOTS[i],cur=save.load[i],tut=tutStep()===1;let tutAt=null;/* はじめの案内②：一覧の中で、つけられる品（レーザー）に印（tutGuide がそこだけ明るくする） */
   const sh=openSheet(s.name+'につける装備',cur?'いま：'+MODS[cur.t].name:null);
   const list=TYPES.filter(t=>save.owned[t]>0);
   if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていない。ショップで買える'));
@@ -2146,7 +2164,7 @@ function openList(i){
     b.disabled=!isCur&&a<=0;
     b.addEventListener('click',()=>{if(isCur){closeSheet();return;}mountAt(i,t);});
     sh.appendChild(b);
-    if(tut&&!tutAt&&!b.disabled){b.classList.add('tut');tutAt=el('div','sfinger');const im=el('img');im.alt='';im.src=FINGERURL;tutAt.append(im,el('b',null,'ここをタップ'));sh.appendChild(tutAt);}
+    if(tut&&!tutAt&&!b.disabled){b.classList.add('tut');tutAt=b;}
   });
   const go=el('button','btn3','ショップで装備を買う');go.type='button';go.addEventListener('click',()=>{closeSheet();openShop();});sh.appendChild(go);
 }
@@ -2360,9 +2378,8 @@ $('infoBtn').addEventListener('click',openInfo);
 $('launchBtn').addEventListener('click',()=>{if(!haveShip(view))return;if(!save.tut&&save.load.some(Boolean)){save.tut=1;persist();}/* はじめの案内は出撃で終わり */startRun();});
 if(window.ResizeObserver)new ResizeObserver(()=>{layoutEditor();renderSlots();}).observe(bay);
 else window.addEventListener('resize',()=>{layoutEditor();renderSlots();});
-{const im=el('img');im.alt='';im.src=FINGERURL;$('lfinger').appendChild(im);}/* 出撃をさす指（下向き） */
+{const im=el('img');im.alt='';im.src=FINGERURL;$('tfinger').prepend(im);}/* はじめの案内の指 */requestAnimationFrame(tutLoop);
 $('toTitle').appendChild(pixIcon('l',3));$('shipPrev').appendChild(pixIcon('l',3));$('shipNext').appendChild(pixIcon('r',3));$('stPrev').appendChild(pixIcon('l',3));$('stNext').appendChild(pixIcon('r',3));
-document.querySelectorAll('.finger span').forEach(s=>{const im=el('img');im.alt='';im.src=FINGERURL;im.style.cssText='width:32px;height:40px;image-rendering:pixelated';s.replaceWith(im);});
 
 /* ---------- sortie ---------- */
 const stage=$('stage'),cv=$('game'),ctx=cv.getContext('2d'),overlay=$('overlay'),banner=$('banner');

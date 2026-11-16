@@ -1,6 +1,6 @@
 """はじめの流れとショップの解放のテスト（issue #15）
 使い方: python3 tools/test/unlock15.py [--shots]
-- はじめの案内（本物のクリック）：新しいセーブ → 遊び方4枚 → 格納庫。① 機首の「＋」を指でさす → 一覧はレーザー（のこり 1/1）だけ・② 一覧のレーザーをさす →
+- はじめの案内（本物のクリック・#17 で押す所だけ明るくする形に）：新しいセーブ → 遊び方4枚 → 格納庫。① 機首の「＋」を指でさす → 一覧はレーザー（のこり 1/1）だけ・② 一覧のレーザーをさす →
   閉じると①にもどる → つける → ③ 出撃をさす（板が開いている間は出さない）→ 出撃で save.tut=1 → もう出ない。前の版のセーブ（装備あり・tut なし）は③から・tut=1 は何も出ない
 - データ：最初から8こ（攻撃4・防御2・補助2）・のこり61こに条件（記録の名前・22字まで・使わない言葉なし）・条件の数の1つ手前では解放されず、数で解放される（61こ全部）
   ・どの品も、最初の8こから順に解放できる（Lv8・つけてクリアの相手がたどれる）・機体の解放と進化の相手もたどれる
@@ -52,34 +52,45 @@ def tutorial(pg):
     ok('新しいセーブ：レーザー1つ・ほかは0・枠は全部空・300G', s['laser'] == 1 and s['other'] == 0 and s['eq'] == 0 and s['gold'] == 300 and not s['tut'], s)
     lb = pg.evaluate("()=>{const b=document.getElementById('launchBtn');return [b.textContent,b.disabled]}")
     ok('何もつけていないときの出撃ボタン：「＋に装備をつける」', lb == ['＋に装備をつける', True], lb)
-    # ① 機首の＋
-    f = center(pg, '#finger'); s0 = pg.evaluate("()=>{const b=document.querySelectorAll('#slots .slotb')[0].getBoundingClientRect();return [b.left+b.width/2,b.top+b.height/2,b.bottom]}")
-    ok('① 指が機首の＋の真下', vis(pg, '#finger') and abs(f[0] - s0[0]) < 2 and 0 <= f[2] - s0[1] < 30 and not vis(pg, '#lfinger'), [f, s0])
+    # ① 機首の＋（#17：押す所だけ明るく・ほかは暗くて押せない・指は押す所に向かって動く）
+    g = tut_state(pg, "document.querySelectorAll('#slots .slotb')[0]")
+    ok('① 機首の＋だけ明るい・指はその下・ほかは押せない', g['on'] and g['inHole'] and not g['down'] and g['fTop'] >= g['tBot'] and abs(g['fX'] - g['tX']) < 2 and g['blocked'] == 'blk' and g['anim'] == 'tbob', g)
     pg.locator('#slots .slotb').first.click(); pg.wait_for_timeout(250)
     rows = pg.evaluate("()=>[...document.querySelectorAll('#sheet .irow')].map(b=>b.querySelector('b').textContent+' '+b.querySelector('em').textContent+(b.classList.contains('tut')?' tut':''))")
-    ok('② 一覧はレーザーだけ（のこり 1/1）・行が目立つ・指が一覧の中', rows == ['レーザー のこり 1/1 tut'] and vis(pg, '#sheet .sfinger') and not vis(pg, '#finger'), rows)
-    fr = center(pg, '#sheet .sfinger img'); rr = center(pg, '#sheet .irow.tut')
-    ok('② 指はレーザーの行のすぐ下', 0 <= fr[2] - rr[3] < 16, [fr, rr])
-    pg.click('#sheet .x'); pg.wait_for_timeout(200)
-    ok('一覧を何もえらばずに閉じる → ①にもどる', vis(pg, '#finger') and not vis(pg, '#sheetBg'))
+    g = tut_state(pg, "document.querySelector('#sheet .irow.tut')")
+    ok('② 一覧はレーザーだけ（のこり 1/1）・その行だけ明るい・指はそのとなり（下に入らなければ上）', rows == ['レーザー のこり 1/1 tut'] and g['on'] and g['inHole'] and (0 <= g['tTop'] - g['fBot'] < 20 if g['down'] else 0 <= g['fTop'] - g['tBot'] < 20) and g['blocked'] == 'blk', [rows, g])
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    g = tut_state(pg, "document.querySelectorAll('#slots .slotb')[0]")
+    ok('一覧を何もえらばずに閉じる → ①にもどる', g['on'] and g['inHole'] and not vis(pg, '#sheetBg'), g)
     pg.locator('#slots .slotb').first.click(); pg.wait_for_timeout(200)
     pg.click('#sheet .irow.tut'); pg.wait_for_timeout(250)
     eq = pg.evaluate("()=>window.__T.save.ships.standard.eq[0]")
     lb = pg.evaluate("()=>{const b=document.getElementById('launchBtn');return [b.textContent,b.disabled]}")
-    lf = center(pg, '#lfinger'); bt = center(pg, '#launchBtn')
     ok('レーザーを機首につける（前向き）', eq == {'t': 'laser', 'd': 0} and lb == ['出撃', False], [eq, lb])
-    ok('③ 指が出撃ボタンの上・①の指は消える', vis(pg, '#lfinger') and not vis(pg, '#finger') and lf[3] <= bt[2] + 2 and abs(lf[0] - bt[0]) < 80, [lf, bt])
-    pg.locator('#slots .slotb.full').first.click(); pg.wait_for_timeout(200)
-    hid = pg.evaluate("()=>getComputedStyle(document.getElementById('lfinger')).visibility")
-    pg.click('#sheet .x'); pg.wait_for_timeout(150)
-    ok('板が開いている間は③の指を出さない', hid == 'hidden' and pg.evaluate("()=>getComputedStyle(document.getElementById('lfinger')).visibility") == 'visible', hid)
+    g = tut_state(pg, "document.getElementById('launchBtn')")
+    st = pg.evaluate("()=>{const a=document.getElementById('stsel').getBoundingClientRect(),f=document.getElementById('tfinger').getBoundingClientRect();return [f.bottom>a.top,f.top<a.bottom]}")
+    ok('③ 出撃だけ明るい・指はその上（ステージの所に重ねる）・機体の場所は動かない', g['on'] and g['inHole'] and g['down'] and g['fBot'] <= g['tTop'] + 2 and st == [True, True] and g['blocked'] == 'blk', [g, st])
+    full = pg.evaluate("()=>{const r=document.querySelector('#slots .slotb.full').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&e.className}")
+    ok('③ の間、つけた装備や他のボタンは押せない', full == 'blk', full)
     pg.click('#launchBtn'); pg.wait_for_timeout(400)
     tut = pg.evaluate("()=>[window.__T.save.tut,JSON.parse(localStorage.getItem(window.__T.KEY)).tut,!document.getElementById('sortie').hidden]")
     ok('出撃 → 案内おわり（tut=1 を保存）', tut == [1, 1, True], tut)
     pg.evaluate("()=>{window.__HOLD=1;window.__T.endRun(false,true);}"); pg.wait_for_timeout(200)
     pg.click('#overlay .btnrow .go'); pg.wait_for_timeout(250)
-    ok('出撃のあとは指を出さない', not vis(pg, '#finger') and not vis(pg, '#lfinger'))
+    ok('出撃のあとは案内を出さない', not vis(pg, '#tutDim'))
     pg.evaluate("()=>{window.__HOLD=0;}")
+
+
+def tut_state(pg, target):
+    pg.wait_for_timeout(120)
+    return pg.evaluate("""()=>{const d=document.getElementById('tutDim'),f=document.getElementById('tfinger'),t=%s;
+      if(d.hidden||!t)return {on:false};
+      const h=d.querySelector('.hole').getBoundingClientRect(),r=t.getBoundingClientRect(),fr=f.getBoundingClientRect();
+      const sb=document.getElementById('shopBtn')||document.querySelector('header button');const q=sb.getBoundingClientRect();
+      const e=document.elementFromPoint(q.left+q.width/2,q.top+q.height/2);
+      return {on:true,inHole:h.left<=r.left&&h.top<=r.top&&h.right>=r.right&&h.bottom>=r.bottom&&h.width<r.width+20,down:f.classList.contains('down'),
+        fTop:Math.round(fr.top),fBot:Math.round(fr.bottom),fX:Math.round(fr.left+fr.width/2),tX:Math.round(r.left+r.width/2),tTop:Math.round(r.top),tBot:Math.round(r.bottom),
+        blocked:e&&e.className,anim:getComputedStyle(f).animationName}}""" % target)
 
 
 def old_tut(pg):
@@ -90,7 +101,8 @@ def old_tut(pg):
                       ('装備なし', {'gold': 500, 'owned': {'laser': 2}, 'ships': {'standard': {'have': True, 'eq': []}}, 'howto': 1})):
         pg.evaluate("(o)=>{localStorage.setItem(window.__T.KEY,JSON.stringify(o));}", raw); pg.reload(); pg.wait_for_timeout(350)
         pg.click('#startBtn'); pg.wait_for_timeout(250)
-        out[name] = [vis(pg, '#finger'), vis(pg, '#lfinger')]
+        pg.wait_for_timeout(120)
+        out[name] = pg.evaluate("()=>{const d=document.getElementById('tutDim'),dn=document.getElementById('tfinger').classList.contains('down');return [!d.hidden&&!dn,!d.hidden&&dn]}")
     ok('前の版のセーブ：装備あり → ③から・tut=1 → なし・装備なし → ①', out == {'装備あり': [False, True], 'tut=1': [False, False], '装備なし': [True, False]}, out)
 
 
