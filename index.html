@@ -3161,10 +3161,14 @@ const BIG={
         if(e.tm<=0){e.tm=2.2;fanAt(e.x,e.y+40,3,0.25,100,true);}
         e.of-=dt*sf;if(e.of<=0){e.of=1.6;for(let i=0;i<6;i++){const a=e.oa+i*TAU/6;ebAt(e.x+Math.cos(a)*96,e.y+Math.sin(a)*96,a,70,false);}}}}},
 };
-function separate(){
-  for(const e of R.E){if(e.dead||e.kind==='boss'||KIND[e.kind].fixed||e.kind==='rock')continue;
-    near(e.x,e.y,e.r+13.5,o=>{if(o===e)return;const dx=e.x-o.x,dy=e.y-o.y,md=e.r+o.r-1.5,d2=dx*dx+dy*dy;
-      if(d2>0.0001&&d2<md*md){const d=Math.sqrt(d2),p=(md-d)*0.35;e.x+=dx/d*p;e.y+=dy/d*p;}});}
+function separate(){/* near と同じ順でマスを見る（#34：敵ごとに関数を作らない） */
+  for(const e of R.E){if(e.dead||e.kind==='boss'||KIND[e.kind].fixed||e.kind==='rock')continue;ATK++;
+    const rr=e.r+13.5+gMaxR+2;
+    const x0=clamp(Math.floor((e.x-rr+PADG)/CELL),0,gCols-1),x1=clamp(Math.floor((e.x+rr+PADG)/CELL),0,gCols-1);
+    const y0=clamp(Math.floor((e.y-rr+PADG)/CELL),0,gRows-1),y1=clamp(Math.floor((e.y+rr+PADG)/CELL),0,gRows-1);
+    for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++){const cell=grid[cy*gCols+cx];
+      for(let i=0;i<cell.length;i++){const o=cell[i];if(o.dead||o===e)continue;const dx=e.x-o.x,dy=e.y-o.y,md=e.r+o.r-1.5,d2=dx*dx+dy*dy;
+        if(d2>0.0001&&d2<md*md){const d=Math.sqrt(d2),p=(md-d)*0.35;e.x+=dx/d*p;e.y+=dy/d*p;}}}}
 }
 const modPos=m=>[R.x+SLOTS[m.slot].x+(m.cx||0),R.y+SLOTS[m.slot].y+(m.cy||0)];/* cx・cy＝ファントムの分身のずれ */
 function nearest(x,y,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.hide||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=e;}}return best;}
@@ -3649,6 +3653,7 @@ function draw6Over(g){
       const nf=q.l8?10:6;if(q.l8)g.fillStyle='#ffffff';for(let i=0;i<nf;i++){const a=R.t*4+i*TAU/nf,rr=q.r+2+((i+((R.t*14)|0))%3);px2(g,q.x+Math.cos(a)*rr,q.y+Math.sin(a)*rr);}}
     else if(q.k==='nap'){g.fillStyle='#2f7fb8';px3(g,q.x-q.vx*0.02,q.y-q.vy*0.02);g.fillStyle='#6af0ff';px3(g,q.x,q.y);g.fillStyle='#ffffff';g.fillRect(Math.round(q.x),Math.round(q.y),1,1);}
   }
+  g.dense(1);/* 輪はまとめて描く（#34） */
   for(let q=0;q<2;q++)for(const r of q?R.RH:R.RG){if(r.t<0)continue;/* 2つの配列を順に（毎フレーム新しい配列を作らない） */
     const fade=r.t>r.dur?Math.max(0,1-(r.t-r.dur)/0.15):1,cr=r.noHit?r.R*Math.min(1,r.t/r.dur):(r.cr||0);if(cr<2)continue;
     const st=Math.max(2.2,cr*TAU/360);/* 大きな輪は点の数を360までにする */
@@ -3663,6 +3668,7 @@ function draw6Over(g){
           g.fillStyle='#e6dcff';g.fillRect(-8,-5,16,2);g.fillStyle='#949fb8';g.fillRect(-1,4,3,10);g.restore();}break;}
     }
   }
+  g.dense(0);
 }
 /* 機体の上：チェーンソーの刃・レールガンのため・衛星・近接の振り */
 function draw6Ship(g,px,py){
@@ -3674,6 +3680,7 @@ function draw6Ship(g,px,py){
       g.fillStyle=(((R.t*24)|0)%2)?'#ffffff':'#9fd0ff';g.fillRect(Math.round(mx)-r,Math.round(my)-r,r*2,r*2);}}
     else if(m.t==='satellite'&&m.sat){const s8=stat('satellite').l8;for(const s of m.sat)DS(g,s8?SAT8:SAT,s.x,s.y);}
   }
+  g.dense(1);/* 近接の振りはまとめて描く（#34） */
   for(const s of R.S){
     if(!s.k||s.t<0)continue;
     const cx=s.m.cx||0,cy=s.m.cy||0,[ox,oy]=s.k==='sc'?[px+cx,py+cy]:[px+SLOTS[s.m.slot].x+cx,py+SLOTS[s.m.slot].y+cy],p=Math.min(1,s.t/s.dur),fade=s.t>s.dur?Math.max(0,1-(s.t-s.dur)/0.12):1;
@@ -3697,15 +3704,17 @@ function draw6Ship(g,px,py){
       for(let i=1;i<=24;i++){const k=i/24,an=a-bend*Math.sin(Math.PI*k)*(1-k*0.3),rr=s.len*k;g.fillStyle=i>21?'#ffffff':i%2?(s.l8?'#d2ffe8':'#7dff9a'):(s.l8?'#5dffb0':'#1fae63');
         (s.l8?px3:px2)(g,ox+Math.cos(an)*rr,oy+Math.sin(an)*rr);}g.globalAlpha=1;}
   }
+  g.dense(0);
 }
 /* 弾より上：追尾レーザー・狙撃とレールガンの線 */
-function draw6Top(g){
+function draw6Top(g){g.dense(1);/* #34 */
   for(const h of R.HL){const t=h.tr,n=t.length>>1;
     for(let i=0;i<n;i++){const x=t[i*2],y=t[i*2+1],k=i/n;g.fillStyle=k>(h.l8?0.6:0.8)?'#ffffff':k>0.4?'#6dffa0':'#1fae63';(k>0.4||h.l8?px3:px2)(g,x,y);
       if(i>0){g.fillRect(Math.round((x+t[i*2-2])/2)-1,Math.round((y+t[i*2-1])/2)-1,2,2);}}}
   for(const t of R.TR){const k=1-t.t/t.dur,dx=t.x1-t.x0,dy=t.y1-t.y0,l=Math.hypot(dx,dy)||1,n=Math.ceil(l/3);g.globalAlpha=k;
     for(let i=0;i<n;i+=1){const x=t.x0+dx*i/n,y=t.y0+dy*i/n;if(x<-4||x>GW+4||y<-4||y>GH+4)break;g.fillStyle=i%2?t.c:'#ffffff';const tw=t.w||2;g.fillRect(Math.round(x)-(tw>2?1:0),Math.round(y)-(tw>2?1:0),tw,tw);}
     g.globalAlpha=1;}
+  g.dense(0);
 }
 /* 試作6の弾の絵（kind 7〜15） */
 function drawB6(g,b,ux,uy){
@@ -4132,8 +4141,8 @@ function update(dt){
 }
 
 /* drawing */
-function px2(g,x,y){g.fillRect(Math.round(x)-1,Math.round(y)-1,2,2);}
-function px3(g,x,y){g.fillRect(Math.round(x)-1,Math.round(y)-1,3,3);}
+function px2(g,x,y){if(g===PXG)g.dot(x,y,2);else g.fillRect(Math.round(x)-1,Math.round(y)-1,2,2);}
+function px3(g,x,y){if(g===PXG)g.dot(x,y,3);else g.fillRect(Math.round(x)-1,Math.round(y)-1,3,3);}
 function arcPix(g,x,y,a,half,rad,c,al,step){
   const n=Math.ceil(half*2*rad/step);g.fillStyle=c;
   for(let i=0;i<=n;i++){const an=a-half+2*half*i/n;g.globalAlpha=al*((i+((R.t*12)|0))%4===0?1:0.75);px2(g,x+Math.cos(an)*rad,y+Math.sin(an)*rad);}
@@ -4182,8 +4191,73 @@ function drawShipAt(g,sh,mods,px,py,t){
     if(m.t==='cannon'&&m.cd<0.6&&!(R&&R.evo&&R.evo.cannon)){const a=dirAngle(m.d),q=1-Math.max(0,m.cd)/0.6,r=Math.round(1+q*4);
       g.fillStyle=(((t*24)|0)%2)?'#ffffff':'#5cffef';g.fillRect(Math.round(mx+Math.cos(a)*15)-r,Math.round(my+Math.sin(a)*15)-r,r*2,r*2);}}
 }
+/* 描く回数をへらす（11/17・#34）：出撃の画面の小さい四角（fillRect）は、まず手元の絵（PXG の中）に同じ計算で重ねて、
+   ほかの描き方（絵・大きい四角・回転）の前と、描き終わりに、まとめて1回で画面へ出す。描く順番と色の重なり方は同じ（色の差は 1/255 ほど） */
+const PXG=(()=>{
+  const BH=32;/* 画面へ出すときは、32行ずつの帯で、描いた所の左右だけ。帯ごとに別のキャンバス（描いたあとに書きかえると、ブラウザが全体を写しなおすため） */
+  const S=new Float64Array(6);/* 0 a・1〜3 色×a・4 1-a・5 globalAlpha（小数を数の箱にしない＝毎回メモリを作らない） */
+  let dz=0,W=0,H=0,NB=0,F=null,T=null,TP=null,BC=[],BG=[],BI=[],BD=[],tn=0,BX0=null,BX1=null,b0=0,b1=-1;
+  let fs='#000000',fc=[0,0,0,1],fsD=true,gaD=true,clean=true,sD=true;const st=[],COL=new Map();S[5]=1;
+  const col=s=>{let c=COL.get(s);if(c!==undefined)return c;c=null;let m;
+    if(typeof s==='string'){
+      if(s[0]==='#'&&s.length===7){const n=parseInt(s.slice(1),16);if(!isNaN(n))c=[n>>16&255,n>>8&255,n&255,1];}
+      else if(s[0]==='#'&&s.length===4){const n=parseInt(s.slice(1),16);if(!isNaN(n))c=[(n>>8&15)*17,(n>>4&15)*17,(n&15)*17,1];}
+      else if((m=/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/.exec(s))&&+m[1]<256&&+m[2]<256&&+m[3]<256)c=[+m[1],+m[2],+m[3],m[4]==null?1:Math.min(1,+m[4])];}
+    if(COL.size>400)COL.clear();COL.set(s,c);return c;};
+  const sync=()=>{if(fsD){ctx.fillStyle=fs;fsD=false;}if(gaD){ctx.globalAlpha=S[5];gaD=false;}};
+  function flush(){if(!tn)return;
+    for(let j=0;j<tn;j++){const o=T[j]<<2,A=F[o+3],q=1/A,P=TP[j],d=BD[P>>>16],p=P&65535;
+      d[p]=F[o]*q;d[p+1]=F[o+1]*q;d[p+2]=F[o+2]*q;d[p+3]=A*255;F[o]=F[o+1]=F[o+2]=F[o+3]=0;}
+    if(S[5]!==1||gaD){ctx.globalAlpha=1;gaD=true;}
+    for(let b=b0;b<=b1;b++){if(BX1[b]<0)continue;const x=BX0[b],w=BX1[b]-x+1,h=Math.min(BH,H-b*BH);
+      BG[b].putImageData(BI[b],0,0,x,0,w,h);ctx.drawImage(BC[b],x,0,w,h,x,b*BH,w,h);BX0[b]=W;BX1[b]=-1;}
+    for(let j=0;j<tn;j++){const P=TP[j],d=BD[P>>>16],p=P&65535;d[p]=d[p+1]=d[p+2]=d[p+3]=0;}
+    tn=0;b0=NB;b1=-1;}
+  function put(x,y,xe,ye){/* 手元の絵に四角を重ねる（canvas の source-over と同じ式） */
+    if(sD){const a=S[5]*fc[3];S[0]=a;S[1]=fc[0]*a;S[2]=fc[1]*a;S[3]=fc[2]*a;S[4]=1-a;sD=false;}
+    if(!(S[0]>0))return;
+    const xa=x<0?0:x,ya=y<0?0:y,xb=xe>W?W:xe,yb=ye>H?H:ye;if(xa>=xb||ya>=yb)return;
+    const p=ya>>5,q=(yb-1)>>5;for(let b=p;b<=q;b++){if(xa<BX0[b])BX0[b]=xa;if(xb-1>BX1[b])BX1[b]=xb-1;}if(p<b0)b0=p;if(q>b1)b1=q;
+    if(S[0]===1){const r=fc[0],gg=fc[1],bl=fc[2];
+      for(let yy=ya;yy<yb;yy++){let o=(yy*W+xa)<<2;const P=((yy>>5)<<16)|((yy&31)*W<<2);
+        for(let xx=xa;xx<xb;xx++,o+=4){if(F[o+3]===0){T[tn]=o>>2;TP[tn++]=P+(xx<<2);}F[o]=r;F[o+1]=gg;F[o+2]=bl;F[o+3]=1;}}}
+    else{
+      for(let yy=ya;yy<yb;yy++){let o=(yy*W+xa)<<2;const P=((yy>>5)<<16)|((yy&31)*W<<2);
+        for(let xx=xa;xx<xb;xx++,o+=4){const A=F[o+3];
+        if(A===0){T[tn]=o>>2;TP[tn++]=P+(xx<<2);F[o]=S[1];F[o+1]=S[2];F[o+2]=S[3];F[o+3]=S[0];}
+        else{const k=S[4];F[o]=F[o]*k+S[1];F[o+1]=F[o+1]*k+S[2];F[o+2]=F[o+2]*k+S[3];F[o+3]=A*k+S[0];}}}}}
+  const G={
+    begin(){const w=ctx.canvas.width,h=ctx.canvas.height;if(w!==W||h!==H){W=w;H=h;NB=Math.ceil(H/BH);F=new Float32Array(W*H*4);T=new Int32Array(W*H);TP=new Int32Array(W*H);/* TP＝帯の番号<<16｜帯の中の場所 */
+      BX0=new Int32Array(NB).fill(W);BX1=new Int32Array(NB).fill(-1);BC=[];BG=[];BI=[];BD=[];
+      for(let b=0;b<NB;b++){const c=document.createElement('canvas');c.width=W;c.height=BH;const g=c.getContext('2d');BC.push(c);BG.push(g);const d=g.createImageData(W,BH);BI.push(d);BD.push(d.data);}
+      tn=0;b0=NB;b1=-1;}
+      fs=ctx.fillStyle;fc=col(fs);S[5]=ctx.globalAlpha;fsD=gaD=false;sD=true;clean=true;dz=0;st.length=0;},
+    end(){flush();sync();dz=0;},
+    dense(on){if(!on)flush();dz=on?1:0;},
+    get fillStyle(){return fs;},
+    set fillStyle(v){if(v===fs)return;let c=col(v);if(c===null){flush();sync();ctx.fillStyle=v;v=ctx.fillStyle;c=col(v);fsD=false;}else fsD=true;fs=v;fc=c;sD=true;},
+    get globalAlpha(){return S[5];},
+    set globalAlpha(v){if(v>=0&&v<=1&&v!==S[5]){S[5]=v;gaD=true;sD=true;}},
+    fillRect(x,y,w,h){
+      if(w<0){x+=w;w=-w;}if(h<0){y+=h;h=-h;}
+      if(dz&&clean&&fc!==null&&(x|0)===x&&(y|0)===y&&(w|0)===w&&(h|0)===h&&w*h<=144){if(w&&h)put(x,y,x+w,y+h);return;}
+      flush();sync();ctx.fillRect(x,y,w,h);},
+    dot(x,y,n){/* px2・px3 と同じ四角（左上が round-1・n×n） */
+      if(!dz||!clean||fc===null){this.fillRect(Math.round(x)-1,Math.round(y)-1,n,n);return;}
+      const xa=Math.round(x)-1,ya=Math.round(y)-1;if(xa>-n&&xa<W&&ya>-n&&ya<H)put(xa,ya,xa+n,ya+n);},
+    drawImage(){flush();sync();ctx.drawImage.apply(ctx,arguments);},
+    save(){st.push(fs,fc,S[5],clean);ctx.save();},
+    restore(){if(st.length){clean=st.pop();S[5]=st.pop();fc=st.pop();fs=st.pop();fsD=gaD=sD=true;}ctx.restore();},
+  };
+  for(const k of ['translate','rotate','scale','transform','setTransform','resetTransform','clip'])G[k]=function(){flush();clean=false;return ctx[k].apply(ctx,arguments);};
+  const P=CanvasRenderingContext2D.prototype;
+  for(const k of Object.getOwnPropertyNames(P)){if(k in G||k==='constructor')continue;const d=Object.getOwnPropertyDescriptor(P,k);
+    if(typeof d.value==='function')G[k]=function(){flush();sync();return ctx[k].apply(ctx,arguments);};
+    else if(d.get)Object.defineProperty(G,k,{get(){return ctx[k];},set(v){flush();sync();ctx[k]=v;clean=false;}});}
+  return G;
+})();
 function draw(){
-  const g=ctx;
+  const g=PXG;g.begin();
   g.globalAlpha=1;drawBg(g);
   for(const gm of R.G)DS(g,gm.big?GEMB:GEMS,gm.x,gm.y);
   for(const c of R.C)DS(g,COIN7,c.x,c.y);
@@ -4204,6 +4278,7 @@ function draw(){
   for(const w of R.W)DS(g,SAWS[w.big?1:0][((w.t*20)|0)%2],w.x,w.y);
   draw6Over(g);
   const px=Math.round(R.x),py=Math.round(R.y);
+  g.dense(1);/* シールド・雷の印・振りはまとめて描く（#34） */
   for(const m of R.mods){
     if(m.t!=='shield'&&m.t!=='reflector')continue;
     const st=stat(m.t),ox=px+SLOTS[m.slot].x,oy=py+SLOTS[m.slot].y,a=dirAngle(m.d);
@@ -4231,6 +4306,7 @@ function draw(){
       const n=Math.max(1,Math.ceil((a1-tail)*rad/1.6));g.fillStyle=j===0?'#ffffff':j<3?'#e6dcff':j<6?'#a98bff':'#6a48e0';
       for(let i=0;i<=n;i++){const an=tail+(a1-tail)*i/n;px2(g,ox+Math.cos(an)*rad,oy+Math.sin(an)*rad);}}
     g.globalAlpha=1;}
+  g.dense(0);
   const blink=R.inv>0&&R.ebT<=0&&R.ghost<=0&&((R.t*16|0)%2===0);
   if(R.sp)spUnder(g,px,py);
   if(!blink&&R.state!=='over'){
@@ -4245,6 +4321,7 @@ function draw(){
   draw6Ship(g,px,py);draw10(g,px,py);if(R.sp||R.ES.length)spDraw(g,px,py);if(R.sh.focus&&R.focus>0.05)drawFocus(g,px,py);
   for(const a of R.A){const s=ALLY[a.vx>0?0:1];DS(g,s,a.x,a.y);
     const f=((R.t*20)|0)%2;g.fillStyle='#ffb032';g.fillRect(Math.round(a.x)-(a.vx>0?20+f*2:-16),Math.round(a.y)-1,3+f*2,3);g.fillStyle='#fff2a8';g.fillRect(Math.round(a.x)-(a.vx>0?18:-16),Math.round(a.y),2,1);}
+  g.dense(1);/* 弾（#34） */
   for(const b of R.B){
     const sp=Math.hypot(b.vx,b.vy)||1,ux=b.vx/sp,uy=b.vy/sp;
     switch(b.k){
@@ -4259,6 +4336,7 @@ function draw(){
       default:for(let k=6;k>=0;k--){g.fillStyle=k<2?'#ffffff':k<4?'#4adcf6':'#168fb8';px3(g,b.x-ux*k*2,b.y-uy*k*2);}
     }
   }
+  g.dense(0);
   for(const ms of R.M)DS(g,(ms.sm?MICRO:ms.sw?SWARM:MISS)[((Math.round(ms.a/(Math.PI/8))%16)+16)%16],ms.x,ms.y);
   draw6Top(g);
   for(const l of R.L){const k=1-l.t/0.3;if(k<=0)continue;
@@ -4269,6 +4347,7 @@ function draw(){
     else{g.globalAlpha=k*0.45;g.fillStyle='#18b0b4';g.fillRect(0,-l.w*k/2-4,l.len,l.w*k+8);
     g.globalAlpha=k*0.8;g.fillStyle='#5cffef';g.fillRect(0,-l.w*k/2,l.len,l.w*k);
     g.globalAlpha=k;g.fillStyle='#e0fffb';g.fillRect(0,-l.w*k/4,l.len,Math.max(1,l.w*k/2));}g.restore();g.globalAlpha=1;}
+  g.dense(1);/* いなずま（#34） */
   for(const z of R.Z){
     if(((z.t*40)|0)%3===2)continue;
     if(z.sky){/* 雷雲（#12）：黄色いいなずま。点を2ドットおきに */
@@ -4279,6 +4358,7 @@ function draw(){
       for(let s=0;s<=n;s++){const x=ax+(bx-ax)*s/n,y=ay+(by-ay)*s/n;if(z.big){g.fillStyle='#a4c41c';g.fillRect(Math.round(x)-2,Math.round(y)-2,5,5);g.fillStyle='#e6ff5c';px3(g,x,y);g.fillStyle='#ffffff';g.fillRect(Math.round(x),Math.round(y),1,1);}
         else{g.fillStyle='#a4c41c';px3(g,x,y);g.fillStyle='#fbffd0';g.fillRect(Math.round(x),Math.round(y),1,1);}}}
   }
+  g.dense(0);
   for(const x of R.X){const fr=x.f[Math.min(x.f.length-1,Math.floor(x.t/x.dur*x.f.length))];g.drawImage(fr,Math.round(x.x)-(fr.width>>1),Math.round(x.y)-(fr.height>>1));}
   for(const p of R.P){g.globalAlpha=clamp(p.life/p.max*1.4,0,1)*0.9;g.fillStyle=p.c;g.fillRect(Math.round(p.x),Math.round(p.y),p.s,p.s);}
   g.globalAlpha=1;
@@ -4295,6 +4375,7 @@ function draw(){
   if(R.sp)spTop(g,px,py);
   if(R.tstop>0){g.fillStyle='rgba(170,180,255,0.12)';g.fillRect(0,0,GW,GH);}/* 時間停止：画面を少し青白く */
   if(R.hurtFx>0){g.fillStyle='rgba(255,45,111,0.2)';g.fillRect(0,0,GW,GH);}
+  g.end();
 }
 function hud(){
   const lv='LV '+R.lv;if(hc.lv!==lv){hc.lv=lv;$('hudLv').textContent=lv;}
