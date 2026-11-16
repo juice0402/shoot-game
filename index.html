@@ -95,6 +95,8 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .comm{position:fixed;left:0;right:0;z-index:68;pointer-events:none;padding:0 8px}
 .comm.cmtop{top:max(8px,env(safe-area-inset-top,0px))}.comm.cmbot{bottom:max(10px,env(safe-area-inset-bottom,0px))}/* 名前は cm ではじめる（.top・.cbody・.ctop はほかの所で使っている） */
 .comm.wait{inset:0;pointer-events:auto;background:rgba(3,4,10,.72);display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+.comm.note .cmwin{pointer-events:auto;cursor:pointer}/* お知らせ：窓を押すと次へ。ほかの所はそのまま押せる */
+.comm.note.cmtop{top:calc(max(8px,env(safe-area-inset-top,0px)) + var(--cmhead,52px))}/* ヘッダー（ショップ・研究所）の下に出す */
 .comm.wait.cmtop{justify-content:flex-start;padding-top:max(14px,env(safe-area-inset-top,0px))}
 .cmwin{max-width:440px;margin:0 auto;display:flex;gap:10px;align-items:stretch;background:var(--deep);border:3px solid var(--edge);padding:8px;box-shadow:0 4px 0 #000}
 .cmface{flex:none;width:88px;height:100px;position:relative;background:#081a2c;border:2px solid #1f6c94;overflow:hidden}
@@ -2321,7 +2323,8 @@ function tutLoop(){tutGuide();if(!save.tut)requestAnimationFrame(tutLoop);else{$
    セリフは TALK だけ。セリフの中だけは「！」と語りかけを使う（ほかの画面の文は言いきり。copy16 は TALK と #comm を見ない）
    ・wait：タップで次へ（全体を暗く・ほかは押せない）＝はじめのあいさつ
    ・tip：案内の段のひとこと（押す所は tutDim が開ける）。tutGuide が毎フレーム呼ぶので key が同じなら何もしない
-   ・note：お知らせ（押せる所はそのまま。どこかをタップ／しばらくで次へ）＝解放のお知らせ・研究所のはじめて */
+   ・note：お知らせ（押せる所はそのまま。吹き出しをタップ／しばらくで次へ）＝解放のお知らせ
+   ・研究所のはじめては wait（11/17 しょーくん：自動で進むと聞き逃す） */
 const TALK={
   name:'整備士 サラ',
   intro:['格納庫へようこそ！\n整備士のサラだよ。\n機体の整備はまかせて！','さっそく出撃準備だ！\nまずは機体に\n武器をつけよう！'],
@@ -2346,7 +2349,7 @@ function commStatic(ms,then){const c=$('cfaceCv');if(c.width!==MECH.w){c.width=M
 function commShow(lines,o){
   o=o||{};const box=$('comm');clearInterval(COMM.timer);clearTimeout(COMM.wait);COMM.sid++;
   Object.assign(COMM,{mode:o.wait?'wait':o.note?'note':'tip',key:o.key||'',lines,k:0,done:o.done||null});
-  box.className='comm '+(o.pos==='top'?'cmtop':'cmbot')+(o.wait?' wait':'');box.hidden=false;$('cname').textContent=TALK.name;
+  box.className='comm '+(o.pos==='top'?'cmtop':'cmbot')+(o.wait?' wait':o.note?' note':'');box.hidden=false;$('cname').textContent=TALK.name;
   if(RM()){commLine();return;}
   void box.offsetWidth;box.classList.add('fxin');SFX.play('comm');$('ctext').textContent='';$('cnext').hidden=true;commStatic(150,commLine);
 }
@@ -2386,8 +2389,8 @@ function talkUnl(ships,items,labs,stage){
   if(labs.length)L.push(TALK.lab(labs.length));if(stage)L.push(TALK.stage(stage));return L.length?L.slice(0,3):null;
 }
 function commPend(){if(!COMM.pend)return;const L=COMM.pend;COMM.pend=null;commShow(L,{note:true,key:'unl',pos:'top'});}
-$('comm').addEventListener('click',()=>{if(COMM.mode==='wait')commTap();});
-document.addEventListener('pointerdown',e=>{if(COMM.mode==='note'&&!e.target.closest('#comm'))commTap();},true);
+/* wait は画面のどこを押しても次へ。note は吹き出し（窓）を押すと次へ（ほかの所を押しても進めない・11/17 しょーくん「自動で消えるか、吹き出しタップでいいよ」） */
+$('comm').addEventListener('click',e=>{if(COMM.mode==='wait'||(COMM.mode==='note'&&e.target.closest('.cmwin')))commTap();});
 function renderEquip(){
   const own=haveShip(view),sh=SHIPS[view],pg=shipProg(view);
   $('shipName').textContent=sh.name;$('shipName').style.color=own||pg.ok?sh.c:'var(--dim)';$('shipSkill').textContent=sh.desc;
@@ -2658,7 +2661,7 @@ function openLabDetail(id){
   s.appendChild(buy);
 }
 function openLab(){pixWipe(300);labNote='';closeSheet();renderLab();$('labSheet').hidden=false;tilesIn($('labGrid'),'.sitem,.soonh,.lockc,.soonn');
-  if(save.tut&&!save.talk.lab){save.talk.lab=1;persist();commShow(TALK.labIntro,{note:true,key:'lab',pos:'bot'});}/* 11/17：はじめて開いたときだけ整備士がひとこと */}
+  if(save.tut&&!save.talk.lab){save.talk.lab=1;persist();commShow(TALK.labIntro,{wait:true,key:'lab',pos:'bot'});}/* 11/17：はじめて開いたときだけ整備士がひとこと。はじめの案内と同じく、ほかは暗くして押せない・タップで次へ（しょーくん「自動文字送りだったから聞き逃しちゃった」） */}
 function closeLab(){pixWipe(300);closeSheet();$('labSheet').hidden=true;if(COMM.key==='lab')commHide();renderAll();}
 
 /* ---------- #12 図鑑（装備・進化・機体・敵。まだのものはシルエット） ---------- */

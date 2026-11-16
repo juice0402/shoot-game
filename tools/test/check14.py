@@ -185,6 +185,8 @@ def flow(pg, errs):
     pg.click('#shipPrev'); pg.wait_for_timeout(150); pg.click('#shipNext'); pg.wait_for_timeout(150)
     ok('機体の ◀ ▶', vis('#shipName'))
     pg.click('#labBtn'); pg.wait_for_timeout(200)
+    ok('研究所をはじめて開く → 整備士のひとこと（タップで次へ）', vis('#comm'))
+    talk_through(pg)  # 11/17：はじめて開いたときのひとこと
     pg.locator('#labGrid button').first.click(); pg.wait_for_timeout(200)
     l0 = pg.evaluate("()=>window.__T.save.lab.r_hp")
     if pg.locator('#sheet .buybig:not([disabled])').count():

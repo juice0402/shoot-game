@@ -104,7 +104,7 @@ def comm(pg):
     """11/17：整備士の通信のようす（over＝押す所の穴に重なっている）"""
     return pg.evaluate("""()=>{const c=document.getElementById('comm'),T=window.__T;const on=!c.hidden;const w=c.querySelector('.cmwin').getBoundingClientRect(),h=document.querySelector('#tutDim .hole').getBoundingClientRect();
       const cv=document.getElementById('cfaceCv');const face=cv.width>0&&cv.toDataURL().length>600;
-      return {on,wait:c.classList.contains('wait'),key:T.COMM.key,name:document.getElementById('cname').textContent,text:document.getElementById('ctext').textContent,intro:T.TALK.intro,face,
+      return {on,wait:c.classList.contains('wait'),key:T.COMM.key,top:Math.round(w.top),head:Math.round(document.querySelector('#hangar .top').getBoundingClientRect().bottom),name:document.getElementById('cname').textContent,text:document.getElementById('ctext').textContent,intro:T.TALK.intro,face,
         over:on&&!document.getElementById('tutDim').hidden&&!(w.bottom<=h.top||w.top>=h.bottom||w.right<=h.left||w.left>=h.right)}}""")
 
 
@@ -268,12 +268,14 @@ def talks(pg):
     cm = comm(pg)
     hit = pg.evaluate("()=>{const r=document.getElementById('shopBtn').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&(e.id||e.className)}")
     ok('解放のお知らせ：格納庫にもどると整備士が知らせる（品5つ →「〇〇」ほか4つ・押せる所はそのまま）', cm['on'] and not cm['wait'] and cm['key'] == 'unl' and pend and pend[0].startswith('「') and 'ほか4つ' in pend[0] and cm['text'] == pend[0] and hit == 'shopBtn', [pend, cm, hit])
-    seen = [comm(pg)['text']]
+    pg.mouse.click(195, 560); pg.wait_for_timeout(120)
+    same = comm(pg)['text']
+    seen = [same]
     for _ in range(len(pend or [])):
-        pg.evaluate("()=>document.body.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}))"); pg.wait_for_timeout(100)
+        pg.click('#comm .cmwin'); pg.wait_for_timeout(100)
         if comm(pg)['on']:
             seen.append(comm(pg)['text'])
-    ok('どこかをタップ → 次の文 → 閉じる（品・研究の2つ）', seen == pend and len(pend) == 2 and pend[1].startswith('研究所に') and not comm(pg)['on'], [seen, pend])
+    ok('ほかの所を押しても進まない・吹き出しをタップ → 次の文 → 閉じる（品・研究の2つ）・ヘッダーの下に出す', same == pend[0] and seen == pend and len(pend) == 2 and pend[1].startswith('研究所に') and not comm(pg)['on'] and cm['top'] >= cm['head'], [same, seen, pend, cm])
     nt = pg.evaluate("""()=>{const T=window.__T;window.__HOLD=1;const s=T.freshSave();T.save=s;s.howto=1;s.ships.standard.eq[0]={t:'laser',d:0};T.setShip('standard');
       document.getElementById('hangar').hidden=true;document.getElementById('sortie').hidden=false;T.startRun();const R=T.R;R.kills=400;R.t=40;T.endRun(false,true);return T.COMM.pend;}""")
     ok('はじめの案内のとちゅう（tut なし）は知らせない', nt is None, nt)
@@ -281,9 +283,14 @@ def talks(pg):
     pg.evaluate("()=>window.__T.openLab()"); pg.wait_for_timeout(200)
     cm = comm(pg)
     sv = pg.evaluate("()=>[window.__T.save.talk.lab,JSON.parse(localStorage.getItem(window.__T.KEY)).talk.lab]")
-    ok('研究所をはじめて開く → 整備士のひとこと（2つ・保存）', cm['on'] and cm['key'] == 'lab' and not cm['wait'] and sv == [1, 1], [cm, sv])
+    blk = pg.evaluate("()=>{const r=document.getElementById('labClose').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&e.id}")
+    ok('研究所をはじめて開く → 整備士のひとこと（2つ・保存）・はじめの案内と同じくタップで次へ・ほかは押せない', cm['on'] and cm['key'] == 'lab' and cm['wait'] and blk == 'comm' and sv == [1, 1], [cm, blk, sv])
+    pg.click('#comm'); pg.wait_for_timeout(100)
+    t2 = comm(pg)['text']
+    pg.click('#comm'); pg.wait_for_timeout(100)
+    ok('研究所のひとこと：タップで2つめ → タップで閉じる', t2.startswith('新しい研究は') and not comm(pg)['on'], [t2, comm(pg)])
     pg.evaluate("()=>{document.getElementById('labClose').click();window.__T.openLab();}"); pg.wait_for_timeout(200)
-    ok('閉じると消える・2回目は出ない', not comm(pg)['on'], comm(pg))
+    ok('2回目は出ない', not comm(pg)['on'], comm(pg))
     pg.evaluate("()=>document.getElementById('labClose').click()")
     old = pg.evaluate("""()=>{const T=window.__T,k=T.KEY;const a=[];
       localStorage.setItem(k,JSON.stringify({gold:5,tut:1,lab:{r_hp:1}}));a.push(T.loadSave().talk.lab);
