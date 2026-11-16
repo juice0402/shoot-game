@@ -6,7 +6,7 @@
   わざと残す「！」：敵が出たときの知らせ（〜が来る！）とステージクリア（クリア！・全ステージクリア！・深淵の核をたおした！）
 - 説明の文（装備・進化・機体・ステージ・敵・道中の強化・支援・特別・研究所・実績・解放の条件・レベルアップの文）は全角22字まで
 - レベルアップ・道中の強化の文に、数字のない「〜アップ」だけの文がない
-- 飾り：NEW の札・赤い点・一覧の左の太い帯がない。動き（animation）は格納庫の指だけ（ふくらむ・点滅・下から出る動きがない）
+- 飾り：NEW の札・赤い点・一覧の左の太い帯がない。動き（animation）は格納庫の指と、名前が fx ではじまる1回の動き（11/16 作りこみ）だけ（ふくらむ・点滅・下から出る動きがない）
   ◀ ▶ ✕ と向きの矢印は点の絵（img.pix）で、文字はなし・ボタンは44px 以上
 - 出撃の結果（解放6こ＋新しい機体・実績4つ・新記録）：幅390・高さ660 でスクロールなしにボタンまで入る。
   もっと多いとき（ステージの解放・実績8つ・高さ560）も、ボタンは画面の下に見えている
@@ -142,7 +142,7 @@ SCAN = r"""
   const vis=e=>!!(e.offsetParent||getComputedStyle(e).position==='fixed')&&getComputedStyle(e).visibility!=='hidden';
   for(const id of ['title','howto','hangar','sheetBg','shopSheet','labSheet','bookSheet','achSheet','sortie']){const e=document.getElementById(id);if(e&&!e.hidden)out.txt.push(e.innerText);}
   for(const e of document.querySelectorAll('body *')){if(e.closest('[hidden]'))continue;const cs=getComputedStyle(e);
-    if(cs.animationName&&cs.animationName!=='none'&&!e.classList.contains('tfinger'))out.anim.push((e.id||e.className)+':'+cs.animationName);
+    if(cs.animationName&&cs.animationName!=='none'&&!e.classList.contains('tfinger')&&!cs.animationName.split(',').every(n=>n.trim().startsWith('fx')))out.anim.push((e.id||e.className)+':'+cs.animationName);
     for(const pe of ['::before','::after']){const p=getComputedStyle(e,pe);if(!p.content||p.content==='none'||p.content==='normal'||p.display==='none')continue;
       const dot=parseFloat(p.width)<=16&&parseFloat(p.height)<=16||/50%/.test(p.borderRadius);/* 小さい点・丸い印（文字のない箱は、ボタンの下地なので数えない） */
       if(p.content!=='""'||dot)out.deco.push('擬似要素 '+(e.id||e.className)+pe+' '+p.content.slice(0,10));}

@@ -303,6 +303,27 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .gotl{list-style:none;margin:0 auto;padding:0;max-width:320px;width:100%;display:flex;flex-direction:column;gap:4px}
 .gotl li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 10px;background:var(--panel);border:2px solid #6e5a1c;font-size:14px;line-height:1.4}
 .gotl li b{font-family:var(--f-num);font-weight:400;font-size:11px;color:var(--go);align-self:center}
+/* 11/16 作りこみ（しょーくん「ただのドット絵ゲームではない、高級な作り込み」）：押したときだけの1回の動き。名前は fx ではじめる（copy16 はこの名前だけ許す）。
+   くり返す動き・ふくらみつづける動き・下から出る板は入れない（#22 の決まりのまま） */
+.overlay{overflow-x:hidden}
+.card.fxin{animation:fxCardIn .26s cubic-bezier(.2,1.3,.4,1) both;animation-delay:var(--d,0s)}
+@keyframes fxCardIn{0%{transform:translateX(-118%);opacity:0}55%{opacity:1}100%{transform:none;opacity:1}}
+.card.fxpick{animation:fxPick .3s ease-out both}
+@keyframes fxPick{0%{transform:none}25%{transform:scale(1.06);filter:brightness(1.9)}55%{transform:scale(.99)}100%{transform:none}}
+.fxghost{pointer-events:none;z-index:6;animation:fxScrim .34s ease-out both}
+.fxghost>:not(.cards){animation:fxFade .18s ease-out both}
+.fxghost .card{position:relative}
+.fxghost .card.fxout{animation:fxCardOut .24s cubic-bezier(.55,0,.8,.2) both;animation-delay:var(--d,0s)}
+.fxghost .card.fxgot{z-index:1;animation:fxCardGot .42s ease-out both;animation-delay:var(--d,0s)}
+.fxghost .card.fxgot::after{content:'';position:absolute;inset:-3px;border:3px solid #fff;pointer-events:none;animation:fxRing .42s ease-out both;animation-delay:var(--d,0s)}
+@keyframes fxScrim{to{background-color:transparent}}
+@keyframes fxFade{to{opacity:0}}
+@keyframes fxCardOut{to{transform:translateX(72%);opacity:0}}
+@keyframes fxCardGot{0%{transform:none}18%{transform:scale(1.07);filter:brightness(2)}40%{transform:scale(.99);filter:brightness(1.25)}68%{transform:scale(1.01);opacity:1;filter:none}100%{transform:translateY(-14px) scale(1.02);opacity:0}}
+@keyframes fxRing{0%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.1,1.5)}}
+.bay.fxshake{animation:fxShake .16s steps(4,end) both}
+@keyframes fxShake{0%{transform:translate(2px,1px)}25%{transform:translate(-2px,0)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,1px)}100%{transform:none}}
+#wipe{position:fixed;inset:0;width:100%;height:100%;z-index:9999;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges;display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* ---------- #14 の点検：せまい画面（幅320〜380）で、はみ出す・2行になる・最後の1字だけ下の行に行く、を直す ---------- */
 body{text-wrap:pretty}
@@ -1997,6 +2018,10 @@ const SFX=(()=>{
     gun:()=>{tone('sine',140,50,0.22,0.1);noise(0.18,0.06,'lowpass',900,150);},
     tstop:()=>{tone('sine',1200,300,0.5,0.06);tone('triangle',600,150,0.6,0.04,0.05);},
     reroll:()=>[880,660,990].forEach((f,i)=>tone('square',f,f,0.05,0.035,i*0.04)),
+    /* 11/16 作りこみ：装備がはまる「ガチャン」・カードが入る「シュッ」・カードを取る */
+    clank:()=>{noise(0.05,0.09,'bandpass',2600,1400,0,3);tone('square',180,90,0.07,0.07);noise(0.07,0.06,'bandpass',4200,3000,0.06,6);tone('square',1250,1250,0.04,0.03,0.07);},
+    swish:()=>noise(0.07,0.025,'bandpass',900,3200,0,1.5),
+    pick:()=>{tone('square',784,784,0.05,0.05);tone('square',1175,1175,0.05,0.05,0.05);tone('triangle',1568,1568,0.16,0.05,0.1);noise(0.12,0.03,'highpass',5000,7000,0.05);},
   };
   /* #13：大型の敵の登場・最終ボス・岩がこわれる・突進・盾・ワープ・吹雪・レーザーの壁・分かれる・エンディング */
   Object.assign(SND,{
@@ -2073,13 +2098,47 @@ function drawEditor(){
   ssg.clearRect(0,0,SS,SS);
   if(open){ssg.globalAlpha=own?1:0.55;ssg.drawImage(sp.fl[0],SC-sp.cx,SC-sp.cy);ssg.drawImage(sp.img,SC-sp.cx,SC-sp.cy);ssg.globalAlpha=1;}
   else ssg.drawImage(shipSil(view),SC-sp.cx,SC-sp.cy);
-  if(own)save.ships[view].eq.forEach((v,i)=>{if(!v)return;const m=MSPR[v.t][v.d],s=SHIPS[view].slots[i];ssg.drawImage(m.img,SC+s.x-m.cx,SC+s.y-m.cy);});
+  if(own)save.ships[view].eq.forEach((v,i)=>{if(!v)return;const m=MSPR[v.t][v.d],s=SHIPS[view].slots[i];
+    if(snapFx&&snapFx.i===i&&snapFx.view===view){drawSnap(m,SC+s.x,SC+s.y,MODS[v.t].c);return;}
+    ssg.drawImage(m.img,SC+s.x-m.cx,SC+s.y-m.cy);});
   const g=ed,{W,H,k,ox,oy,dpr}=EV;
   g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.fillStyle='#05060f';g.fillRect(0,0,W,H);
   g.fillStyle='#181b44';const step=k*6,dot=Math.max(1,Math.round(dpr));
   for(let y=oy%step;y<H;y+=step)for(let x=ox%step;x<W;x+=step)g.fillRect(Math.round(x),Math.round(y),dot,dot);
   g.imageSmoothingEnabled=false;g.drawImage(ssCv,ox,oy,SS*k,SS*k);
 }
+/* 11/16 作りこみ：装備がはまる動き（ガチャン）。上から少し大きく落ちて → つぶれて → はね返って → 止まる。白い光と火花つき。
+   機体の絵の小さいキャンバスに描くので、のびちぢみもドットのまま。light＝向きを変えたとき（小さく・火花なし） */
+let snapFx=null;
+const SNAP_IN=240,SNAP_ALL=340;
+const SNAPK=[[0,1.5,0.62,-9],[0.28,1.34,0.7,0],[0.52,0.86,1.18,0],[0.76,1.06,0.95,0],[1,1,1,0]];/* [時間の割合, 横, 縦, 上へのずれ] */
+const SNAPL=[[0,1.22,0.82,-3],[0.35,0.9,1.1,0],[0.7,1.04,0.97,0],[1,1,1,0]];
+const WHITEC=new WeakMap();
+function whiteOf(img){let c=WHITEC.get(img);if(c)return c;c=document.createElement('canvas');c.width=img.width;c.height=img.height;const g=c.getContext('2d');
+  g.drawImage(img,0,0);g.globalCompositeOperation='source-in';g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);WHITEC.set(img,c);return c;}
+function snapAt(i,light){
+  const t0=performance.now();
+  snapFx={i,t0,view,light:!!light,sp:light?[]:Array.from({length:8},(_,k)=>({a:-Math.PI*(0.08+0.84*k/7)+(Math.random()-0.5)*0.3,v:34+Math.random()*30,w:k%3===0}))};
+  SFX.play(light?'btn':'clank');
+  if(!light&&!RM())setTimeout(()=>{const b=$('bay');b.classList.remove('fxshake');void b.offsetWidth;b.classList.add('fxshake');},SNAP_IN*SNAPK[1][0]);
+  const run=()=>{if(!snapFx||snapFx.t0!==t0)return;drawEditor();if(performance.now()-t0<SNAP_ALL)requestAnimationFrame(run);else{snapFx=null;drawEditor();}};
+  requestAnimationFrame(run);
+}
+function drawSnap(m,x,y,c){
+  const ms=performance.now()-snapFx.t0,K=snapFx.light?SNAPL:SNAPK,p=Math.min(1,ms/SNAP_IN);
+  let j=0;while(j<K.length-2&&p>K[j+1][0])j++;
+  const [a0,sx0,sy0,dy0]=K[j],[a1,sx1,sy1,dy1]=K[j+1],u=Math.min(1,(p-a0)/((a1-a0)||1)),L=(q,w)=>q+(w-q)*u;
+  const sx=L(sx0,sx1),sy=L(sy0,sy1),w=Math.max(1,Math.round(m.img.width*sx)),h=Math.max(1,Math.round(m.img.height*sy));
+  const dx=Math.round(x-m.cx*sx),dy=Math.round(y-m.cy*sy+L(dy0,dy1));
+  ssg.imageSmoothingEnabled=false;ssg.drawImage(m.img,dx,dy,w,h);
+  const hit=SNAP_IN*K[1][0];
+  if(ms>hit*0.6&&ms<hit+90){ssg.globalAlpha=Math.max(0,1-(ms-hit*0.6)/(hit*0.4+90));ssg.drawImage(whiteOf(m.img),dx,dy,w,h);ssg.globalAlpha=1;}
+  const st=(ms-hit)/1000;
+  if(st>0&&st<0.24)snapFx.sp.forEach(q=>{const px=Math.round(x+Math.cos(q.a)*q.v*st),py=Math.round(y+Math.sin(q.a)*q.v*st+90*st*st);
+    ssg.globalAlpha=Math.max(0,1-st/0.24);ssg.fillStyle=q.w?'#ffffff':c;ssg.fillRect(px,py,q.w?2:1,q.w?2:1);});
+  ssg.globalAlpha=1;
+}
+const RM=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
 function renderSlots(){
   const box=$('slots');box.textContent='';
   const own=haveShip(view);
@@ -2190,7 +2249,7 @@ function mountAt(j,t){
   if(MODS[t].passive){putMod(j,t,prev?prev.d:defaultDir(t,j));return;}
   openDir(j,t);
 }
-function putMod(j,t,d){save.load[j]={t,d};persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけた'+(MODS[t].passive?'':'（'+ARROW_NAME[d]+'向き）'));renderEquip();}
+function putMod(j,t,d){save.load[j]={t,d};persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけた'+(MODS[t].passive?'':'（'+ARROW_NAME[d]+'向き）'));renderEquip();snapAt(j);}
 /* 向きをえらぶ板（つける前）。矢印をタップでつける。まんなかは品の絵（いまの向き・はじめは前向きか外向き）。✕ でつけずに閉じる */
 function openDir(j,t){
   const prev=save.load[j],m=MODS[t],d0=prev?prev.d:defaultDir(t,j),tut=tutStep()===1;
@@ -2214,7 +2273,7 @@ function openAim(i){
   const draw=()=>{grid.textContent='';DIR_GRID.forEach(d=>{
     if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[v.t][v.d].url;c.appendChild(im);grid.appendChild(c);return;}
     const b=el('button');b.appendChild(pixIcon('d'+d,4,v.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
-    b.addEventListener('click',()=>{v.d=d;persist();draw();drawEditor();});grid.appendChild(b);});};
+    b.addEventListener('click',()=>{const ch=v.d!==d;v.d=d;persist();draw();drawEditor();if(ch)snapAt(i,true);});grid.appendChild(b);});};
   draw();sh.appendChild(grid);
   sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効く':'向いた方へ攻撃する'));
   const row=el('div','sbtns'),ch=el('button','btn3','装備をかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
@@ -2310,8 +2369,8 @@ function openDetail(k){
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(it.price-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
 }
-function openShop(k){shopNote='';if(k&&tabOf(k))shopCat=tabOf(k);closeSheet();renderShop();$('shopSheet').hidden=false;if(k)openDetail(k);}
-function closeShop(){closeSheet();$('shopSheet').hidden=true;renderAll();}
+function openShop(k){pixWipe(300);shopNote='';if(k&&tabOf(k))shopCat=tabOf(k);closeSheet();renderShop();$('shopSheet').hidden=false;if(k)openDetail(k);}
+function closeShop(){pixWipe(300);closeSheet();$('shopSheet').hidden=true;renderAll();}
 const achText=got=>got.map(a=>'実績「'+a.name+'」 ＋'+a.g+'G').join('・');
 
 /* ---------- #12 研究所（ショップと同じ2列のカード → タップでくわしく・数字はくわしくの中） ---------- */
@@ -2356,8 +2415,8 @@ function openLabDetail(id){
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(pr-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
 }
-function openLab(){labNote='';closeSheet();renderLab();$('labSheet').hidden=false;}
-function closeLab(){closeSheet();$('labSheet').hidden=true;renderAll();}
+function openLab(){pixWipe(300);labNote='';closeSheet();renderLab();$('labSheet').hidden=false;}
+function closeLab(){pixWipe(300);closeSheet();$('labSheet').hidden=true;renderAll();}
 
 /* ---------- #12 図鑑（装備・進化・機体・敵。まだのものはシルエット） ---------- */
 const SILC={};
@@ -2388,8 +2447,8 @@ function openBookItem(o){
   const info=el('div');if(o.found){info.appendChild(el('p',null,o.desc));if(o.extra)info.appendChild(el('p',null,o.extra));}else info.appendChild(el('p',null,o.hint));
   top.append(img,info);s.appendChild(top);
 }
-function openBook(){closeSheet();renderBook();$('bookSheet').hidden=false;$('bookBody').scrollTop=0;}
-function closeBook(){closeSheet();$('bookSheet').hidden=true;renderAll();}
+function openBook(){pixWipe(300);closeSheet();renderBook();$('bookSheet').hidden=false;$('bookBody').scrollTop=0;}
+function closeBook(){pixWipe(300);closeSheet();$('bookSheet').hidden=true;renderAll();}
 
 /* ---------- #12 実績（24個・決まった G） ---------- */
 function renderAch(){
@@ -2400,8 +2459,8 @@ function renderAch(){
     li.append(img,mid,em);ul.appendChild(li);});
   $('achAll').textContent=done+' / '+ACH.length;body.appendChild(ul);
 }
-function openAch(){closeSheet();renderAch();$('achSheet').hidden=false;$('achBody').scrollTop=0;}
-function closeAch(){closeSheet();$('achSheet').hidden=true;renderAll();}
+function openAch(){pixWipe(300);closeSheet();renderAch();$('achSheet').hidden=false;$('achBody').scrollTop=0;}
+function closeAch(){pixWipe(300);closeSheet();$('achSheet').hidden=true;renderAll();}
 
 $('shopBtn').addEventListener('click',()=>openShop());
 $('shopClose').addEventListener('click',closeShop);
@@ -2413,7 +2472,7 @@ $('debugUnl').addEventListener('click',()=>{save.unl=TYPES.filter(t=>MODS[t].unl
 $('shipPrev').addEventListener('click',()=>stepShip(-1));$('shipNext').addEventListener('click',()=>stepShip(1));
 $('stPrev').addEventListener('click',()=>stepStage(-1));$('stNext').addEventListener('click',()=>stepStage(1));
 $('infoBtn').addEventListener('click',openInfo);
-$('launchBtn').addEventListener('click',()=>{if(!haveShip(view))return;if(!save.tut&&save.load.some(Boolean)){save.tut=1;persist();}/* はじめの案内は出撃で終わり */startRun();});
+$('launchBtn').addEventListener('click',()=>{if(!haveShip(view))return;if(!save.tut&&save.load.some(Boolean)){save.tut=1;persist();}/* はじめの案内は出撃で終わり */startRun();pixWipe(420);});
 if(window.ResizeObserver)new ResizeObserver(()=>{layoutEditor();renderSlots();}).observe(bay);
 else window.addEventListener('resize',()=>{layoutEditor();renderSlots();});
 {const im=el('img');im.alt='';im.src=FINGERURL;$('tfinger').prepend(im);}/* はじめの案内の指 */requestAnimationFrame(tutLoop);
@@ -4001,7 +4060,7 @@ function frame(ts){
   if(!R)return;
   raf=requestAnimationFrame(frame);
   let dt=(ts-last)/1000;last=ts;if(!(dt>0))dt=0;dt=Math.min(dt,0.05);
-  if(R.state==='play')update(dt);
+  if(R.state==='play'&&ts>=fxHold)update(dt);/* fxHold：レベルアップのカードが消える間だけ止める（11/16） */
   if(R){draw();hud();}
 }
 
@@ -4075,7 +4134,8 @@ function openLevelUp(){
   lvChoices=buildChoices();R.pick=R.sh.awaken&&(R.lvupN+1)%10===0?2:1;
   renderLvUp(true);
 }
-function renderLvUp(fresh){
+function renderLvUp(fresh,anim){
+  if(anim==null)anim=fresh;
   overlay.textContent='';
   const wrap=el('div','cards');
   lvChoices.forEach(o=>{const b=cardEl(o);o.btn=b;const nb=!!o.evo||o.key==='f';b.disabled=fresh||o.used||(banMode&&nb);if(banMode&&!nb)b.classList.add('banpick');
@@ -4085,6 +4145,7 @@ function renderLvUp(fresh){
   const acts=lvActs();if(acts)overlay.appendChild(acts);
   overlay.appendChild(buildSummary());
   overlay.hidden=false;
+  if(anim)cardsIn(wrap);
   if(fresh)setTimeout(()=>{if(!lvChoices)return;lvChoices.forEach(o=>{if(o.btn&&!o.used&&!(banMode&&(o.evo||o.key==='f')))o.btn.disabled=false;});},350);
 }
 /* えらび直し・スキップ・除外（研究所で買った回数だけ。買っていないときはボタンを出さない） */
@@ -4095,18 +4156,34 @@ function lvActs(){const L=R.lab;if(!(L.r_reroll||L.r_skip||L.r_ban))return null;
   if(L.r_skip&&lvChoices&&lvChoices.some(o=>o.used)){const b=row.children[L.r_reroll?1:0];if(b)b.disabled=true;}/* 覚醒で1つ取ったあとはスキップできない（#12 の点検） */
   return row;}
 function doReroll(){if(!R||R.state!=='lvup'||!lvChoices||R.rr<=0)return;R.rr--;banMode=false;SFX.play('reroll');
-  const keep=lvChoices.filter(o=>o.used);lvChoices=keep.concat(buildChoices(new Set(keep.map(o=>o.key)))).slice(0,3+keep.length);renderLvUp(false);}
+  const keep=lvChoices.filter(o=>o.used);lvChoices=keep.concat(buildChoices(new Set(keep.map(o=>o.key)))).slice(0,3+keep.length);renderLvUp(false,true);}
 function doSkip(){if(!R||R.state!=='lvup'||!lvChoices||R.sk<=0||lvChoices.some(o=>o.used))return;R.sk--;banMode=false;
   R.gold+=10+2*R.lv;R.xp=Math.min(R.xp+R.need*0.1,R.need*0.999);/* スキップ：お金（10＋レベル×2）と、次のレベルまでの経験値の10% */
-  SFX.play('coin');lvChoices=null;R.lvupN++;R.pending--;if(R.pending>0)openLevelUp();else resume();}
+  SFX.play('coin');ghostCards(null,'skip');lvChoices=null;R.lvupN++;R.pending--;if(R.pending>0)openLevelUp();else resume();}
 function toggleBan(){if(!R||R.state!=='lvup'||!lvChoices)return;if(!banMode&&R.bn<=0)return;banMode=!banMode;renderLvUp(false);}
 function pickChoice(o){if(!R||R.state!=='lvup'||o.used)return;
   if(banMode){if(o.evo||o.key==='f'||!lvChoices)return;/* 進化と修理は除外できない */R.ban.add(o.key);R.bn--;banMode=false;const i=lvChoices.indexOf(o);
     lvChoices[i]=oneChoice(new Set(lvChoices.map(q=>q.key)));renderLvUp(false);return;}
-  o.used=true;o.fn();calcCS();
-  if(--R.pick>0){if(o.btn)o.btn.disabled=true;const sb=overlay.querySelector('.sub');if(sb)sb.textContent='覚醒：あと1つえらぶ';
+  o.used=true;o.fn();calcCS();SFX.play('pick');
+  if(--R.pick>0){if(o.btn){o.btn.disabled=true;if(!RM())o.btn.classList.add('fxpick');}const sb=overlay.querySelector('.sub');if(sb)sb.textContent='覚醒：あと1つえらぶ';
     const acts=overlay.querySelector('.lvacts');if(acts&&R.lab.r_skip){const b=acts.children[R.lab.r_reroll?1:0];if(b)b.disabled=true;}return;}/* オメガの覚醒（1つ取ったあとはスキップできない） */
-  lvChoices=null;banMode=false;R.lvupN++;R.pending--;if(R.pending>0)openLevelUp();else resume();}
+  ghostCards(o.btn,'pick');lvChoices=null;banMode=false;R.lvupN++;R.pending--;if(R.pending>0)openLevelUp();else resume();}
+/* 11/16 作りこみ：カードが左から上の順に「シュシュシュ」と入る */
+function cardsIn(wrap){if(RM())return;[...wrap.children].forEach((b,k)=>{b.classList.add('fxin');b.style.setProperty('--d',(k*0.08)+'s');setTimeout(()=>SFX.play('swish'),k*80);});}
+/* えらんだあと：画面はすぐ閉じて（ゲームの中身はすぐ進む）、写しのカードで動きを見せる。えらんだカードは光って上へ消え、ほかは右へ消える。
+   mode：'pick' えらんだ1枚・'skip' 全部右へ・'all' 全部光る（宝箱）。動いている間（約0.26秒）だけ、敵と弾を止める（fxHold） */
+let fxHold=0;
+function ghostCards(pick,mode){
+  if(RM()||overlay.hidden||!overlay.parentNode)return;
+  const g=overlay.cloneNode(true);g.removeAttribute('id');g.hidden=false;g.classList.add('fxghost');g.setAttribute('aria-hidden','true');
+  g.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+  g.querySelectorAll('button').forEach(b=>{b.disabled=false;b.tabIndex=-1;});
+  const src=[...overlay.querySelectorAll('.cards .card')];
+  [...g.querySelectorAll('.cards .card')].forEach((c,k)=>{c.classList.remove('fxin','fxpick');const got=mode==='all'||(mode==='pick'&&src[k]===pick);
+    c.classList.add(got?'fxgot':'fxout');c.style.setProperty('--d',(mode==='all'?0.06*k:got?0:0.04*k)+'s');});
+  overlay.parentNode.appendChild(g);g.scrollTop=overlay.scrollTop;
+  fxHold=performance.now()+260;setTimeout(()=>g.remove(),560);
+}
 let chestShown=null;
 function openChest(){
   SFX.play('chest');
@@ -4115,10 +4192,10 @@ function openChest(){
   overlay.textContent='';
   const wrap=el('div','cards');picks.forEach(o=>{const b=cardEl(o);b.classList.add('got');b.disabled=true;b.tabIndex=-1;wrap.appendChild(b);});
   const row=el('div','btnrow'),go=el('button','go','受け取る');go.type='button';go.disabled=true;
-  go.addEventListener('click',()=>{if(!R||R.state!=='lvup')return;chestShown=null;if(R.chestQ>0)openChest();else if(R.pending>0)openLevelUp();else resume();});
+  go.addEventListener('click',()=>{if(!R||R.state!=='lvup')return;chestShown=null;SFX.play('pick');ghostCards(null,'all');if(R.chestQ>0)openChest();else if(R.pending>0)openLevelUp();else resume();});
   row.appendChild(go);
   overlay.append(el('h2',null,'宝箱'),el('p','sub','中の強化3つを手に入れた'),wrap,row,buildSummary());
-  overlay.hidden=false;
+  overlay.hidden=false;cardsIn(wrap);
   setTimeout(()=>{go.disabled=false;},350);
 }
 function resume(){if(!R)return;overlay.hidden=true;R.state='play';last=performance.now();}
@@ -4180,7 +4257,7 @@ function endRun(clear,retreat){
   row('かせいだお金','+'+total+'G','total');
   let gotl=null;if(got.length){gotl=el('ul','gotl');const li=el('li');const ns=el('span',null,'実績');got.forEach(a=>ns.appendChild(el('span',null,'「'+a.name+'」')));li.append(ns,el('b',null,'+'+got.reduce((n,a)=>n+a.g,0)+'G'));gotl.appendChild(li);}/* 実績は1行にまとめる（#16） */
   const btns=el('div','btnrow end'),back=el('button','go','格納庫へ'),shop=el('button','btn2','ショップへ');back.type='button';shop.type='button';
-  const toHangar=()=>{cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;overlay.classList.remove('over');layoutEditor();renderAll();};
+  const toHangar=()=>{pixWipe();cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;overlay.classList.remove('over');layoutEditor();renderAll();};
   back.addEventListener('click',()=>{toHangar();toast(total+'G かせいだ');});
   shop.addEventListener('click',()=>{toHangar();openShop();});
   btns.append(shop,back);
@@ -4255,11 +4332,28 @@ function titleFrame(ts){
   const sp=SHIPSPR[save.cur],fl=sp.fl[((S.t*14)|0)%sp.fl.length];
   g.drawImage(fl,px-sp.cx,py-sp.cy);g.drawImage(sp.img,px-sp.cx,py-sp.cy);
 }
-function showTitle(){
+/* 11/16 作りこみ：画面の切りかえ（ドットの四角が斜めに小さくなって、新しい画面が出てくる）。切りかえそのものはすぐ（操作を待たせない）。
+   キャンバスの1点＝画面の8px・6点のマス。前の端は少し明るい色 */
+const wipeCv=document.createElement('canvas');wipeCv.id='wipe';wipeCv.setAttribute('aria-hidden','true');document.body.appendChild(wipeCv);
+let wipeRaf=0;
+function pixWipe(ms){
+  if(RM())return;ms=ms||380;
+  const cell=8,B=6,cw=Math.ceil(innerWidth/cell),ch=Math.ceil(innerHeight/cell);
+  wipeCv.width=cw;wipeCv.height=ch;wipeCv.style.display='block';
+  const g=wipeCv.getContext('2d'),cols=Math.ceil(cw/B),rows=Math.ceil(ch/B),span=Math.max(1,cols+rows-2),t0=performance.now();
+  cancelAnimationFrame(wipeRaf);
+  const step=()=>{const t=(performance.now()-t0)/ms;g.clearRect(0,0,cw,ch);
+    if(t>=1){wipeCv.style.display='none';return;}
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const p=Math.min(1,Math.max(0,(t-(c+r)/span*0.55)/0.45));if(p>=1)continue;
+      const sz=Math.round((1-p)*B);if(sz<=0)continue;const o=(B-sz)>>1;g.fillStyle=p>0.05&&p<0.4?'#2e3277':'#080a1c';g.fillRect(c*B+o,r*B+o,sz,sz);}
+    wipeRaf=requestAnimationFrame(step);};
+  step();
+}
+function showTitle(){pixWipe();
   hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
   titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
 }
-function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;tutReset();view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
+function toHangarFromTitle(){pixWipe();titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;tutReset();view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
 function renderSnd(){const b=$('sndBtn');b.textContent=save.snd===false?'音 OFF':'音 ON';b.setAttribute('aria-pressed',save.snd===false?'false':'true');}
 $('sndBtn').addEventListener('click',()=>{save.snd=save.snd===false;persist();renderSnd();SFX.unlock();SFX.play('btn');});
 $('startBtn').addEventListener('click',()=>{SFX.play('start');if(!save.howto)openHowto(true);else toHangarFromTitle();});
