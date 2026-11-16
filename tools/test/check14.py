@@ -149,6 +149,9 @@ def flow(pg, errs):
     pg.click('#sheet .irow:not([disabled])'); pg.wait_for_timeout(200)
     full = pg.locator('#slots .slotb.full').count()
     ok('一覧のレーザーをつける', full == 1 and not vis('#sheetBg'), full)
+    # #17：はじめの案内③の間は出撃しか押せない（案内のテストは unlock15）。ここからは案内を終えた形でタップのひと回り
+    ok('はじめの案内③：出撃だけ明るい', vis('#tutDim') and pg.evaluate("()=>{const r=document.querySelector('#slots .slotb.full').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&e.className==='blk'}"))
+    pg.evaluate("()=>{window.__T.save.tut=1;}"); pg.wait_for_timeout(100)
     pg.click('#slots .slotb.full'); pg.wait_for_timeout(200)
     ok('つけた装備をタップ → 向き', vis('#sheet .dirs'), full)
     pg.locator('#sheet .dirs button').nth(2).click(); pg.wait_for_timeout(100)
