@@ -24,92 +24,117 @@ button:focus-visible{outline:2px solid #4cc9ff;outline-offset:2px}
 button:disabled{cursor:not-allowed}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:0}
 
-/* ---------- hangar ---------- */
-#hangar{height:100%;overflow-y:auto;max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:8px;padding-block:10px 12px}
-.top{display:flex;align-items:center;gap:8px}
+/* ---------- hangar（スマホ1画面：上＝お金とショップ／まんなか＝大きな機体／下＝出撃） ---------- */
+#hangar{height:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:8px;
+  padding-block:calc(8px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-bottom,0px))}
+.top{display:flex;align-items:center;gap:8px;min-height:44px}
 .ttl{flex:1;min-width:0}
-h1{margin:0;font-size:24px;line-height:1.2;font-weight:400;letter-spacing:.08em}
-h1 small{font-size:11px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
-.best{margin:0;font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gold{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--panel);border:3px solid var(--edge);flex:none}
+h1{margin:0;font-size:22px;line-height:1.2;font-weight:400;letter-spacing:.08em}
+h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
+.gold{display:flex;align-items:center;gap:6px;height:44px;padding:0 10px;background:var(--panel);border:3px solid var(--edge);flex:none}
 .coin{width:16px;height:16px;image-rendering:pixelated;image-rendering:crisp-edges}
-.gold b{font-size:11px;font-weight:400}
-.gold small{color:var(--dim);font-size:12px}
-.shopbtn{flex:none;padding:5px 10px;background:var(--panel);border:3px solid var(--go);color:var(--go);font-size:14px}
-.shiprow{display:flex;align-items:center;gap:6px;background:var(--panel);border:3px solid var(--edge);padding:3px 6px}
-.shiprow p{flex:1;min-width:0;margin:0;text-align:center;line-height:1.25}
-.shiprow b{display:block;font-weight:400;font-size:16px}
-.shiprow small{display:block;font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.shiprow button{width:44px;height:40px;background:var(--panel-2);border:3px solid var(--edge);font-size:16px}
-.sub.unl{color:var(--go)}
-.bay{flex:1;min-height:200px;position:relative;background:var(--deep);border:3px solid var(--edge);overflow:hidden;touch-action:none}
-#editor{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
-.bayhint{position:absolute;left:8px;right:8px;top:5px;margin:0;font-size:11px;line-height:1.4;color:var(--dim);pointer-events:none;text-align:center}
-.toast{position:absolute;left:8px;right:8px;bottom:8px;margin:0 auto;width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--scrim);border:2px solid var(--go);color:var(--go);font-size:13px;text-align:center;pointer-events:none}
-.selbar{display:flex;align-items:center;gap:6px;background:var(--panel);border:3px solid var(--edge);padding:4px 6px}
-.selinfo{flex:1;min-width:0;margin:0;line-height:1.25}
-.selinfo b{display:block;font-weight:400;font-size:15px}
-.selinfo small{display:block;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.selbar button{height:36px;min-width:40px;padding:0 8px;background:var(--panel-2);border:3px solid var(--edge);font-size:15px}
-.selbar button:disabled{opacity:.35}
-.traywrap{display:flex;flex-direction:column;gap:3px}
-.traylabel{margin:0;font-size:11px;color:var(--dim);display:flex;justify-content:space-between;gap:8px}
-.tray{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding-bottom:5px;scrollbar-width:thin;scrollbar-color:var(--edge) transparent;overscroll-behavior-x:contain}
-.chip{flex:0 0 74px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px 4px;background:var(--panel);border:3px solid var(--edge);border-bottom-color:var(--c,var(--edge));touch-action:pan-x;min-width:0;user-select:none;-webkit-user-select:none}
-.chip img{width:36px;height:36px;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
-.chip span{font-size:11px;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.chip small{font-size:8px;color:var(--dim);line-height:1.6}
-.chip.empty{opacity:.6}
-.chip.shopchip{border-style:dashed;border-color:var(--go);color:var(--go);justify-content:center}
-.chip.shopchip b{font-weight:400;font-size:24px;line-height:36px}
-.go{display:block;width:100%;padding:12px;font-size:20px;letter-spacing:.2em;background:var(--go);color:var(--go-ink);border:0;box-shadow:inset 0 -5px 0 var(--go-sh),inset 0 3px 0 rgba(255,255,255,.45)}
+.gold b{font-size:14px;font-weight:400}
+.gold small{color:var(--dim);font-size:14px}
+.shopbtn{position:relative;flex:none;height:44px;padding:0 14px;background:var(--panel);border:3px solid var(--go);color:var(--go);font-size:16px}
+.badge{position:absolute;top:-7px;right:-7px;width:14px;height:14px;background:var(--hurt);border:2px solid var(--void);border-radius:50%}
+.bay{flex:1;min-height:250px;position:relative;background:var(--deep);border:3px solid var(--edge);overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#editor{position:absolute;inset:0;width:100%;height:100%;display:block}
+.shipcap{position:absolute;left:52px;right:52px;top:6px;margin:0;text-align:center;pointer-events:none;line-height:1.3}
+.shipcap b{display:block;font-size:20px;font-weight:400;letter-spacing:.06em}
+.shipcap small{display:block;font-size:14px;color:var(--dim)}
+.navb{position:absolute;top:50%;z-index:3;width:44px;height:72px;margin-top:-36px;background:rgba(20,22,58,.88);border:3px solid var(--edge);font-size:18px}
+#shipPrev{left:4px}#shipNext{right:4px}
+.dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:8px;pointer-events:none}
+.dots i{width:9px;height:9px;background:var(--edge)}
+.dots i.on{background:var(--ink)}
+.slots{position:absolute;inset:0;z-index:2;pointer-events:none}
+.slotb{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:transparent;border:0;pointer-events:auto;padding:0}
+.slotb.empty{border:3px dashed #8fd0ff;background:rgba(10,30,70,.55);color:#cfeaff;font-size:24px;line-height:1;animation:plus 1.2s ease-in-out infinite}
+.slotb.full:active{background:rgba(255,255,255,.15)}
+@keyframes plus{50%{box-shadow:0 0 0 4px rgba(90,170,255,.35),0 0 16px 4px rgba(90,170,255,.55);border-color:#ffffff}}
+.lockbox{position:absolute;left:52px;right:52px;bottom:26px;z-index:3;background:var(--scrim);border:3px solid var(--edge);padding:8px 10px;text-align:center;font-size:14px;line-height:1.4}
+.lockbox p{margin:0}
+.prog{height:12px;background:var(--panel);border:2px solid var(--edge);margin:6px 0}
+.prog i{display:block;height:100%;background:var(--go)}
+.lockbox .btn3{margin-top:6px;width:100%}
+.finger{position:absolute;z-index:4;translate:-50% 0;pointer-events:none;display:flex;flex-direction:column;align-items:center;animation:tap 1s ease-in-out infinite}
+.finger span{font-size:30px;line-height:1;filter:drop-shadow(0 2px 0 #000)}
+.finger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
+@keyframes tap{50%{transform:translateY(6px)}}
+.toast{position:absolute;left:8px;right:8px;bottom:26px;z-index:5;margin:0 auto;width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--scrim);border:2px solid var(--go);color:var(--go);font-size:14px;text-align:center;pointer-events:none}
+.hrow{display:flex;gap:8px}
+.btn3{min-height:48px;padding:0 14px;background:var(--panel-2);border:3px solid var(--edge);font-size:15px}
+.go{flex:1;display:block;width:100%;min-height:58px;padding:10px;font-size:21px;letter-spacing:.2em;background:var(--go);color:var(--go-ink);border:0;box-shadow:inset 0 -5px 0 var(--go-sh),inset 0 3px 0 rgba(255,255,255,.45)}
 .go:active{transform:translateY(2px);box-shadow:inset 0 -3px 0 var(--go-sh)}
-.go:disabled{background:var(--panel-2);color:var(--dim);box-shadow:none;letter-spacing:.06em}
-.dragghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;width:64px;height:64px;display:grid;place-items:center}
-.dragghost img{width:64px;height:64px;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 0 6px rgba(255,255,255,.35))}
-.dragghost span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);padding:0 6px;background:var(--hurt);color:#fff;font-size:12px;white-space:nowrap}
+.go:disabled{background:var(--panel-2);color:var(--dim);box-shadow:none;letter-spacing:.04em;font-size:16px}
 
-/* ---------- shop ---------- */
+/* 下から出る板（装備の一覧・向き・くわしく・ショップのくわしく） */
+.sheetbg{position:fixed;inset:0;z-index:60;background:rgba(5,6,15,.62);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:460px;max-height:82%;overflow-y:auto;overscroll-behavior:contain;background:var(--panel);border:3px solid var(--c,var(--edge));border-bottom:0;
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:up .16s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+.sheet h3{margin:0;font-weight:400;font-size:18px;display:flex;align-items:center;gap:8px;min-height:44px}
+.sheet h3 small{font-size:14px;color:var(--dim)}
+.sheet .x{margin-left:auto;flex:none;width:44px;height:44px;background:var(--panel-2);border:3px solid var(--edge);font-size:18px}
+.sheet p{margin:0;font-size:14px;line-height:1.5}
+.sheet .dim{color:var(--dim)}
+.irow{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;min-height:62px;padding:6px 10px;background:var(--panel-2);border:3px solid var(--edge);border-left:8px solid var(--c);text-align:left;width:100%}
+.irow img{width:48px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges}
+.irow b{display:block;font-size:16px;font-weight:400;line-height:1.3}
+.irow small{display:block;font-size:14px;color:var(--dim);line-height:1.35}
+.irow em{font-style:normal;font-size:14px;color:var(--ink);white-space:nowrap}
+.irow:disabled{opacity:.45}
+.irow.now{border-color:var(--go)}
+.dirs{display:grid;grid-template-columns:repeat(3,68px);grid-auto-rows:68px;gap:8px;justify-content:center}
+.dirs button{font-size:28px;background:var(--panel-2);border:3px solid var(--edge)}
+.dirs button[aria-pressed="true"]{border-color:var(--go);color:var(--go);background:#2a2a5a}
+.dirs .mid{display:grid;place-items:center;background:var(--deep);border:3px solid var(--edge)}
+.dirs .mid img{width:56px;height:56px;image-rendering:pixelated;image-rendering:crisp-edges}
+.sbtns{display:flex;gap:8px}
+.sbtns button{flex:1}
+.btn3.warn{border-color:var(--hurt);color:#ffb0c4}
+.statl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.statl li{display:flex;justify-content:space-between;gap:6px;padding:6px 8px;background:var(--panel-2);font-size:14px}
+.statl li b{font-weight:400;color:var(--go)}
+
+/* ---------- shop（2列の大きなカード → タップでくわしく） ---------- */
 .shopx{position:fixed;inset:0;z-index:40;background:var(--void);display:flex;flex-direction:column;gap:8px;
-  padding-block:calc(10px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-bottom,0px));
+  padding-block:calc(8px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-bottom,0px));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .shopx>*{width:100%;max-width:460px;margin-inline:auto}
-.shead{display:flex;align-items:center;gap:8px}
+.shead{display:flex;align-items:center;gap:8px;min-height:44px}
 .shead h2{flex:1;margin:0;font-weight:400;font-size:22px;letter-spacing:.08em}
-.stabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.stabs button{padding:5px 2px;background:var(--panel);border:3px solid var(--edge);font-size:14px}
+.stabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stabs button{position:relative;min-height:46px;background:var(--panel);border:3px solid var(--edge);font-size:16px}
 .stabs button[aria-selected="true"]{border-color:var(--go);color:var(--go);background:var(--panel-2)}
-.sgrid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px;align-content:start;padding:2px}
-.sitem{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px 6px;background:var(--panel);border:3px solid var(--edge);border-bottom-color:var(--c);min-width:0}
-.sitem img{width:40px;height:40px;image-rendering:pixelated;image-rendering:crisp-edges}
-.sitem span{font-size:12px;line-height:1.3;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.sitem small{font-family:var(--f-num);font-size:9px;color:var(--go);line-height:1.8}
+.sgrid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;padding:2px;overscroll-behavior:contain}
+.sitem{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:138px;padding:10px 6px;background:var(--panel);border:3px solid var(--edge);border-bottom:6px solid var(--c);min-width:0}
+.sitem img{width:64px;height:64px;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain}
+.sitem span{font-size:15px;line-height:1.3;text-align:center;max-width:100%}
+.sitem small{font-size:14px;color:var(--go);line-height:1.3}
 .sitem small.short{color:var(--dim)}
-.sitem i{position:absolute;top:3px;right:3px;font-style:normal;font-family:var(--f-num);font-size:8px;line-height:1;color:var(--ink);background:var(--edge);padding:3px 4px}
-.sitem[aria-pressed="true"]{border-color:var(--c);background:var(--panel-2)}
-.sdetail{background:var(--panel);border:3px solid var(--c,var(--edge));padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.dtop{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start}
-.dtop img{width:52px;height:52px;image-rendering:pixelated;image-rendering:crisp-edges;background:var(--deep);border:2px solid var(--c)}
-.dtop b{font-weight:400;font-size:17px;line-height:1.3}
-.cat{display:inline-block;margin-left:8px;padding:0 6px;font-size:11px;background:var(--c);color:var(--deep);vertical-align:2px}
-.dtop p{margin:3px 0 0;font-size:12px;color:var(--dim);line-height:1.45}
-.drate{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--dim)}
-.rt{display:flex;align-items:center;gap:5px}
-.bars{display:flex;gap:2px}
-.bars i{width:7px;height:9px;background:var(--edge)}
+.sitem i{position:absolute;top:4px;right:4px;font-style:normal;font-size:14px;line-height:1;color:var(--ink);background:var(--edge);padding:4px 6px}
+.sitem.can::after{content:"";position:absolute;top:6px;left:6px;width:10px;height:10px;background:var(--go);border-radius:50%}
+.dtop{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
+.dtop img{width:76px;height:76px;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;background:var(--deep);border:3px solid var(--c)}
+.dtop b{font-weight:400;font-size:19px;line-height:1.3}
+.cat{display:inline-block;margin-left:8px;padding:0 6px;font-size:14px;background:var(--c);color:var(--deep);vertical-align:2px}
+.dtop p{margin:4px 0 0;font-size:14px;color:var(--dim);line-height:1.5}
+.drate{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.rt{display:grid;grid-template-columns:3.5em 1fr;align-items:center;gap:8px}
+.bars{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.bars i{height:12px;background:var(--edge)}
 .bars i.on{background:var(--c)}
-.eff{margin:0;font-size:13px}
+.eff{margin:0;font-size:15px}
 .eff span{color:var(--dim)}
-.dbuy{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.dbuy .own{font-size:12px;color:var(--dim);line-height:1.4}
-.dbuy .own b{font-weight:400;color:var(--ink)}
-.buybig{flex:none;padding:10px 14px;font-size:15px;background:var(--go);color:var(--go-ink);border:0;box-shadow:inset 0 -4px 0 var(--go-sh)}
-.buybig .num{font-size:11px}
-.buybig:disabled{background:var(--panel-2);color:var(--dim);box-shadow:none}
-.snote{margin:0;min-height:1.4em;font-size:12px;color:var(--go);text-align:center}
-.linkbtn{background:none;border:2px dashed var(--edge);color:var(--dim);padding:6px;width:100%;font-size:12px}
-.btn2{padding:12px;background:var(--panel);border:3px solid var(--edge)}
-.btn2.small{padding:4px 10px;font-size:14px}
+.own{font-size:14px;color:var(--dim)}
+.own b{font-weight:400;color:var(--ink)}
+.buybig{width:100%;min-height:56px;padding:10px 14px;font-size:18px;background:var(--go);color:var(--go-ink);border:0;box-shadow:inset 0 -5px 0 var(--go-sh)}
+.buybig:disabled{background:var(--panel-2);color:var(--dim);box-shadow:none;font-size:16px}
+.snote{margin:0;min-height:1.4em;font-size:14px;color:var(--go);text-align:center}
+.linkbtn{background:none;border:2px dashed var(--edge);color:var(--dim);min-height:44px;width:100%;font-size:14px}
+.btn2{min-height:48px;padding:12px;background:var(--panel);border:3px solid var(--edge);font-size:15px}
+.btn2.small{min-height:44px;padding:4px 12px;font-size:15px}
 
 /* ---------- sortie ---------- */
 #sortie{height:100%;display:flex;flex-direction:column;position:relative;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -167,41 +192,30 @@ h1 small{font-size:11px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 
 <main id="hangar">
   <header class="top">
-    <div class="ttl">
-      <h1>格納庫<small>試作5</small></h1>
-      <p class="best" id="bestLine">さいこう記録：まだなし</p>
-    </div>
+    <div class="ttl"><h1>格納庫<small>試作5</small></h1></div>
     <div class="gold" aria-label="持っているお金"><img class="coin" alt=""><b id="goldNum" class="num">0</b><small>G</small></div>
-    <button id="shopBtn" class="shopbtn" type="button">ショップ</button>
+    <button id="shopBtn" class="shopbtn" type="button">ショップ<span id="shopDot" class="badge" hidden></span></button>
   </header>
 
-  <div class="shiprow">
-    <button id="shipPrev" type="button" aria-label="前の機体">◀</button>
-    <p><b id="shipName">スタンダード</b><small id="shipSkill"></small></p>
-    <button id="shipNext" type="button" aria-label="次の機体">▶</button>
-  </div>
   <div class="bay" id="bay">
-    <canvas id="editor" aria-label="シップの装備画面。場所をタップでえらぶ。装備をドラッグして動かす"></canvas>
-    <p class="bayhint">装備を船までドラッグ ・ 丸いつまみを回すと向きが変わる</p>
+    <canvas id="editor" aria-hidden="true"></canvas>
+    <p class="shipcap"><b id="shipName">スタンダード</b><small id="shipSkill"></small></p>
+    <div class="slots" id="slots"></div>
+    <button id="shipPrev" class="navb" type="button" aria-label="前の機体">◀</button>
+    <button id="shipNext" class="navb" type="button" aria-label="次の機体">▶</button>
+    <div class="lockbox" id="lockbox" hidden></div>
+    <div class="finger" id="finger" hidden><span aria-hidden="true">👆</span><b>ここをタップ</b></div>
+    <div class="dots" id="dots"></div>
     <p class="toast" id="note" aria-live="polite" hidden></p>
   </div>
 
-  <div class="selbar">
-    <p class="selinfo"><b id="slotLabel">左肩</b><small id="slotState">からっぽ</small></p>
-    <button id="rotL" type="button" aria-label="左に45度まわす">↺</button>
-    <button id="rotR" type="button" aria-label="右に45度まわす">↻</button>
-    <button id="unequip" type="button">外す</button>
+  <div class="hrow">
+    <button id="infoBtn" class="btn3" type="button">くわしく</button>
+    <button id="launchBtn" class="go" type="button">出撃</button>
   </div>
-
-  <div class="traywrap">
-    <p class="traylabel"><span>持っている装備（上へドラッグでつける）</span><span>横にスクロール ▶</span></p>
-    <div class="tray" id="tray"></div>
-  </div>
-
-  <button id="launchBtn" class="go" type="button">出撃する</button>
 </main>
 
-<div id="ghost" class="dragghost" hidden><img id="ghostImg" alt=""><span id="ghostTag" hidden>はなすと外す</span></div>
+<div id="sheetBg" class="sheetbg" hidden><div id="sheet" class="sheet" role="dialog" aria-modal="true"></div></div>
 
 <div id="shopSheet" class="shopx" role="dialog" aria-label="ショップ" hidden>
   <header class="shead">
@@ -211,7 +225,7 @@ h1 small{font-size:11px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
   </header>
   <nav class="stabs" id="shopTabs" role="tablist"></nav>
   <div class="sgrid" id="shopGrid"></div>
-  <section class="sdetail" id="shopDetail" aria-live="polite"></section>
+  <p class="snote" id="shopNote" aria-live="polite"></p>
   <button id="debugGold" class="linkbtn" type="button">試作用：1000G もらう</button>
 </div>
 
@@ -755,6 +769,7 @@ function loadSave(){
         if(o.ships&&typeof o.ships==='object')SHIP_IDS.forEach(id=>{const v=o.ships[id];if(v&&typeof v==='object'){s.ships[id].have=id==='standard'||!!v.have;s.ships[id].eq=cleanLoad(id,v.eq);}});
         else if(Array.isArray(o.load))s.ships.standard.eq=cleanLoad('standard',o.load);   /* 試作4のセーブ：今の装備をスタンダード機へ */
         if(SHIPS[o.cur]&&s.ships[o.cur].have)s.cur=o.cur;
+        if(o.tut)s.tut=1;
         if(Array.isArray(o.seen))s.seen=o.seen.filter(k=>SHIPS[k]);
         if(o.best&&Number.isFinite(o.best.t))s.best={t:o.best.t,kills:o.best.kills|0,clear:!!o.best.clear};
         const r=o.rec;if(r&&typeof r==='object'){
@@ -774,14 +789,18 @@ function setShip(id){save.cur=id;SLOTS=SHIPS[id].slots;save.load=save.ships[id].
 let save=loadSave();setShip(save.cur);
 
 /* ---------- hangar ---------- */
+/* タップだけで使う（ドラッグはなし）：空いている場所の「＋」→ 下から一覧 → つく ／ ついている装備 → 向き（大きな矢印8つ）と外す */
 const hangar=$('hangar'),sortie=$('sortie'),bay=$('bay'),edCv=$('editor'),ed=edCv.getContext('2d');
 const SS=112,SC=56;
 const ssCv=document.createElement('canvas');ssCv.width=SS;ssCv.height=SS;const ssg=ssCv.getContext('2d');
-let EV={dpr:1,k:1,ox:0,oy:0,W:1,H:1};
-let sel=1,aim=null,drag=null,hoverSlot=-1,liftSlot=-1,dragEndAt=0,noteT=0;
+const FINGERURL=paint(16,20,[{m:'yel',r:2,p:[[5,0],[8,0],[8,9],[13,9],[15,12],[15,19],[3,19],[1,13],[3,10],[5,10]]},{m:'gold',r:1,p:[[8,10],[9,10],[9,14],[8,14]]}],{}).img.toDataURL();
+let EV={dpr:1,k:1,ox:0,oy:0,W:1,H:1,css:1},noteT=0,view=save.cur,swipe=null,swipeAt=0;
 const used=t=>save.load.reduce((n,v)=>n+(v&&v.t===t?1:0),0);
 const avail=t=>save.owned[t]-used(t);
 const defaultDir=(t,i)=>(t==='shield'||t==='sword'||t==='reflector'||t==='armor')?SLOTS[i].out:0;
+const haveShip=id=>save.ships[id].have;
+/* 印は「まだ持っていなくて、いま買える物」があるときだけ */
+const affordable=()=>TYPES.some(t=>save.owned[t]===0&&save.gold>=MODS[t].price)||SHIP_IDS.some(id=>!haveShip(id)&&shipProg(id).ok&&save.gold>=SHIPS[id].price);
 
 function toast(msg){const n=$('note');n.textContent=msg;n.hidden=false;clearTimeout(noteT);noteT=setTimeout(()=>{n.hidden=true;},2200);}
 
@@ -790,268 +809,198 @@ function layoutEditor(){
   const dpr=Math.min(3,window.devicePixelRatio||1);
   const W=Math.round(r.width*dpr),H=Math.round(r.height*dpr);
   edCv.width=W;edCv.height=H;
-  const top=14*dpr,k=Math.max(1,Math.floor(Math.min(W,H-top)/SS));
-  EV={dpr,k,W,H,ox:Math.round((W-SS*k)/2),oy:Math.round(top+(H-top-SS*k)/2)};
+  const top=52*dpr,bot=26*dpr,k=Math.max(1,Math.floor(Math.min(W-40*dpr,H-top-bot)/96));/* 96＝機体と装備が入る大きさ */
+  EV={dpr,k,W,H,css:k/dpr,ox:Math.round((W-SS*k)/2),oy:Math.round(top+(H-top-bot-SS*k)/2)};
   drawEditor();
 }
-const toDev=(ax,ay)=>[EV.ox+(ax+0.5)*EV.k,EV.oy+(ay+0.5)*EV.k];
-const slotDev=i=>toDev(SC+SLOTS[i].x,SC+SLOTS[i].y);
-function clientToDev(cx,cy){const r=edCv.getBoundingClientRect();return [(cx-r.left)*EV.W/Math.max(1,r.width),(cy-r.top)*EV.H/Math.max(1,r.height)];}
-function slotAt(x,y,maxArt){let best=-1,bd=maxArt*EV.k;SLOTS.forEach((s,i)=>{const p=slotDev(i),d=Math.hypot(x-p[0],y-p[1]);if(d<bd){bd=d;best=i;}});return best;}
-function handlePos(){
-  const v=save.load[sel];if(!v||liftSlot===sel)return null;
-  const [cx,cy]=slotDev(sel),a=dirAngle(v.d),ux=Math.cos(a),uy=Math.sin(a),HR=17*EV.dpr,m=HR+4*EV.dpr;
-  let t=24*EV.k;
-  if(ux>0.01)t=Math.min(t,(EV.W-m-cx)/ux);if(ux<-0.01)t=Math.min(t,(m-cx)/ux);
-  if(uy>0.01)t=Math.min(t,(EV.H-m-cy)/uy);if(uy<-0.01)t=Math.min(t,(m-cy)/uy);
-  t=Math.max(t,12*EV.k);
-  return {x:cx+ux*t,y:cy+uy*t,cx,cy,HR,ux,uy,t};
-}
+const slotCss=i=>{const s=SHIPS[view].slots[i];return [(EV.ox+(SC+s.x+0.5)*EV.k)/EV.dpr,(EV.oy+(SC+s.y+0.5)*EV.k)/EV.dpr];};
 function drawEditor(){
+  const own=haveShip(view),open=own||shipProg(view).ok,sp=SHIPSPR[view];
   ssg.clearRect(0,0,SS,SS);
-  const SHIP=SHIPSPR[save.cur];ssg.drawImage(SHIP.fl[0],SC-SHIP.cx,SC-SHIP.cy);ssg.drawImage(SHIP.img,SC-SHIP.cx,SC-SHIP.cy);
-  save.load.forEach((v,i)=>{if(!v||i===liftSlot)return;const m=MSPR[v.t][v.d];ssg.drawImage(m.img,SC+SLOTS[i].x-m.cx,SC+SLOTS[i].y-m.cy);});
+  if(open){ssg.globalAlpha=own?1:0.55;ssg.drawImage(sp.fl[0],SC-sp.cx,SC-sp.cy);ssg.drawImage(sp.img,SC-sp.cx,SC-sp.cy);ssg.globalAlpha=1;}
+  else ssg.drawImage(shipSil(view),SC-sp.cx,SC-sp.cy);
+  if(own)save.ships[view].eq.forEach((v,i)=>{if(!v)return;const m=MSPR[v.t][v.d],s=SHIPS[view].slots[i];ssg.drawImage(m.img,SC+s.x-m.cx,SC+s.y-m.cy);});
   const g=ed,{W,H,k,ox,oy,dpr}=EV;
-  g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;
-  g.fillStyle='#05060f';g.fillRect(0,0,W,H);
-  g.fillStyle='#181b44';
-  const step=k*6,dot=Math.max(1,Math.round(dpr));
+  g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.fillStyle='#05060f';g.fillRect(0,0,W,H);
+  g.fillStyle='#181b44';const step=k*6,dot=Math.max(1,Math.round(dpr));
   for(let y=oy%step;y<H;y+=step)for(let x=ox%step;x<W;x+=step)g.fillRect(Math.round(x),Math.round(y),dot,dot);
-  const hp=handlePos(),v=save.load[sel];
-  if(hp){
-    g.strokeStyle=MODS[v.t].c;g.globalAlpha=.75;g.lineWidth=2*dpr;g.setLineDash([6*dpr,5*dpr]);
-    g.beginPath();g.moveTo(hp.cx,hp.cy);g.lineTo(hp.x,hp.y);g.stroke();g.setLineDash([]);g.globalAlpha=1;
-    if(aim){g.fillStyle='#ffffff';g.globalAlpha=.4;
-      for(let d=0;d<8;d++){if(d===v.d)continue;const a=dirAngle(d);g.beginPath();g.arc(hp.cx+Math.cos(a)*hp.t,hp.cy+Math.sin(a)*hp.t,4*dpr,0,TAU);g.fill();}
-      g.globalAlpha=1;}
-  }
   g.imageSmoothingEnabled=false;g.drawImage(ssCv,ox,oy,SS*k,SS*k);
-  SLOTS.forEach((s,i)=>{
-    if(save.load[i]&&i!==liftSlot)return;
-    const [x,y]=slotDev(i);
-    g.strokeStyle='#8a8fd6';g.lineWidth=1.5*dpr;g.setLineDash([3*dpr,3*dpr]);
-    g.beginPath();g.arc(x,y,5.5*k,0,TAU);g.stroke();g.setLineDash([]);
-    g.fillStyle='#8a8fd6';g.fillRect(x-4*dpr,y-dpr,8*dpr,2*dpr);g.fillRect(x-dpr,y-4*dpr,2*dpr,8*dpr);
+}
+function renderSlots(){
+  const box=$('slots');box.textContent='';
+  const own=haveShip(view);
+  if(own)SHIPS[view].slots.forEach((s,i)=>{
+    const v=save.load[i],b=el('button','slotb '+(v?'full':'empty'),v?null:'＋');b.type='button';
+    const [x,y]=slotCss(i);b.style.left=x+'px';b.style.top=y+'px';
+    b.setAttribute('aria-label',s.name+(v?'：'+MODS[v.t].name+'（'+ARROW_NAME[v.d]+'向き）':'：あいている'));
+    b.addEventListener('click',()=>{if(performance.now()-swipeAt<350)return;v?openAim(i):openList(i);});
+    box.appendChild(b);
   });
-  {const [x,y]=slotDev(sel);g.strokeStyle='#ffd23f';g.lineWidth=2.5*dpr;g.beginPath();g.arc(x,y,8*k,0,TAU);g.stroke();}
-  if(hoverSlot>=0){const [x,y]=slotDev(hoverSlot);g.strokeStyle='#5dffb0';g.lineWidth=3.5*dpr;g.beginPath();g.arc(x,y,8*k,0,TAU);g.stroke();}
-  if(hp){
-    g.fillStyle=MODS[v.t].c;g.beginPath();g.arc(hp.x,hp.y,hp.HR,0,TAU);g.fill();
-    g.strokeStyle='#05060f';g.lineWidth=2.5*dpr;g.stroke();
-    g.save();g.translate(hp.x,hp.y);g.rotate(Math.atan2(hp.uy,hp.ux));g.fillStyle='#05060f';
-    const s=hp.HR*0.55;g.beginPath();g.moveTo(s,0);g.lineTo(-s*0.6,-s*0.75);g.lineTo(-s*0.6,s*0.75);g.closePath();g.fill();g.restore();
-  }
-}
-
-const chips={};
-TYPES.forEach(t=>{
-  const b=el('button','chip');b.type='button';b.style.setProperty('--c',MODS[t].c);
-  const img=el('img');img.alt='';img.src=ICON[t];img.draggable=false;
-  const ct=el('small','num');
-  b.append(img,el('span',null,MODS[t].name),ct);
-  b.addEventListener('pointerdown',e=>{
-    if(e.button>0||drag||aim)return;
-    if(save.owned[t]<=0||avail(t)<=0)return;
-    const cur=save.load[sel];
-    beginPending(e,{src:'tray',t,d:cur&&cur.t!==t?cur.d:defaultDir(t,sel)},b);
-  });
-  b.addEventListener('click',()=>{if(performance.now()-dragEndAt<400)return;tapChip(t);});
-  $('tray').appendChild(b);chips[t]={b,ct};
-});
-{const sb=el('button','chip shopchip');sb.type='button';sb.append(el('b',null,'＋'),el('span',null,'ショップ'));sb.addEventListener('click',()=>openShop());$('tray').appendChild(sb);}
-
-function tapChip(t){
-  const v=save.load[sel];
-  if(v&&v.t===t){toast('もうついているよ。つまみで向きを変えてね');return;}
-  if(avail(t)<=0){toast(MODS[t].name+'はぜんぶつけているよ');return;}
-  mountAt(sel,t);
-}
-function mountAt(j,t){
-  const prev=save.load[j];
-  if(prev&&prev.t===t){sel=j;renderEquip();return;}
-  if(avail(t)<=0){toast(MODS[t].name+'はぜんぶつけているよ');return;}
-  save.load[j]={t,d:prev?prev.d:defaultDir(t,j)};sel=j;persist();
-  toast(SLOTS[j].name+'に'+MODS[t].name+'をつけたよ');renderEquip();
-}
-
-function renderSel(){
-  const v=save.load[sel];
-  $('slotLabel').textContent=SLOTS[sel].name;
-  $('slotState').textContent=v?MODS[v.t].name+' ・ '+ARROW[v.d]+' '+ARROW_NAME[v.d]+'向き':'からっぽ ・ 下の装備をドラッグかタップ';
-  $('rotL').disabled=!v;$('rotR').disabled=!v;$('unequip').disabled=!v;
-}
-function renderTray(){
-  TYPES.forEach(t=>{
-    const {b,ct}=chips[t],own=save.owned[t],a=own-used(t);
-    b.hidden=own<=0;ct.textContent=a+'/'+own;
-    b.classList.toggle('empty',a<=0);
-    b.setAttribute('aria-label',MODS[t].name+'、のこり'+a+'個');
-  });
+  /* はじめての人：指のマークで「ここをタップ」（1回目だけ） */
+  const f=$('finger'),first=SHIPS[view].slots.findIndex((_,i)=>!save.load[i]);
+  if(!save.tut&&own&&first>=0&&$('sheetBg').hidden){const [x,y]=slotCss(first);f.style.left=x+'px';f.style.top=(y+20)+'px';f.hidden=false;}else f.hidden=true;
 }
 function renderEquip(){
-  renderSel();renderTray();drawEditor();
-  const any=save.load.some(Boolean),btn=$('launchBtn');
-  btn.disabled=!any;btn.textContent=any?'出撃する':'装備をつけてね';
+  const own=haveShip(view),sh=SHIPS[view],pg=shipProg(view);
+  $('shipName').textContent=sh.name;$('shipName').style.color=own||pg.ok?sh.c:'var(--dim)';$('shipSkill').textContent=own?sh.desc:'まだ持っていない機体';
+  const dots=$('dots');dots.textContent='';SHIP_IDS.forEach(id=>dots.appendChild(el('i',id===view?'on':null)));
+  const lb=$('lockbox');lb.textContent='';lb.hidden=own;
+  if(!own){
+    if(pg.ok){lb.append(el('p',null,'解放できた！ '+sh.price+'G で買える'));const b=el('button','btn3','ショップで見る');b.type='button';b.addEventListener('click',()=>openShop(view));lb.appendChild(b);}
+    else{lb.append(el('p',null,'解放の条件：'+sh.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);lb.append(pr,el('p','dim num',pg.cur+' / '+pg.n));}
+  }
+  drawEditor();renderSlots();
+  const any=own&&save.load.some(Boolean),btn=$('launchBtn');
+  btn.disabled=!any;btn.textContent=!own?'まだ持っていない機体':any?'出撃':'＋をタップして装備をつけてね';
 }
-function switchShip(step){const own=SHIP_IDS.filter(id=>save.ships[id].have);if(own.length<2){toast('ほかの機体はショップの「機体」で買えるよ');return;}
-  const i=own.indexOf(save.cur);setShip(own[(i+step+own.length)%own.length]);sel=0;persist();renderAll();}
+function viewShip(id){view=id;if(haveShip(id)){setShip(id);persist();}closeSheet();renderAll();}
+function stepShip(d){const i=SHIP_IDS.indexOf(view);viewShip(SHIP_IDS[(i+d+SHIP_IDS.length)%SHIP_IDS.length]);}
 function renderAll(){
-  $('goldNum').textContent=save.gold;
-  const sh=SHIPS[save.cur];$('shipName').textContent=sh.name;$('shipName').style.color=sh.c;$('shipSkill').textContent=sh.skill;
-  const b=save.best;
-  $('bestLine').textContent=b?'さいこう記録：'+fmt(b.t)+' 生存・'+b.kills+'体'+(b.clear?'（クリア）':''):'さいこう記録：まだなし';
+  $('goldNum').textContent=save.gold;$('shopDot').hidden=!affordable();
+  if(!haveShip(view)&&!SHIPS[view])view=save.cur;
   renderEquip();
   if(!$('shopSheet').hidden)renderShop();
 }
 
+/* 下から出る板 */
+const sheetBg=$('sheetBg'),sheet=$('sheet');let sheetOn=null;
+function openSheet(title,sub,c,onClose){
+  sheet.textContent='';sheet.style.setProperty('--c',c||'var(--edge)');
+  const h=el('h3');h.append(el('span',null,title));if(sub)h.append(el('small',null,sub));
+  const x=el('button','x','✕');x.type='button';x.setAttribute('aria-label','とじる');x.addEventListener('click',closeSheet);h.appendChild(x);
+  sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;$('finger').hidden=true;return sheet;
+}
+function closeSheet(){if(sheetBg.hidden)return;sheetBg.hidden=true;sheet.textContent='';const f=sheetOn;sheetOn=null;if(f)f();else if(!hangar.hidden)renderSlots();}
+sheetBg.addEventListener('click',e=>{if(e.target===sheetBg)closeSheet();});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheetBg.hidden)closeSheet();});
+
+function shortEff(t){const m=MODS[t];return m.eff||m.desc;}
+function openList(i){
+  const s=SLOTS[i],cur=save.load[i];
+  if(!save.tut){save.tut=1;persist();}/* 指の案内は1回だけ */
+  const sh=openSheet(s.name+'につける装備',cur?'いま：'+MODS[cur.t].name:null);
+  const list=TYPES.filter(t=>save.owned[t]>0);
+  if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていないよ。ショップで買ってね'));
+  list.forEach(t=>{
+    const m=MODS[t],a=avail(t),isCur=cur&&cur.t===t,b=el('button','irow'+(isCur?' now':''));b.type='button';b.style.setProperty('--c',m.c);
+    const im=el('img');im.alt='';im.src=ICON[t];
+    const mid=el('span');mid.append(el('b',null,m.name),el('small',null,shortEff(t)));
+    b.append(im,mid,el('em',null,isCur?'つけている':'のこり '+a+'/'+save.owned[t]));
+    b.disabled=!isCur&&a<=0;
+    b.addEventListener('click',()=>{if(isCur){closeSheet();return;}mountAt(i,t);});
+    sh.appendChild(b);
+  });
+  const go=el('button','btn3','ショップで装備を買う');go.type='button';go.addEventListener('click',()=>{closeSheet();openShop();});sh.appendChild(go);
+}
+function mountAt(j,t){
+  const prev=save.load[j];
+  if(avail(t)<=0&&!(prev&&prev.t===t)){toast(MODS[t].name+'はぜんぶつけているよ');return;}
+  save.load[j]={t,d:prev?prev.d:defaultDir(t,j)};
+  if(!save.tut)save.tut=1;
+  persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけたよ');renderEquip();
+}
+const DIR_GRID=[7,0,1,6,-1,2,5,4,3];
+function openAim(i){
+  const v=save.load[i];if(!v)return;
+  const m=MODS[v.t],sh=openSheet(SLOTS[i].name+'：'+m.name,'向きをえらんでね',m.c);
+  const grid=el('div','dirs');
+  const draw=()=>{grid.textContent='';DIR_GRID.forEach(d=>{
+    if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[v.t][v.d].url;c.appendChild(im);grid.appendChild(c);return;}
+    const b=el('button',null,ARROW[d]);b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
+    b.addEventListener('click',()=>{v.d=d;persist();draw();drawEditor();});grid.appendChild(b);});};
+  draw();sh.appendChild(grid);
+  sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効くよ':'向いた方へ攻撃するよ'));
+  const row=el('div','sbtns'),ch=el('button','btn3','装備をかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
+  ch.addEventListener('click',()=>{sheetOn=null;openList(i);});
+  off.addEventListener('click',()=>{save.load[i]=null;persist();closeSheet();toast(SLOTS[i].name+'の'+m.name+'を外したよ');renderEquip();});
+  row.append(ch,off);sh.appendChild(row);
+}
+function openInfo(){
+  const sh=SHIPS[view],s=openSheet(sh.name+'のくわしい性能',null,sh.c);
+  s.append(el('p',null,sh.desc),el('p',null,'能力：'+sh.skill));
+  const ul=el('ul','statl'),pc=v=>(v>=1?'+':'')+Math.round((v-1)*100)+'%';
+  [['最大HP',String(Math.round(BASE_HP*sh.hp))],['速さ',pc(sh.spd)],['吸い寄せ',pc(sh.mag)],['連射',pc(sh.rate)],['火力',pc(sh.pow)],['お金',pc(sh.gold)],['装備の場所',sh.slots.length+'か所']].forEach(([k,v])=>{const li=el('li');li.append(el('span',null,k),el('b','num',v));ul.appendChild(li);});
+  s.appendChild(ul);
+  if(haveShip(view)){const eq=save.ships[view].eq.map((v,i)=>v?sh.slots[i].name+'：'+MODS[v.t].name+' '+ARROW[v.d]:null).filter(Boolean);
+    s.appendChild(el('p','dim','つけている装備：'+(eq.length?eq.join('　'):'なし')));}
+  const b=save.best,r=save.rec;
+  s.appendChild(el('p','dim','さいこう記録：'+(b?fmt(b.t)+' 生存・'+b.kills+'体'+(b.clear?'（クリア）':''):'まだなし')+'　クリア '+r.clears+'回・大型の敵 '+r.bosses+'体・かせいだ合計 '+r.goldTotal+'G'));
+}
+
+/* 左右スワイプで機体を切りかえ */
+bay.addEventListener('pointerdown',e=>{swipe={id:e.pointerId,x:e.clientX,y:e.clientY};});
+bay.addEventListener('pointerup',e=>{if(!swipe||e.pointerId!==swipe.id)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.3){swipeAt=performance.now();stepShip(dx<0?1:-1);}});
+bay.addEventListener('pointercancel',()=>{swipe=null;});
+
 /* ---------- shop ---------- */
-let shopCat='all',shopSel='laser',shopNote='';
-const SHOP_TABS=[['all','すべて'],['ship','機体'],['atk','攻撃'],['def','防御'],['sup','補助']];
-function shopList(){return shopCat==='ship'?SHIP_IDS:TYPES.filter(t=>shopCat==='all'||MODS[t].cat===shopCat);}
+let shopCat='atk',shopNote='';
+const SHOP_TABS=[['ship','機体'],['atk','攻撃'],['def','防御'],['sup','補助']];
+const tabOf=k=>SHIPS[k]?'ship':MODS[k]?MODS[k].cat:null;
+const canBuy=k=>SHIPS[k]?(!haveShip(k)&&shipProg(k).ok&&save.gold>=SHIPS[k].price):(save.owned[k]===0&&save.gold>=MODS[k].price);
+function shopList(cat){return cat==='ship'?SHIP_IDS:TYPES.filter(t=>MODS[t].cat===cat);}
 function renderShop(){
-  $('goldNum2').textContent=save.gold;
-  if(shopCat==='ship'){renderShipShop();return;}
+  $('goldNum2').textContent=save.gold;$('shopNote').textContent=shopNote;
   const tabs=$('shopTabs');tabs.textContent='';
   SHOP_TABS.forEach(([k,label])=>{const b=el('button',null,label);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',shopCat===k?'true':'false');
-    b.addEventListener('click',()=>{shopCat=k;const l=shopList();if(!l.includes(shopSel))shopSel=l[0];shopNote='';renderShop();});tabs.appendChild(b);});
-  const grid=$('shopGrid'),list=shopList();grid.textContent='';
-  list.forEach(t=>{
-    const m=MODS[t],b=el('button','sitem');b.type='button';b.style.setProperty('--c',m.c);
-    b.setAttribute('aria-pressed',shopSel===t?'true':'false');
-    const img=el('img');img.alt='';img.src=ICON[t];
-    const pr=el('small',save.gold<m.price?'short':null,m.price+'G');
-    b.append(img,el('span',null,m.name),pr);
-    if(save.owned[t]>0)b.appendChild(el('i',null,'×'+save.owned[t]));
-    b.addEventListener('click',()=>{shopSel=t;shopNote='';renderShop();});
+    if(shopList(k).some(canBuy)){const d=el('span','badge');b.appendChild(d);}
+    b.addEventListener('click',()=>{shopCat=k;shopNote='';renderShop();$('shopGrid').scrollTop=0;});tabs.appendChild(b);});
+  const grid=$('shopGrid');grid.textContent='';
+  shopList(shopCat).forEach(k=>{
+    const isShip=!!SHIPS[k],it=isShip?SHIPS[k]:MODS[k],b=el('button','sitem'+(canBuy(k)?' can':''));b.type='button';b.style.setProperty('--c',it.c);
+    const img=el('img');img.alt='';
+    let price;
+    if(isShip){const pg=shipProg(k),have=haveShip(k);img.src=(have||pg.ok?SHIPSPR[k].img:shipSil(k)).toDataURL();
+      price=have?el('small','short','持っている'):pg.ok?el('small',save.gold<it.price?'short':null,it.price+'G'):el('small','short','解放 '+pg.cur+'/'+pg.n);}
+    else{img.src=ICON[k];price=el('small',save.gold<it.price?'short':null,it.price+'G');if(save.owned[k]>0)b.appendChild(el('i',null,'×'+save.owned[k]));}
+    b.append(img,el('span',null,it.name),price);
+    b.addEventListener('click',()=>openDetail(k));
     grid.appendChild(b);
   });
-  const t=shopSel,m=MODS[t],dt=$('shopDetail');dt.textContent='';dt.style.setProperty('--c',m.c);
-  const top=el('div','dtop'),img=el('img');img.alt='';img.src=ICON[t];
-  const info=el('div'),nm=el('b',null,m.name);info.append(nm,el('span','cat',CATS[m.cat]),el('p',null,m.desc));
-  top.append(img,info);dt.appendChild(top);
-  if(m.rate){const r=el('div','drate');m.rate.forEach((v,i)=>{const rt=el('span','rt');rt.appendChild(document.createTextNode(RATE_NAMES[i]));
-      const bars=el('span','bars');for(let k=0;k<5;k++)bars.appendChild(el('i',k<v?'on':null));rt.appendChild(bars);r.appendChild(rt);});dt.appendChild(r);}
-  else{const p=el('p','eff');p.append(el('span',null,'こうか：'),document.createTextNode(m.eff+(m.passive?'（1つにつき・向きは自由）':'')));dt.appendChild(p);}
-  const row=el('div','dbuy'),own=el('span','own');
-  own.append(document.createTextNode('持っている '),el('b','num',String(save.owned[t])),document.createTextNode('　装備中 '),el('b','num',String(used(t))));
-  const buy=el('button','buybig');buy.type='button';
-  if(save.gold>=m.price){buy.append(el('span','num',String(m.price)),document.createTextNode('G で買う'));}
-  else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(m.price-save.gold)),document.createTextNode('G'));}
-  buy.addEventListener('click',()=>{if(save.gold<m.price)return;save.gold-=m.price;save.owned[t]++;persist();
-    shopNote=m.name+'を買ったよ！格納庫でドラッグしてつけてね';renderAll();});
-  row.append(own,buy);dt.appendChild(row);
-  dt.appendChild(el('p','snote',shopNote));
 }
-function buyShip(id){const sh=SHIPS[id];if(save.ships[id].have||!shipProg(id).ok||save.gold<sh.price)return;
+function buyShip(id){const sh=SHIPS[id];if(haveShip(id)||!shipProg(id).ok||save.gold<sh.price)return false;
   save.gold-=sh.price;save.ships[id].have=true;sh.start.forEach(v=>{if(save.owned[v.t]<sh.start.filter(w=>w.t===v.t).length)save.owned[v.t]++;});
-  save.ships[id].eq=startLoad(id);persist();shopNote=sh.name+'を手に入れた！格納庫の ◀ ▶ で切りかえてね';renderAll();}
-function renderShipShop(){
-  const tabs=$('shopTabs');tabs.textContent='';
-  SHOP_TABS.forEach(([k,label])=>{const b=el('button',null,label);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',shopCat===k?'true':'false');
-    b.addEventListener('click',()=>{shopCat=k;const l=shopList();if(!l.includes(shopSel))shopSel=l[0];shopNote='';renderShop();});tabs.appendChild(b);});
-  if(!SHIPS[shopSel])shopSel='standard';
-  const grid=$('shopGrid');grid.textContent='';
-  SHIP_IDS.forEach(id=>{const sh=SHIPS[id],st=save.ships[id],pg=shipProg(id),b=el('button','sitem');b.type='button';b.style.setProperty('--c',sh.c);
-    b.setAttribute('aria-pressed',shopSel===id?'true':'false');
-    const img=el('img');img.alt='';img.src=pg.ok||st.have?SHIPSPR[id].img.toDataURL():shipSil(id).toDataURL();
-    b.append(img,el('span',null,sh.name),el('small',st.have?'short':save.gold<sh.price||!pg.ok?'short':null,st.have?'持っている':pg.ok?sh.price+'G':'まだ'));
-    b.addEventListener('click',()=>{shopSel=id;shopNote='';renderShop();});grid.appendChild(b);});
-  const id=shopSel,sh=SHIPS[id],st=save.ships[id],pg=shipProg(id),dt=$('shopDetail');dt.textContent='';dt.style.setProperty('--c',sh.c);
-  const top=el('div','dtop'),img=el('img');img.alt='';img.src=(pg.ok||st.have?SHIPSPR[id].img:shipSil(id)).toDataURL();
-  const info=el('div');info.append(el('b',null,sh.name),el('span','cat','機体'),el('p',null,sh.desc+'。'+sh.skill+'。装備の場所 '+sh.slots.length+'か所'));
-  top.append(img,info);dt.appendChild(top);
-  const row=el('div','dbuy'),own=el('span','own');
-  if(sh.unlock)own.append(document.createTextNode('解放：'+sh.unlock.txt+' '),el('b','num',pg.cur+'/'+pg.n));else own.textContent='はじめから持っている';
+  save.ships[id].eq=startLoad(id);persist();return true;}
+function openDetail(k){
+  const isShip=!!SHIPS[k],it=isShip?SHIPS[k]:MODS[k];
+  const s=openSheet(it.name,isShip?'機体':CATS[it.cat],it.c,()=>renderShop());
+  const top=el('div','dtop'),img=el('img');img.alt='';
+  const info=el('div');
+  if(isShip){const pg=shipProg(k);img.src=(haveShip(k)||pg.ok?SHIPSPR[k].img:shipSil(k)).toDataURL();
+    info.append(el('p',null,it.desc+'。'),el('p',null,'能力：'+it.skill+'。'),el('p',null,'装備の場所 '+it.slots.length+'か所・はじめの武器 '+it.start.map(v=>MODS[v.t].name).join('と')));}
+  else{img.src=ICON[k];info.append(el('p',null,it.desc));}
+  top.append(img,info);s.appendChild(top);
+  if(isShip){
+    const ul=el('ul','statl'),pc=v=>(v>=1?'+':'')+Math.round((v-1)*100)+'%';
+    [['最大HP',String(Math.round(BASE_HP*it.hp))],['速さ',pc(it.spd)],['吸い寄せ',pc(it.mag)],['連射',pc(it.rate)]].forEach(([a,b])=>{const li=el('li');li.append(el('span',null,a),el('b','num',b));ul.appendChild(li);});s.appendChild(ul);
+    if(it.unlock){const pg=shipProg(k);s.appendChild(el('p',null,'解放の条件：'+it.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);s.append(pr,el('p','dim num',pg.cur+' / '+pg.n+(pg.ok?'　達成！':'')));}
+  }else if(it.rate){const r=el('div','drate');it.rate.forEach((v,i)=>{const rt=el('div','rt');rt.appendChild(el('span',null,RATE_NAMES[i]));
+      const bars=el('span','bars');for(let q=0;q<5;q++)bars.appendChild(el('i',q<v?'on':null));rt.appendChild(bars);r.appendChild(rt);});s.appendChild(r);}
+  else{const p=el('p','eff');p.append(el('span',null,'こうか：'),document.createTextNode(it.eff+(it.passive?'（1つにつき）':'')));s.appendChild(p);}
+  if(!isShip){const own=el('p','own');own.append(document.createTextNode('持っている '),el('b','num',String(save.owned[k])));s.appendChild(own);}
   const buy=el('button','buybig');buy.type='button';
-  if(st.have){buy.disabled=true;buy.textContent='持っている';}
-  else if(!pg.ok){buy.disabled=true;buy.textContent='まだ解放されていない';}
-  else if(save.gold>=sh.price){buy.append(el('span','num',String(sh.price)),document.createTextNode('G で買う'));buy.addEventListener('click',()=>buyShip(id));}
-  else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(sh.price-save.gold)),document.createTextNode('G'));}
-  row.append(own,buy);dt.appendChild(row);dt.appendChild(el('p','snote',shopNote));
+  if(isShip&&haveShip(k)){buy.disabled=true;buy.textContent='持っている';}
+  else if(isShip&&!shipProg(k).ok){buy.disabled=true;buy.textContent='まだ解放されていない';}
+  else if(save.gold>=it.price){buy.append(el('span','num',String(it.price)),document.createTextNode('G で買う'));
+    buy.addEventListener('click',()=>{
+      if(isShip){if(!buyShip(k))return;shopNote=it.name+'を手に入れた！格納庫で ◀ ▶ をおして切りかえてね';view=k;setShip(k);}
+      else{if(save.gold<it.price)return;save.gold-=it.price;save.owned[k]++;persist();shopNote=it.name+'を買ったよ！格納庫の「＋」をタップしてつけてね';}
+      closeSheet();renderAll();});}
+  else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(it.price-save.gold)),document.createTextNode('G'));}
+  s.appendChild(buy);
 }
-function openShop(t){if(t)shopSel=t;shopNote='';renderShop();$('shopSheet').hidden=false;}
-function closeShop(){$('shopSheet').hidden=true;renderAll();}
+function openShop(k){shopNote='';if(k&&tabOf(k))shopCat=tabOf(k);closeSheet();renderShop();$('shopSheet').hidden=false;if(k)openDetail(k);}
+function closeShop(){closeSheet();$('shopSheet').hidden=true;renderAll();}
 
-/* drag & aim */
-const ghost=$('ghost'),ghostImg=$('ghostImg'),ghostTag=$('ghostTag');
-function beginPending(e,info,target){
-  drag=Object.assign({id:e.pointerId,sx:e.clientX,sy:e.clientY,started:false,mouse:e.pointerType==='mouse',lift:e.pointerType==='mouse'?0:34},info);
-  try{target.setPointerCapture(e.pointerId);}catch(_){}
-}
-function startGhost(){
-  drag.started=true;
-  ghostImg.src=MSPR[drag.t][drag.d].url;ghost.hidden=false;
-  if(drag.src==='slot'){liftSlot=drag.slot;drawEditor();}
-}
-function moveGhost(cx,cy){
-  const gx=cx,gy=cy-drag.lift;
-  ghost.style.transform='translate('+(gx-32)+'px,'+(gy-32)+'px)';
-  const r=edCv.getBoundingClientRect();let h=-1;
-  if(gx>=r.left&&gx<=r.right&&gy>=r.top&&gy<=r.bottom){const p=clientToDev(gx,gy);h=slotAt(p[0],p[1],12);}
-  ghostTag.hidden=!(drag.src==='slot'&&h<0);
-  if(h!==hoverSlot){hoverSlot=h;drawEditor();}
-}
-function endDragVisual(){ghost.hidden=true;ghostTag.hidden=true;hoverSlot=-1;liftSlot=-1;dragEndAt=performance.now();}
-function drop(d){
-  const j=hoverSlot;endDragVisual();
-  if(d.src==='tray'){if(j>=0)mountAt(j,d.t);else renderEquip();return;}
-  const i=d.slot;
-  if(j<0){save.load[i]=null;persist();toast(SLOTS[i].name+'の'+MODS[d.t].name+'を外したよ');}
-  else if(j!==i){const a=save.load[i],b=save.load[j];save.load[j]=a;save.load[i]=b;sel=j;persist();
-    toast(b?SLOTS[i].name+'と'+SLOTS[j].name+'を入れかえたよ':SLOTS[j].name+'に動かしたよ');}
-  renderEquip();
-}
-function aimTo(x,y){
-  const v=save.load[sel];if(!v)return;
-  const [cx,cy]=slotDev(sel);if(Math.hypot(x-cx,y-cy)<4*EV.dpr)return;
-  const nd=angToDir(Math.atan2(y-cy,x-cx));
-  if(nd!==v.d){v.d=nd;renderSel();}
-  drawEditor();
-}
-edCv.addEventListener('pointerdown',e=>{
-  if(e.button>0||drag||aim)return;
-  e.preventDefault();
-  const [x,y]=clientToDev(e.clientX,e.clientY),hp=handlePos();
-  if(hp&&Math.hypot(x-hp.x,y-hp.y)<=hp.HR+10*EV.dpr){
-    aim={id:e.pointerId};try{edCv.setPointerCapture(e.pointerId);}catch(_){}
-    aimTo(x,y);return;
-  }
-  const i=slotAt(x,y,11);if(i<0)return;
-  sel=i;renderEquip();
-  const v=save.load[i];
-  if(v)beginPending(e,{src:'slot',slot:i,t:v.t,d:v.d},edCv);
-});
-window.addEventListener('pointermove',e=>{
-  if(aim&&e.pointerId===aim.id){const p=clientToDev(e.clientX,e.clientY);aimTo(p[0],p[1]);return;}
-  if(!drag||e.pointerId!==drag.id)return;
-  if(!drag.started){
-    const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
-    if(Math.hypot(dx,dy)<7)return;
-    if(drag.src==='tray'&&!drag.mouse&&Math.abs(dx)>Math.abs(dy)){drag=null;return;}
-    startGhost();
-  }
-  moveGhost(e.clientX,e.clientY);
-});
-window.addEventListener('pointerup',e=>{
-  if(aim&&e.pointerId===aim.id){aim=null;persist();renderEquip();return;}
-  if(!drag||e.pointerId!==drag.id)return;
-  const d=drag;drag=null;
-  if(d.started)drop(d);
-});
-window.addEventListener('pointercancel',e=>{
-  if(aim&&e.pointerId===aim.id){aim=null;persist();renderEquip();}
-  if(drag&&e.pointerId===drag.id){const d=drag;drag=null;if(d.started){endDragVisual();renderEquip();}}
-});
-$('rotL').addEventListener('click',()=>{const v=save.load[sel];if(!v)return;v.d=(v.d+7)%8;persist();renderEquip();});
-$('rotR').addEventListener('click',()=>{const v=save.load[sel];if(!v)return;v.d=(v.d+1)%8;persist();renderEquip();});
-$('unequip').addEventListener('click',()=>{const v=save.load[sel];if(!v)return;save.load[sel]=null;persist();toast(SLOTS[sel].name+'の'+MODS[v.t].name+'を外したよ');renderEquip();});
 $('shopBtn').addEventListener('click',()=>openShop());
-$('shipPrev').addEventListener('click',()=>switchShip(-1));$('shipNext').addEventListener('click',()=>switchShip(1));
 $('shopClose').addEventListener('click',closeShop);
 $('debugGold').addEventListener('click',()=>{save.gold+=1000;persist();shopNote='試作用に1000Gふやしたよ';renderAll();});
-$('launchBtn').addEventListener('click',()=>startRun());
-if(window.ResizeObserver)new ResizeObserver(()=>layoutEditor()).observe(bay);
-else window.addEventListener('resize',layoutEditor);
+$('shipPrev').addEventListener('click',()=>stepShip(-1));$('shipNext').addEventListener('click',()=>stepShip(1));
+$('infoBtn').addEventListener('click',openInfo);
+$('launchBtn').addEventListener('click',()=>{if(haveShip(view))startRun();});
+if(window.ResizeObserver)new ResizeObserver(()=>{layoutEditor();renderSlots();}).observe(bay);
+else window.addEventListener('resize',()=>{layoutEditor();renderSlots();});
+document.querySelectorAll('.finger span').forEach(s=>{const im=el('img');im.alt='';im.src=FINGERURL;im.style.cssText='width:32px;height:40px;image-rendering:pixelated';s.replaceWith(im);});
 
 /* ---------- sortie ---------- */
 const stage=$('stage'),cv=$('game'),ctx=cv.getContext('2d'),overlay=$('overlay'),banner=$('banner');
@@ -1679,7 +1628,7 @@ function endRun(clear,retreat){
   if(gb)row('大型の敵','+'+gb+'G');if(gc)row('クリアボーナス','+'+gc+'G');if(gi)row('収入アップ','+'+gi+'G');
   row('かせいだお金','+'+total+'G','total');
   const btns=el('div','btnrow'),back=el('button','go','格納庫へ'),shop=el('button','btn2','ショップへ');back.type='button';shop.type='button';
-  const toHangar=()=>{cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;renderAll();layoutEditor();};
+  const toHangar=()=>{cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;layoutEditor();renderAll();};
   back.addEventListener('click',()=>{toHangar();toast(total+'G かせいだよ');});
   shop.addEventListener('click',()=>{toHangar();openShop();});
   btns.append(back,shop);
@@ -1713,6 +1662,6 @@ window.addEventListener('blur',()=>keys.clear());
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&R&&R.state==='play')openPause();});
 
 document.querySelectorAll('img.coin').forEach(i=>{i.src=COINURL;});
-renderAll();layoutEditor();
+layoutEditor();renderAll();
 })();
 </script>
