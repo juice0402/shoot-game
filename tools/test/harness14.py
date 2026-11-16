@@ -66,3 +66,11 @@ def open_page(b, pp, w=390, h=844, errs=None, warns=None, scale=1, fx=False):
     pg.goto('file://' + pp)
     pg.wait_for_timeout(500)
     return pg
+
+
+def talk_through(pg, n=6):
+    """11/17：整備士のあいさつ（タップで次へ・#comm.wait）を最後まで進める。出ていなければ何もしない"""
+    for _ in range(n):
+        if not pg.evaluate("()=>{const c=document.getElementById('comm');return !c.hidden&&c.classList.contains('wait')}"):
+            return
+        pg.click('#comm'); pg.wait_for_timeout(80)

@@ -91,6 +91,24 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .tfinger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
 .tfinger.down{flex-direction:column-reverse;--bob:8px}
 .tfinger.down img{transform:scaleY(-1);filter:drop-shadow(0 -2px 0 #000)}
+/* 整備士の通信（11/17）：顔（ドット・走査線）と名前とセリフ。.wait はタップで次へ（全体を暗く・ほかは押せない） */
+.comm{position:fixed;left:0;right:0;z-index:68;pointer-events:none;padding:0 8px}
+.comm.cmtop{top:max(8px,env(safe-area-inset-top,0px))}.comm.cmbot{bottom:max(10px,env(safe-area-inset-bottom,0px))}/* 名前は cm ではじめる（.top・.cbody・.ctop はほかの所で使っている） */
+.comm.wait{inset:0;pointer-events:auto;background:rgba(3,4,10,.72);display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+.comm.note .cmwin{pointer-events:auto;cursor:pointer}/* お知らせ：窓を押すと次へ。ほかの所はそのまま押せる */
+.comm.note.cmtop{top:calc(max(8px,env(safe-area-inset-top,0px)) + var(--cmhead,52px))}/* ヘッダー（ショップ・研究所）の下に出す */
+.comm.wait.cmtop{justify-content:flex-start;padding-top:max(14px,env(safe-area-inset-top,0px))}
+.cmwin{max-width:440px;margin:0 auto;display:flex;gap:10px;align-items:stretch;background:var(--deep);border:3px solid var(--edge);padding:8px;box-shadow:0 4px 0 #000}
+.cmface{flex:none;width:88px;height:100px;position:relative;background:#081a2c;border:2px solid #1f6c94;overflow:hidden}
+.cmface canvas{display:block;width:88px;height:100px;image-rendering:pixelated;image-rendering:crisp-edges}
+.cmface::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(transparent 0 2px,rgba(0,8,20,.32) 2px 4px)}
+.cmbody{flex:1;min-width:0;display:flex;flex-direction:column}
+.cmname{margin:0 0 2px;font-size:12px;color:#5aaedc;letter-spacing:.04em}
+.cmtext{margin:0;font-size:15px;line-height:1.5;color:var(--ink);min-height:4.5em;white-space:pre-line;overflow-wrap:anywhere}/* 11/17：行はセリフの中で手で切る（1行12字まで＝幅320でも入る） */
+.cmtext i{font-style:normal;color:transparent}/* まだ出ていない文字（先に置いて、行がとちゅうで変わらないように） */
+.cmnext{align-self:flex-end;width:12px;height:8px;margin-top:auto;background:var(--go);clip-path:polygon(0 0,100% 0,50% 100%)}
+.comm.fxin .cmwin{animation:fxCommIn .22s ease-out both}
+@keyframes fxCommIn{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
 @keyframes tbob{50%{transform:translateY(var(--bob))}}
 .toast{position:absolute;left:8px;right:8px;bottom:26px;z-index:5;margin:0 auto;width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--scrim);border:2px solid var(--go);color:var(--go);font-size:14px;text-align:center;pointer-events:none}
 .hrow{display:flex;gap:8px}
@@ -441,7 +459,8 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
 </main>
 
 <div id="sheetBg" class="sheetbg" hidden><div id="sheet" class="sheet" role="dialog" aria-modal="true"></div></div>
-<div id="tutDim" class="tutdim" hidden><i class="hole"></i><b class="blk"></b><b class="blk"></b><b class="blk"></b><b class="blk"></b><div class="tfinger" id="tfinger"><b>ここをタップ</b></div></div>
+<div id="tutDim" class="tutdim" hidden><i class="hole"></i><b class="blk"></b><b class="blk"></b><b class="blk"></b><b class="blk"></b><div class="tfinger" id="tfinger"></div></div>
+<div id="comm" class="comm" hidden><div class="cmwin"><div class="cmface"><canvas id="cfaceCv"></canvas></div><div class="cmbody"><p class="cmname" id="cname"></p><p class="cmtext" id="ctext" aria-live="polite"></p><i class="cmnext" id="cnext"></i></div></div></div>
 
 <div id="shopSheet" class="shopx" role="dialog" aria-label="ショップ" hidden>
   <header class="shead">
@@ -1048,6 +1067,58 @@ const RC=(g,x,y,w,h)=>g.fillRect(x-0.5,y-0.5,w,h);
 const star=(g,cx,cy,r1,r2,n,rot)=>{g.beginPath();for(let i=0;i<n*2;i++){const r=i%2?r2:r1,a=(rot||0)+i*Math.PI/n;const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i?g.lineTo(x,y):g.moveTo(x,y);}g.closePath();g.fill();};
 /* ---------- sprites (すべてコードで描いた絵。docs/ART.md) ---------- */
 const MIR=(pts,w)=>pts.map(([x,y])=>[w-1-x,y]);
+/* 整備士のお姉さん（通信の顔・40×46）：paint で体と髪を描き、目・口などの細かい所は1ドットずつ置く。口は閉じ・開きの2コマ */
+MAT.skin=['#4a1e1a','#8c4a3a','#d4886a','#f6c2a0','#fff0e0'];MRAD.skin=3.2;MCOL.skin=MAT.skin.map(hex);
+MAT.hair=['#140a12','#2e1420','#5a2632','#8e3e48','#d27a78'];MRAD.hair=2.6;MCOL.hair=MAT.hair.map(hex);
+const MECH=(()=>{
+  const W=40,H=46;
+  const parts=[
+    /* 後ろ髪（ショートカット・耳の下まで。11/17 しょーくん「ポニテはいらない。普通にショートカットでいい」） */
+    {m:'hair',r:3,f:g=>{E(g,19.5,17.5,12,12);g.beginPath();g.moveTo(7.6,17);g.lineTo(31.4,17);g.lineTo(31,25);g.lineTo(29.6,29.6);g.lineTo(27.6,26.6);g.lineTo(11.4,26.6);g.lineTo(9.4,29.6);g.lineTo(8,25);g.closePath();g.fill();}},
+    /* つなぎ（肩と胸） */
+    {m:'yel',r:2.4,p:[[4,45],[6,39],[11,35.5],[16,35],[23,35],[28,35.5],[33,39],[35,45]]},
+    /* 首と、つなぎのえりの中（黒いシャツ） */
+    {m:'metal',r:1.5,p:[[16,34],[23,34],[21.5,39],[19.5,40.5],[17.5,39]]},
+    /* えり（左右） */
+    {m:'orangeA',r:1.4,mir:true,p:[[10.5,36.5],[16,34.5],[19,41.5],[15,43]]},
+    {m:'skin',r:2,p:[[16,28],[23,28],[23,35],[19.5,37],[16,35]]},
+    /* 顔 */
+    {m:'skin',f:g=>{E(g,19.5,21,9.2,10);g.beginPath();g.moveTo(11,24);g.quadraticCurveTo(13,31,19.5,32.5);g.quadraticCurveTo(26,31,28,24);g.closePath();g.fill();}},
+    /* 耳（右）とヘッドセット */
+    {m:'skin',r:1.5,f:g=>E(g,28.6,22,1.8,2.6)},
+    {m:'steel',r:2,f:g=>E(g,29.5,21.5,2.4,3.2)},
+    {m:'steel',r:1,lw:0,f:g=>{g.beginPath();g.moveTo(29.2,24);g.lineTo(30.4,24.6);g.lineTo(28.6,30.6);g.lineTo(27.4,30.2);g.closePath();g.fill();}},
+    {m:'red',r:1,f:g=>E(g,27.6,31,1.3,1.1)},
+    /* 前髪（毛先はぎざぎざ） */
+    {m:'hair',r:2.2,p:[[8.5,20],[9,13],[13,8.5],[19.5,7],[26,8.5],[30.5,13],[30.5,19],[28.5,15.5],[27.5,18],[25,14.5],[23,17.5],[21,13.5],[18.5,17],[16.5,13.5],[14,17.5],[12.5,14],[10.5,19],[9.5,22]]},
+    /* おでこのゴーグル（バンドとレンズ） */
+    {m:'metal',r:1.2,p:[[8,9.5],[31,9.5],[31.5,12.5],[7.5,12.5]]},
+    {m:'metal',r:2,f:g=>{E(g,14.2,10.8,3.9,3.2);E(g,24.8,10.8,3.9,3.2);}},
+    {m:'glass',r:2.4,f:g=>{E(g,14.2,10.8,2.6,2);E(g,24.8,10.8,2.6,2);}},
+  ];
+  const base=paint(W,H,parts,{spec:[[13,10],[23,10]]});
+  const P=2;
+  const px=(g,c,a)=>{g.fillStyle=c;a.forEach(([x,y])=>g.fillRect(x+P,y+P,1,1));};
+  const face=(g,mouth)=>{
+    /* まゆ */
+    px(g,'#3a1820',[[13,18],[14,17],[15,17],[16,18],[23,18],[24,17],[25,17],[26,18]]);
+    /* 目（上のまつげ・ひとみ・光） */
+    const eye=x0=>{px(g,'#12060e',[[x0-1,20],[x0,19],[x0+1,19],[x0+2,19],[x0+3,20]]);
+      px(g,'#1a5a6a',[[x0,20],[x0+1,20],[x0+2,20],[x0,21],[x0+2,21],[x0,22]]);
+      px(g,'#3cc8c8',[[x0+1,21],[x0+1,22],[x0+2,22],[x0,23],[x0+1,23],[x0+2,23]]);
+      px(g,'#f4ffff',[[x0+1,20]]);px(g,'#8a4a3a',[[x0,24],[x0+1,24],[x0+2,24]]);};
+    eye(13);eye(23);
+    /* ほお・鼻・つなぎのファスナー */
+    px(g,'#8a4c0c',[[19,42],[19,43],[19,44],[19,45]]);
+    px(g,'#ee8c86',[[12,25],[13,25],[26,25],[27,25]]);
+    px(g,'#b86a54',[[19,25]]);
+    /* 口 */
+    if(mouth)(px(g,'#4a1018',[[18,28],[19,28],[20,28],[21,28],[18,29],[21,29]]),px(g,'#d05a66',[[19,29],[20,29]]),px(g,'#4a1018',[[19,30],[20,30]]));
+    else px(g,'#8a3a32',[[18,28],[19,29],[20,29],[21,28]]);
+  };
+  const mk=m=>{const c=document.createElement('canvas');c.width=base.w;c.height=base.h;const g=c.getContext('2d');g.drawImage(base.img,0,0);face(g,m);return c;};
+  return {w:base.w,h:base.h,shut:mk(0),open:mk(1)};
+})();
 /* 自機：スタンダード（見本 ship_v2 どおり） */
 const SHIP_PARTS={
   standard:{w:64,h:80,spec:[[30,16],[30,17],[29,19],[30,18]],flames:[[20,24,70,7],[39,43,70,7],[28,35,72,9]],parts:[
@@ -1808,7 +1879,7 @@ const startLoad=id=>{const l=emptyLoad(id);SHIPS[id].start.forEach(v=>{l[v.s]={t
 function freshSave(){const owned={};TYPES.forEach(t=>{owned[t]=0;});owned.laser=1;
   const ships={};SHIP_IDS.forEach(id=>{ships[id]={have:id==='standard',eq:emptyLoad(id)};});
   const lab={};LAB.forEach(o=>{lab[o.id]=0;});
-  const s={v:2,gold:300,owned,ships,cur:'standard',best:null,evo:{},lab,ach:{},book:{e:{}},st:1,unl:[],lunl:[],rec:{clears:0,bosses:0,goldTotal:0,wmax:{},sup5:[],cw:{},...REC0()}};
+  const s={v:2,gold:300,owned,ships,cur:'standard',best:null,evo:{},lab,ach:{},book:{e:{}},st:1,unl:[],lunl:[],talk:{lab:0},rec:{clears:0,bosses:0,goldTotal:0,wmax:{},sup5:[],cw:{},...REC0()}};
   ensureSlots(s);return s;}
 /* #15 の解放の記録：出撃の回数（runs）・その品をつけてクリアした回数（cw：種類ごと）。大型の敵の種類ごとのたおした数は図鑑の book.e を使う
    #11 の解放の記録：大型の敵を30秒以内にたおした数・1出撃の撃破数の最高・HP半分以上でクリアした数・近接での撃破の合計・進化の回数・クリアしたステージ
@@ -1874,6 +1945,7 @@ function loadSave(){
         if(SHIPS[o.cur]&&s.ships[o.cur].have)s.cur=o.cur;
         if(o.tut)s.tut=1;
         if(o.howto)s.howto=1;
+        s.talk={lab:(o.talk&&typeof o.talk==='object'?o.talk.lab:Object.values(s.lab).some(v=>v>0))?1:0};/* 11/17：整備士のひとこと済み。talk のない前のセーブは、研究所を使っていれば済み */
         if(o.snd===false)s.snd=false;
         if(Array.isArray(o.seen))s.seen=o.seen.filter(k=>SHIPS[k]);
         if(o.evo&&typeof o.evo==='object')for(const t in EVO)if(o.evo[t])s.evo[t]=1;/* 1回でも進化させた武器（ショップのくわしくに名前が出る） */
@@ -2011,7 +2083,7 @@ const SFX=(()=>{
     guard:()=>{noise(0.24,0.09,'bandpass',500,2200,0,2.5);tone('triangle',990,990,0.12,0.03,0.08);},
   };
   const SHOT_GAP={gatling:0.12,flame:0.12,laser:0.1,pulse:0.1,needle:0.12,satellite:0.15,chainsaw:0.25,hyper:0.15,storm:0.12,inferno:0.12,esaw:0.3};
-  const GAP={shot:0.07,hit:0.045,kill:0.035,xp:0.04,btn:0.05,coin:0.06,frost:0.2,evade:0.1,shield:0.06,zap:0.08,star:0.08,gun:0.12,
+  const GAP={talk:0.05,shot:0.07,hit:0.045,kill:0.035,xp:0.04,btn:0.05,coin:0.06,frost:0.2,evade:0.1,shield:0.06,zap:0.08,star:0.08,gun:0.12,
     crack:0.06,dash:0.15,block:0.08,warp:0.1,lzwarn:0.3,lzfire:0.2,split:0.05,bossin:0.3};
   const SND={
     hit:()=>tone('square',260,180,0.025,0.025),
@@ -2075,6 +2147,9 @@ const SFX=(()=>{
     lzwarn:()=>[0,0.25,0.5,0.75,1].forEach(d=>tone('square',1250,1250,0.06,0.028,d)),
     lzfire:()=>{tone('sawtooth',220,110,0.5,0.06);noise(0.5,0.06,'highpass',1800,900);},
     split:()=>tone('triangle',2000,2600,0.06,0.03),
+    /* 整備士の通信（11/17）：開くときのザザッ・1字ずつのピッ */
+    comm:()=>{noise(0.16,0.05,'bandpass',1800,900,0,1.2);tone('square',1560,1560,0.04,0.025,0.15);},
+    talk:()=>tone('square',1040+Math.random()*160,1040,0.025,0.018),
     ending:()=>[523,659,784,1047,988,784,880,1047,1319,1568].forEach((f,i)=>tone('triangle',f,f,i===9?0.9:0.2,0.07,i*0.16)),
   });
   function play(name,arg){
@@ -2220,15 +2295,18 @@ function tutReset(){if(save.tut||!save.ships.standard.have)return;save.ships.sta
    指は押す所の下（入らなければ上）に置いて、押す所に向かって動かす。毎フレーム場所を合わせる（tut=1 で止まる） */
 const TUTB={d:''};
 function tutGuide(){
-  const d=$('tutDim');let tg=null;
+  const d=$('tutDim');let tg=null,tk='';
   if(!save.tut&&save.load&&!hangar.hidden&&$('shopSheet').hidden&&$('labSheet').hidden&&$('title').hidden&&$('howto').hidden){
     const st=tutStep();
-    if(!sheetBg.hidden){if(st===1)tg=sheet.querySelector('.tut');}
-    else if(st===1)tg=$('slots').children[tutSlot()]||null;
-    else if(st===4)tg=$('launchBtn');
+    /* 11/17：①の前に整備士のあいさつ（タップで次へ）。そのあいだは穴と指を出さない */
+    if(st===1&&sheetBg.hidden&&!COMM.intro){if(COMM.key!=='intro')commShow(TALK.intro,{wait:true,key:'intro',pos:'bot',done:()=>{COMM.intro=1;}});if(!d.hidden)d.hidden=true;TUTB.d='';return;}
+    if(!sheetBg.hidden){if(st===1){tg=sheet.querySelector('.tut');tk=tg&&tg.closest('.dirs')?'t3':'t2';}}
+    else if(st===1){tg=$('slots').children[tutSlot()]||null;tk='t1';}
+    else if(st===4){tg=$('launchBtn');tk='t4';}
   }
-  if(!tg){if(!d.hidden)d.hidden=true;TUTB.d='';return;}
-  const r=tg.getBoundingClientRect();if(r.width<1){d.hidden=true;return;}
+  if(!tg){if(!d.hidden)d.hidden=true;TUTB.d='';if(COMM.mode==='tip')commHide();return;}
+  const r=tg.getBoundingClientRect();if(r.width<1){d.hidden=true;if(COMM.mode==='tip')commHide();return;}
+  commTip(tk,r);
   if(d.hidden)d.hidden=false;
   const P=6,l=Math.round(r.left-P),t=Math.round(r.top-P),w=Math.round(r.width+P*2),h=Math.round(r.height+P*2),W=innerWidth,H=innerHeight;
   const f=$('tfinger'),fh=f.offsetHeight||64,down=t+h+fh+12>H,key=l+','+t+','+w+','+h+','+W+','+H+','+down;
@@ -2239,7 +2317,80 @@ function tutGuide(){
   f.classList.toggle('down',down);
   f.style.left=clamp(r.left+r.width/2,64,W-64)+'px';f.style.top=(down?t-fh-4:t+h+4)+'px';
 }
-function tutLoop(){tutGuide();if(!save.tut)requestAnimationFrame(tutLoop);else $('tutDim').hidden=true;}
+function tutLoop(){tutGuide();if(!save.tut)requestAnimationFrame(tutLoop);else{$('tutDim').hidden=true;if(COMM.mode==='tip')commHide();}}
+/* ---------- 整備士の通信（11/17 しょーくん「吹き出しとキャラクターで世界観を守りつつ」「イメージはスターフォックスとかメタルギア」） ----------
+   顔は MECH（ドット）。開くとザザッ → 文字は1字ずつ・口が動く・ピッ。
+   セリフは TALK だけ。セリフの中だけは「！」と語りかけを使う（ほかの画面の文は言いきり。copy16 は TALK と #comm を見ない）
+   ・wait：タップで次へ（全体を暗く・ほかは押せない）＝はじめのあいさつ
+   ・tip：案内の段のひとこと（押す所は tutDim が開ける）。tutGuide が毎フレーム呼ぶので key が同じなら何もしない
+   ・note：お知らせ（押せる所はそのまま。吹き出しをタップ／しばらくで次へ）＝解放のお知らせ
+   ・研究所のはじめては wait（11/17 しょーくん：自動で進むと聞き逃す） */
+const TALK={
+  name:'整備士 サラ',
+  intro:['格納庫へようこそ！\n整備士のサラだよ。\n機体の整備はまかせて！','さっそく出撃準備だ！\nまずは機体に\n武器をつけよう！'],
+  t1:'機首の＋をタップ！\nここが武器を\nつける場所だよ。',
+  t2:'持っている武器は\nこのレーザー1つ。\nえらんで！',
+  t3:'次は撃つ向き。\n敵は前から来るから\n上向きにしよう！',
+  t4:'装備完了！\n出撃をタップして……\n行ってらっしゃい！',
+  ship:(n,k)=>'「'+n+'」'+(k>1?'ほか'+(k-1)+'機':'の')+'\n設計図が届いたよ！\nショップで買えるよ。',
+  item:(n,k)=>'「'+n+'」'+(k>1?'\nほか'+(k-1)+'つが入荷したよ！\n':'が\nショップに入荷したよ！\n')+'見てみて！',
+  lab:k=>'研究所に新しい研究が\n'+k+'つ増えたよ！\nのぞいてみて！',
+  stage:n=>'「'+n+'」への\n航路がひらいたよ！\n準備ができたら行こう！',
+  labIntro:['ここは研究所！\nGを使って、ずっと\n続く強化ができるよ。','新しい研究は、\n出撃で条件を満たすと\n増えていくからね！'],
+};
+const COMM={mode:'',key:'',lines:null,k:0,i:0,timer:0,wait:0,done:null,intro:0,pend:null,typing:false,sid:0};
+function commFace(open){const c=$('cfaceCv');if(c.width!==MECH.w){c.width=MECH.w;c.height=MECH.h;}const g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.drawImage(open?MECH.open:MECH.shut,0,0);}
+/* 開くときのノイズ（ドットの砂あらし）→ 顔 */
+function commStatic(ms,then){const c=$('cfaceCv');if(c.width!==MECH.w){c.width=MECH.w;c.height=MECH.h;}const g=c.getContext('2d'),t0=performance.now(),id=COMM.sid;
+  const step=()=>{if(COMM.sid!==id||!COMM.mode)return;/* 開き直したら古いノイズは止める */const im=g.createImageData(c.width,c.height),D=im.data;
+    for(let p=0;p<D.length;p+=4){const v=Math.random()*150|0,y=(p/4/c.width)|0,dim=y%2?0.6:1;D[p]=v*0.5*dim;D[p+1]=v*0.8*dim;D[p+2]=(v+60)*dim;D[p+3]=255;}
+    g.putImageData(im,0,0);if(performance.now()-t0<ms)requestAnimationFrame(step);else then();};
+  step();}
+function commShow(lines,o){
+  o=o||{};const box=$('comm');clearInterval(COMM.timer);clearTimeout(COMM.wait);COMM.sid++;
+  Object.assign(COMM,{mode:o.wait?'wait':o.note?'note':'tip',key:o.key||'',lines,k:0,done:o.done||null});
+  box.className='comm '+(o.pos==='top'?'cmtop':'cmbot')+(o.wait?' wait':o.note?' note':'');box.hidden=false;$('cname').textContent=TALK.name;
+  if(RM()){commLine();return;}
+  void box.offsetWidth;box.classList.add('fxin');SFX.play('comm');$('ctext').textContent='';$('cnext').hidden=true;commStatic(150,commLine);
+}
+function commLine(){
+  clearInterval(COMM.timer);clearTimeout(COMM.wait);
+  const txt=COMM.lines[COMM.k],T=$('ctext');$('cnext').hidden=true;COMM.i=0;
+  if(RM()){T.textContent=txt;commFace(0);commEnd();return;}
+  const done=document.createTextNode(''),rest=el('i');T.textContent='';T.append(done,rest);rest.textContent=txt;COMM.typing=true;
+  COMM.timer=setInterval(()=>{COMM.i++;done.data=txt.slice(0,COMM.i);rest.textContent=txt.slice(COMM.i);const ch=txt[COMM.i-1],say=ch&&!/[\s。、！？…「」]/.test(ch);
+    if(say&&COMM.i%2)SFX.play('talk');commFace(say&&(COMM.i>>1)%2===0);
+    if(COMM.i>=txt.length){clearInterval(COMM.timer);commFace(0);commEnd();}},38);
+}
+function commEnd(){
+  COMM.typing=false;const last=COMM.k>=COMM.lines.length-1;
+  $('cnext').hidden=COMM.mode==='tip'||(COMM.mode==='note'&&last);
+  if(COMM.mode==='note')COMM.wait=setTimeout(commTap,last?3600:2800);
+}
+/* タップ：文のとちゅうなら全部出す → 次の文 → 終わり */
+function commTap(){
+  if(!COMM.mode||COMM.mode==='tip')return;
+  if(COMM.typing){clearInterval(COMM.timer);$('ctext').textContent=COMM.lines[COMM.k];commFace(0);commEnd();return;}
+  if(COMM.k<COMM.lines.length-1){COMM.k++;commLine();return;}
+  const f=COMM.done;commHide();if(f)f();
+}
+const commOff=k=>{if(COMM.key===k)commHide();};
+function commHide(){clearInterval(COMM.timer);clearTimeout(COMM.wait);COMM.sid++;COMM.typing=false;COMM.mode='';COMM.key='';$('comm').hidden=true;$('comm').classList.remove('fxin');}
+/* 案内の段：押す所にかからない側（上か下）に出す。板が開いているときは上 */
+function commTip(tk,r){
+  if(COMM.key===tk&&COMM.mode==='tip')return;
+  const ch=136,H=innerHeight,canTop=r.top>ch,canBot=r.bottom<H-ch;
+  const up=!sheetBg.hidden||r.top+r.height/2>H*0.55;/* 板（下から）が開いているときと、押す所が下のほうなら上に */
+  commShow([TALK[tk]],{key:tk,pos:up?(canTop?'top':'bot'):(canBot?'bot':'top')});
+}
+/* 出撃の結果で解放されたもの → 格納庫にもどったときに知らせる（多くて3つ） */
+function talkUnl(ships,items,labs,stage){
+  const L=[];if(ships.length)L.push(TALK.ship(SHIPS[ships[0]].name,ships.length));if(items.length)L.push(TALK.item(MODS[items[0]].name,items.length));
+  if(labs.length)L.push(TALK.lab(labs.length));if(stage)L.push(TALK.stage(stage));return L.length?L.slice(0,3):null;
+}
+function commPend(){if(!COMM.pend)return;const L=COMM.pend;COMM.pend=null;commShow(L,{note:true,key:'unl',pos:'top'});}
+/* wait は画面のどこを押しても次へ。note は吹き出し（窓）を押すと次へ（ほかの所を押しても進めない・11/17 しょーくん「自動で消えるか、吹き出しタップでいいよ」） */
+$('comm').addEventListener('click',e=>{if(COMM.mode==='wait'||(COMM.mode==='note'&&e.target.closest('.cmwin')))commTap();});
 function renderEquip(){
   const own=haveShip(view),sh=SHIPS[view],pg=shipProg(view);
   $('shipName').textContent=sh.name;$('shipName').style.color=own||pg.ok?sh.c:'var(--dim)';$('shipSkill').textContent=sh.desc;
@@ -2460,7 +2611,7 @@ function openDetail(k){
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(it.price-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
 }
-function openShop(k){pixWipe(300);shopNote='';if(k&&tabOf(k))shopCat=tabOf(k);closeSheet();renderShop();$('shopSheet').hidden=false;tilesIn($('shopGrid'),'.sitem,.soonh,.lockc,.soonn');if(k)openDetail(k);}
+function openShop(k){pixWipe(300);commOff('lab');shopNote='';if(k&&tabOf(k))shopCat=tabOf(k);closeSheet();renderShop();$('shopSheet').hidden=false;tilesIn($('shopGrid'),'.sitem,.soonh,.lockc,.soonn');if(k)openDetail(k);}
 function closeShop(){pixWipe(300);closeSheet();$('shopSheet').hidden=true;renderAll();}
 const achText=got=>got.map(a=>'実績「'+a.name+'」 ＋'+a.g+'G').join('・');
 
@@ -2509,8 +2660,9 @@ function openLabDetail(id){
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(pr-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
 }
-function openLab(){pixWipe(300);labNote='';closeSheet();renderLab();$('labSheet').hidden=false;tilesIn($('labGrid'),'.sitem,.soonh,.lockc,.soonn');}
-function closeLab(){pixWipe(300);closeSheet();$('labSheet').hidden=true;renderAll();}
+function openLab(){pixWipe(300);labNote='';closeSheet();renderLab();$('labSheet').hidden=false;tilesIn($('labGrid'),'.sitem,.soonh,.lockc,.soonn');
+  if(save.tut&&!save.talk.lab){save.talk.lab=1;persist();commShow(TALK.labIntro,{wait:true,key:'lab',pos:'bot'});}/* 11/17：はじめて開いたときだけ整備士がひとこと。はじめの案内と同じく、ほかは暗くして押せない・タップで次へ（しょーくん「自動文字送りだったから聞き逃しちゃった」） */}
+function closeLab(){pixWipe(300);closeSheet();$('labSheet').hidden=true;if(COMM.key==='lab')commHide();renderAll();}
 
 /* ---------- #12 図鑑（装備・進化・機体・敵。まだのものはシルエット） ---------- */
 const SILC={};
@@ -2541,7 +2693,7 @@ function openBookItem(o){
   const info=el('div');if(o.found){info.appendChild(el('p',null,o.desc));if(o.extra)info.appendChild(el('p',null,o.extra));}else info.appendChild(el('p',null,o.hint));
   top.append(img,info);s.appendChild(top);
 }
-function openBook(){pixWipe(300);closeSheet();renderBook();$('bookSheet').hidden=false;$('bookBody').scrollTop=0;tilesIn($('bookBody'),'.bgrid>button');}
+function openBook(){pixWipe(300);commOff('lab');closeSheet();renderBook();$('bookSheet').hidden=false;$('bookBody').scrollTop=0;tilesIn($('bookBody'),'.bgrid>button');}
 function closeBook(){pixWipe(300);closeSheet();$('bookSheet').hidden=true;renderAll();}
 
 /* ---------- #12 実績（24個・決まった G） ---------- */
@@ -2553,7 +2705,7 @@ function renderAch(){
     li.append(img,mid,em);ul.appendChild(li);});
   $('achAll').textContent=done+' / '+ACH.length;body.appendChild(ul);
 }
-function openAch(){pixWipe(300);closeSheet();renderAch();$('achSheet').hidden=false;$('achBody').scrollTop=0;tilesIn($('achBody'),'.arow');}
+function openAch(){pixWipe(300);commOff('lab');closeSheet();renderAch();$('achSheet').hidden=false;$('achBody').scrollTop=0;tilesIn($('achBody'),'.arow');}
 function closeAch(){pixWipe(300);closeSheet();$('achSheet').hidden=true;renderAll();}
 
 $('shopBtn').addEventListener('click',()=>openShop());
@@ -2566,7 +2718,7 @@ $('debugUnl').addEventListener('click',()=>{save.unl=TYPES.filter(t=>MODS[t].unl
 $('shipPrev').addEventListener('click',()=>stepShip(-1));$('shipNext').addEventListener('click',()=>stepShip(1));
 $('stPrev').addEventListener('click',()=>stepStage(-1));$('stNext').addEventListener('click',()=>stepStage(1));
 $('infoBtn').addEventListener('click',openInfo);
-$('launchBtn').addEventListener('click',()=>{if(!haveShip(view))return;if(!save.tut&&save.load.some(Boolean)){save.tut=1;persist();}/* はじめの案内は出撃で終わり */startRun();pixWipe(420);});
+$('launchBtn').addEventListener('click',()=>{if(!haveShip(view))return;commHide();if(!save.tut&&save.load.some(Boolean)){save.tut=1;persist();}/* はじめの案内は出撃で終わり */startRun();pixWipe(420);});
 if(window.ResizeObserver)new ResizeObserver(()=>{layoutEditor();renderSlots();}).observe(bay);
 else window.addEventListener('resize',()=>{layoutEditor();renderSlots();});
 {const im=el('img');im.alt='';im.src=FINGERURL;$('tfinger').prepend(im);}/* はじめの案内の指 */requestAnimationFrame(tutLoop);
@@ -2663,6 +2815,7 @@ function stat0(t){
 }
 
 function startRun(){
+  commHide();COMM.pend=null;/* 11/17：出撃中は通信を出さない */
   if(!save.load.some(Boolean)||!stOpen(save.st||1))return;
   $('shopSheet').hidden=true;
   hangar.hidden=true;sortie.hidden=false;overlay.hidden=true;banner.hidden=true;
@@ -4327,6 +4480,7 @@ function endRun(clear,retreat){
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
   if(newly.length){save.seen=(save.seen||[]).concat(newly);}
   const got=checkAch(),newU=syncUnl(),newL=syncLabUnl();/* #15：この出撃で解放された品・11/16：研究所 */
+  COMM.pend=save.tut?talkUnl(newly,newU,newL,opened?STAGES[R.stage].name:null):null;/* 11/17：格納庫にもどったら整備士が知らせる */
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
   persist();
@@ -4351,7 +4505,7 @@ function endRun(clear,retreat){
   row('かせいだお金','+'+total+'G','total');
   let gotl=null;if(got.length){gotl=el('ul','gotl');const li=el('li');const ns=el('span',null,'実績');got.forEach(a=>ns.appendChild(el('span',null,'「'+a.name+'」')));li.append(ns,el('b',null,'+'+got.reduce((n,a)=>n+a.g,0)+'G'));gotl.appendChild(li);}/* 実績は1行にまとめる（#16） */
   const btns=el('div','btnrow end'),back=el('button','go','格納庫へ'),shop=el('button','btn2','ショップへ');back.type='button';shop.type='button';
-  const toHangar=()=>{pixWipe();cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;overlay.classList.remove('over');layoutEditor();renderAll();};
+  const toHangar=()=>{pixWipe();cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;overlay.classList.remove('over');layoutEditor();renderAll();commPend();};
   back.addEventListener('click',()=>{toHangar();toast(total+'G かせいだ');});
   shop.addEventListener('click',()=>{toHangar();openShop();});
   btns.append(shop,back);
@@ -4449,7 +4603,7 @@ function pixWipe(ms){
     wipeRaf=requestAnimationFrame(step);};
   step();
 }
-function showTitle(){pixWipe();
+function showTitle(){pixWipe();commHide();
   hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
   titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
 }

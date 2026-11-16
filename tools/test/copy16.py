@@ -64,6 +64,7 @@ def static_src(src):
     html, js = h[:i], h[i:]
     html = re.sub(r'<style>.*?</style>', '', html, flags=re.S)
     js = re.sub(r'/\*.*?\*/', '', js, flags=re.S)
+    js = re.sub(r'\nconst TALK=\{.*?\n\};', '', js, flags=re.S)  # 11/17：整備士のセリフ（TALK）だけは「！」と語りかけを使う
     out = []
     for m in re.finditer(r"'((?:[^'\\\n]|\\.)*)'", js):
         if re.search(r'[ぁ-んァ-ヶ一-龠！!]', m.group(1)) or re.search(SYM, m.group(1)):
@@ -184,6 +185,8 @@ def screens(pg):
     for k in range(4):
         S.scan('遊び方%d' % (k + 1)); pg.click('#howNext'); pg.wait_for_timeout(80)
     pg.wait_for_timeout(200)
+    S.scan('格納庫（整備士のあいさつ）')
+    harness14.talk_through(pg)  # 11/17
     S.scan('格納庫（はじめの案内①）')
     pg.locator('#slots .slotb').first.click(); pg.wait_for_timeout(200)
     S.scan('一覧（はじめの案内②）')
