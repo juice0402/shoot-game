@@ -46,8 +46,10 @@ def write_build(src=SRC, seed=False, dbg=False, patch=None):
     return pp
 
 
-def open_page(b, pp, w=390, h=844, errs=None, warns=None, scale=1):
+def open_page(b, pp, w=390, h=844, errs=None, warns=None, scale=1, fx=False):
     ctx = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=scale)
+    if not fx:  # 11/16：作りこみの動き（fx）は止めて、大きさや場所をはかるテストをぶれなくする。fx=True で動かす（copy16 の fx の点検）
+        ctx.add_init_script('window.__NOFX=true')
     pg = ctx.new_page()
     if errs is not None:
         pg.on('pageerror', lambda e: errs.append('pageerror: ' + str(e)))

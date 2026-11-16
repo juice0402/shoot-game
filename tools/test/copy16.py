@@ -386,6 +386,37 @@ def shots(b, errs, warns):
     o.save(os.path.join(SHOTS, '16-before-after.png'))
 
 
+def fx_check(b, errs, warns, pp):
+    """11/16 作りこみの動き（fx）を動かしたまま、ひと回り：板は横から・タイルは左上から・装備のガチャン・レベルアップ・宝箱・結果。エラーが出ないこと"""
+    pg = open_page(b, pp, 390, 844, errs, warns, fx=True)
+    ev = pg.evaluate
+    ev("()=>{const T=window.__T;T.save=T.freshSave();T.save.tut=1;T.save.howto=1;T.save.gold=5000;T.save.owned.laser=2;T.save.ships.standard.eq[0]={t:'laser',d:0};T.setShip('standard');T.persist();}")
+    pg.reload(); pg.wait_for_timeout(400); pg.click('#startBtn'); pg.wait_for_timeout(500)
+    pg.locator('#slots .slotb.empty').first.click(); pg.wait_for_timeout(30)
+    a = ev("()=>[getComputedStyle(document.getElementById('sheet')).animationName,getComputedStyle(document.querySelector('#sheet .irow')).animationName,getComputedStyle(document.querySelector('#slots .slotb.empty')).animationName]")
+    ok('fx：パーツをえらぶ板は横から入る・一覧はタイルで敷く・空き枠はふくらまない', a == ['fxSide', 'fxTile', 'none'], a)
+    pg.wait_for_timeout(500); pg.click('#sheet .irow:not([disabled])'); pg.wait_for_timeout(500)
+    d = ev("()=>[...document.querySelectorAll('#sheet .dirs button')].map(b=>getComputedStyle(b).animationDelay)")
+    ok('fx：向きの矢印も左上から順に（遅れがふえる）', len(d) == 8 and d[0] == '0s' and d[-1] != '0s', d)
+    pg.locator('#sheet .dirs button').nth(1).click(); pg.wait_for_timeout(500)
+    ok('fx：向きをえらぶ → つく（ガチャンのあと）', ev("()=>window.__T.save.ships.standard.eq.filter(Boolean).length") == 2)
+    pg.click('#shopBtn') if pg.locator('#shopBtn').count() else ev("()=>window.__T.openShop()")
+    pg.wait_for_timeout(500); pg.locator('#shopTabs button').nth(1).click(); pg.wait_for_timeout(30)
+    t = ev("()=>[...document.querySelectorAll('#shopGrid .sitem')].slice(0,4).map(e=>[getComputedStyle(e).animationName,getComputedStyle(e).animationDelay])")
+    ok('fx：ショップのタブを切りかえるとタイルが左上から（2列目と2行目は遅れる）', len(t) >= 3 and all(x[0] == 'fxTile' for x in t) and t[0][1] == '0s' and t[1][1] != '0s' and t[2][1] != '0s', t)
+    pg.wait_for_timeout(500); ev("()=>window.__T.closeShop()"); pg.wait_for_timeout(300)
+    for f in ('openLab', 'openBook', 'openAch'):
+        ev("()=>window.__T.%s()" % f); pg.wait_for_timeout(450)
+        ev("()=>['labSheet','bookSheet','achSheet'].forEach(i=>{document.getElementById(i).hidden=true;})"); pg.wait_for_timeout(200)
+    r = ev("""async()=>{const T=window.__T,w=ms=>new Promise(r=>setTimeout(r,ms));document.getElementById('hangar').hidden=true;document.getElementById('sortie').hidden=false;
+      T.startRun();T.R.pending=1;T.openLevelUp();await w(450);const n=document.querySelectorAll('#overlay .card.fxin').length;document.querySelector('#overlay .card').click();
+      const gh=document.querySelectorAll('.fxghost .card.fxgot').length;await w(600);const left=document.querySelectorAll('.fxghost').length;
+      T.R.chestQ=1;T.openChest();await w(450);document.querySelector('#overlay .btnrow .go').click();await w(600);
+      T.endRun(false,true);await w(100);return [n,gh,left,T.R?T.R.state:'none',document.querySelectorAll('#overlay .stats li.fxtile').length>0];}""")
+    ok('fx：レベルアップ（カードが入る3枚・えらんだ1枚が光る・あとで写しは消える）・宝箱・結果の行もタイル', r[0] == 3 and r[1] == 1 and r[2] == 0 and r[4], r)
+    pg.close()
+
+
 def main():
     errs, warns = [], []
     static(SRC)
@@ -398,6 +429,7 @@ def main():
         screens(pg)
         pg.close()
         result_fit(b, errs, warns, pp)
+        fx_check(b, errs, warns, pp)
         if '--shots' in sys.argv:
             shots(b, errs, warns)
         b.close()
