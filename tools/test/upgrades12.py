@@ -45,7 +45,7 @@ def build(src):
 HELPERS = r"""
 ()=>{
   /* 機体 id で出撃（list の武器をつける）。外から動かすので requestAnimationFrame は止める */
-  window.__go=(id,list,lab)=>{const T=window.__T;window.__HOLD=1;if(lab)Object.assign(T.save.lab,lab);T.ensureSlots(T.save);T.save.ships[id].have=true;T.setShip(id);const L=T.save.load;for(let i=0;i<L.length;i++)L[i]=null;
+  window.__go=(id,list,lab)=>{const T=window.__T;window.__HOLD=1;T.save.st=1;if(lab)Object.assign(T.save.lab,lab);T.ensureSlots(T.save);T.save.ships[id].have=true;T.setShip(id);const L=T.save.load;for(let i=0;i<L.length;i++)L[i]=null;
     (list||['laser']).forEach((t,i)=>{L[i]={t,d:0};T.save.owned[t]=Math.max(T.save.owned[t],9);});
     T.startRun();const R=T.R;R.pending=0;R.bossAt=[];R.waveAt=1e9;return R;};
   window.__fill=(n,kinds,cx,cy)=>{const T=window.__T,R=T.R;while(R.E.length<n){const a=Math.random()*Math.PI*2,d=90+Math.random()*260;T.addEnemy(kinds?kinds[(Math.random()*kinds.length)|0]:(Math.random()<0.25?'tank':'bug'),(cx??R.x)+Math.cos(a)*d,(cy??R.y)+Math.sin(a)*d*0.9);}};
@@ -278,9 +278,9 @@ ACHT = r"""
 BOOKT = r"""
 ()=>{const T=window.__T,res={};const ok=(k,pass,val)=>{res[k]={pass:!!pass,val};};
   T.save=T.freshSave();T.setShip('standard');
-  ok('図鑑 全部で 69＋14＋12＋5',T.BOOK_N()===100&&T.TYPES.length===69&&Object.keys(T.EVO).length===14,T.BOOK_N());
+  ok('図鑑 全部で 69＋14＋12＋20（#13 で敵15）',T.BOOK_N()===115&&T.TYPES.length===69&&Object.keys(T.EVO).length===14,T.BOOK_N());
   T.openBook();const secs=[...document.querySelectorAll('#bookBody .bsec')];
-  ok('図鑑の画面：4つの区切り・100個',secs.length===4&&document.querySelectorAll('#bookBody .bgrid button').length===100,secs.map(s=>s.querySelector('h3').textContent).join(' '));
+  ok('図鑑の画面：4つの区切り・115個',secs.length===4&&document.querySelectorAll('#bookBody .bgrid button').length===115,secs.map(s=>s.querySelector('h3').textContent).join(' '));
   ok('はじめ：レーザー・スタンダードだけ',T.bookCount(T.save)===2&&document.querySelectorAll('#bookBody .bgrid button:not(.no)').length===2,T.bookCount(T.save));
   document.querySelector('#bookBody .bgrid button.no').click();ok('まだのもの：？？？',/？？？/.test(document.getElementById('sheet').textContent),document.querySelector('#sheet h3').textContent);T.closeSheet();
   document.querySelector('#bookBody .bgrid button:not(.no)').click();ok('見つけたもの：名前',/レーザー/.test(document.getElementById('sheet').textContent),document.querySelector('#sheet h3').textContent);T.closeSheet();T.closeBook();
