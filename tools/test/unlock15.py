@@ -187,7 +187,7 @@ def shop(pg):
 RESULT = r"""
 (p)=>{const T=window.__T;window.__HOLD=1;localStorage.clear();const s=T.freshSave();T.save=s;s.howto=1;s.tut=1;s.ships.standard.eq[0]={t:'laser',d:0};T.setShip('standard');
   T.startRun();const R=T.R;Object.assign(R,p);R.tlv.laser=p.lv8?8:R.tlv.laser;T.endRun(!!p.clear,!p.clear);
-  const ov=document.getElementById('overlay');const li=[...ov.querySelectorAll('.unll li:not(.ship)')].map(l=>[l.textContent,!!(l.querySelector('img')&&l.querySelector('img').src.startsWith('data:'))]);
+  const ov=document.getElementById('overlay');const li=[...ov.querySelectorAll('.unll li:not(.ship):not(.lab)')].map(l=>[l.textContent,!!(l.querySelector('img')&&l.querySelector('img').src.startsWith('data:'))]);
   return {li,unl:T.save.unl.slice(),saved:JSON.parse(localStorage.getItem(T.KEY)).unl};}
 """
 
@@ -198,12 +198,12 @@ def result(pg):
     want = ['追撃ミサイル', '扇レーザー', 'はね返り弾', '追尾レーザー', '冷却装置']
     ok('結果の画面：解放された品をアイコンと名前で（30秒以上の出撃1回・400体・Lv12・レーザーLv8）', sorted(x[0] for x in r['li']) == sorted(want) and all(x[1] for x in r['li']), r['li'])
     ok('お知らせ済みを保存', sorted(r['unl']) == sorted(r['saved']) and len(r['unl']) == 5, r['unl'])
-    again = pg.evaluate("()=>{const T=window.__T;T.startRun();const R=T.R;R.kills=10;R.t=40;T.endRun(false,true);return [...document.querySelectorAll('#overlay .unll li:not(.ship)')].map(l=>l.textContent);}")
+    again = pg.evaluate("()=>{const T=window.__T;T.startRun();const R=T.R;R.kills=10;R.t=40;T.endRun(false,true);return [...document.querySelectorAll('#overlay .unll li:not(.ship):not(.lab)')].map(l=>l.textContent);}")
     ok('次の出撃では同じ品を出さない（30秒以上の出撃2回 → 無敵延長だけ）', again == ['無敵延長'], again)
     # 機体を買うとついてくる品：解放ずみ・お知らせなし
     sh = pg.evaluate("""()=>{const T=window.__T;const s=T.save;s.rec.halfClear=1;s.gold=5000;T.openShop('phantom');document.querySelector('#sheet .buybig').click();T.closeShop();
       const a=[s.ships.phantom.have,s.owned.twin,s.unl.includes('twin'),T.isUnl('twin')];T.startRun();const R=T.R;T.endRun(false,true);
-      return a.concat([[...document.querySelectorAll('#overlay .unll li:not(.ship)')].map(l=>l.textContent).join(',')]);}""")
+      return a.concat([[...document.querySelectorAll('#overlay .unll li:not(.ship):not(.lab)')].map(l=>l.textContent).join(',')]);}""")
     ok('機体を買うとついてくる品（ファントムの双剣）は解放ずみ・お知らせなし', sh[:4] == [True, 1, True, True] and '双剣' not in sh[4], sh)
     # 出撃中の強化は、つけている武器だけ
     pool = pg.evaluate("""()=>{const T=window.__T;window.__seed(3);const s=T.freshSave();T.save=s;s.unl=T.TYPES.filter(t=>T.MODS[t].unlock);s.owned.missile=1;
@@ -225,7 +225,7 @@ SAVES = r"""
   {const s=ld({gold:900,owned:{laser:2},ships:{standard:{have:true,eq:[null,{t:'laser',d:0}]}},tut:1,howto:1,
     rec:{clears:2,bosses:3,goldTotal:900,wmax:{laser:8},sup5:[],fastBoss:0,bestKills:400,halfClear:1,meleeK:0,evos:1,stageMax:1,kills:900,bestLv:12,time:700},best:{t:300,kills:400,clear:true}});
     T.save=s;out.p12=['fan','hlaser','mine','thunder','flame','ricochet','cooler','acid','missile','iframe','scope'].filter(t=>!s.unl.includes(t));out.p12runs=s.rec.runs;
-    T.setShip('standard');T.startRun();const R=T.R;T.endRun(false,true);out.p12ann=[...document.querySelectorAll('#overlay .unll li:not(.ship)')].map(l=>l.textContent);}
+    T.setShip('standard');T.startRun();const R=T.R;T.endRun(false,true);out.p12ann=[...document.querySelectorAll('#overlay .unll li:not(.ship):not(.lab)')].map(l=>l.textContent);}
   /* #15 の点検：ships があって owned がない形（レーザー2つ・ラピッドにガトリング）→ つけている数まで持っている */
   {const s=ld({gold:100,ships:{standard:{have:true,eq:[{t:'laser',d:0},{t:'laser',d:0},null]},rapid:{have:true,eq:[{t:'gatling',d:0}]}},cur:'standard',tut:1,howto:1});
     out.noOwned=[s.owned.laser,s.ships.standard.eq.filter(Boolean).length,s.owned.gatling,s.ships.rapid.eq.filter(Boolean).length];}

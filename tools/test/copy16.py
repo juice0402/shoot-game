@@ -318,7 +318,7 @@ RES6 = r"""
   document.getElementById('hangar').hidden=true;document.getElementById('sortie').hidden=false;
   T.startRun();const R=T.R;R.kills=2200;R.lv=19;R.tlv.laser=8;R.bossKills=1;R.t=p.clear?300:260;if(p.many){R.chestN=12;R.spN=60;R.lv=31;R.spcN=3;}T.endRun(!!p.clear,false);
   const ov=document.getElementById('overlay'),bs=[...ov.querySelectorAll('.btnrow button')].map(b=>{const r=b.getBoundingClientRect();return [b.textContent,Math.round(r.top),Math.round(r.bottom)];});
-  return {unl:[...ov.querySelectorAll('.unll li')].map(l=>[l.textContent,!!(l.querySelector('img')&&l.querySelector('img').src.startsWith('data:'))]),
+  return {lab:[...ov.querySelectorAll('.unll li.lab')].map(l=>l.textContent),unl:[...ov.querySelectorAll('.unll li:not(.lab)')].map(l=>[l.textContent,!!(l.querySelector('img')&&l.querySelector('img').src.startsWith('data:'))]),
     ach:ov.querySelectorAll('.gotl li').length?ov.querySelector('.gotl li').textContent:'',sh:ov.scrollHeight,ch:ov.clientHeight,top:ov.scrollTop,bs,h:innerHeight,over:ov.classList.contains('over'),
     best:!!ov.querySelector('.stats li.best'),opened:!!ov.querySelector('.sub.unl')};}
 """
@@ -329,6 +329,7 @@ def result_fit(b, errs, warns, pp):
     r = pg.evaluate(RES6, {})
     items = [u for u in r['unl'] if u[0] != 'ボマー']
     ok('結果（解放6こ＋新しい機体ボマー・実績4つ・新記録）：アイコンと名前を小さく並べる', len(items) == 6 and ['ボマー', True] in r['unl'] and all(u[1] for u in r['unl']) and r['best'], r['unl'])
+    ok('結果：研究所の解放も同じ並び（エンジン・えらび直し）', sorted(r['lab']) == sorted(['エンジン', 'えらび直し']), r['lab'])
     ok('結果（解放6こ）：幅390・高さ660 でスクロールなし・ボタン2つが画面の中', r['sh'] <= r['ch'] and all(x[2] <= 660 for x in r['bs']) and len(r['bs']) == 2, [r['sh'], r['ch'], r['bs']])
     ok('結果：実績は1行（「千体」「嵐の出撃」… ＋G）', r['ach'].startswith('実績「') and r['ach'].endswith('G'), r['ach'])
     pg.close()

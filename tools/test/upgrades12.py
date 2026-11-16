@@ -204,6 +204,14 @@ LABT = r"""
   /* 値段：1.6倍・10G単位 */
   let badP=[];for(const o of T.LAB)for(let l=0;l<o.max;l++){const want=Math.round(o.p*Math.pow(1.6,l)/10)*10;if(T.labPrice(o,l)!==want||want%10)badP.push(o.id+l);}
   ok('値段 1.6倍（10G単位）',badP.length===0&&T.labPrice(T.LAB[0],1)===320&&T.labPrice(T.LAB[0],2)===510,badP.join(','));
+  /* 11/16：研究所の段階的な解放（最初は4こ・もうすぐ解放3こ・のこり8こ・まだの研究は買えない） */
+  T.save.gold=1e6;T.openLab();
+  {const g=document.getElementById('labGrid'),cards=g.querySelectorAll('button.sitem.lab').length,soon=g.querySelectorAll('.lockc').length,rest=(g.querySelector('.soonn')||{}).textContent;
+   T.openLabDetail('r_slot');const lb=document.querySelector('#sheet .buybig');
+   ok('研究所の解放：最初は4こ・もうすぐ3こ・のこり8こ・まだの研究は買えない',cards===4&&soon===3&&rest==='のこり 8こ'&&lb.disabled&&/ステージ4クリア/.test(lb.textContent)&&!T.buyLab('r_slot')&&T.save.lab.r_slot===0,[cards,soon,rest,lb.textContent].join('/'));
+   T.closeSheet();T.save.rec.stageMax=1;T.closeLab();T.openLab();
+   ok('ステージ1クリア → 自己修復が並ぶ',[...document.querySelectorAll('#labGrid button.sitem.lab span')].some(e=>e.textContent==='自己修復'),'');
+   T.save.rec.stageMax=0;T.save.lunl=T.LAB.filter(o=>o.unlock).map(o=>o.id);T.closeLab();}
   /* 画面から全部買う（くわしく → 強化） */
   T.save.gold=1e6;T.openLab();let spent=0,clicks=0;
   for(const o of T.LAB)for(let l=0;l<o.max;l++){T.openLabDetail(o.id);const b=document.querySelector('#sheet .buybig');const g=T.save.gold;b.click();spent+=g-T.save.gold;clicks++;}

@@ -754,6 +754,12 @@ const LAB=[
   {id:'r_revive',name:'予備の機体',max:1,p:2500,per:'1出撃に1回、HP50%で復活',u:1,unit:'回'},
 ];
 const LABK={};LAB.forEach(o=>{LABK[o.id]=o;});
+/* 研究所の解放（11/16 しょーくん「研究所もアンロックは段階的に」）。ここにない4こ（機体の補強・火力の研究・磁力・商売）は最初から。
+   形はショップの品と同じ [記録, 種類, 数, 条件の文]（お金や運では決まらない）。だいたいやさしい順（もうすぐ解放の並びに使う） */
+const LAB_UNLOCK={r_rate:['runs',0,2,'30秒以上の出撃2回'],r_xp:['runs',0,3,'30秒以上の出撃3回'],r_spd:['bosses',0,1,'大型の敵を1体たおす'],r_reroll:['bestLv',0,10,'1出撃でLv10'],
+  r_regen:['stageMax',0,1,'ステージ1クリア'],r_skip:['bosses',0,3,'大型の敵を合計3体たおす'],r_ban:['stageMax',0,2,'ステージ2クリア'],r_lv:['clears',0,3,'合計3回クリア'],
+  r_skill:['spTotal',0,10,'必殺技を合計10回出す'],r_revive:['stageMax',0,3,'ステージ3クリア'],r_slot:['stageMax',0,4,'ステージ4クリア']};
+const LAB_ORDER={};Object.keys(LAB_UNLOCK).forEach((id,i)=>{const [k,x,n,txt]=LAB_UNLOCK[id];LABK[id].unlock={k,t:x||null,n,txt};LAB_ORDER[id]=i;});
 const labPrice=(o,lv)=>Math.round(o.p*Math.pow(1.6,lv)/10)*10;
 /* 図鑑：敵（ステージの順。st＝はじめて出るステージ） */
 const BOOK_E=[
@@ -1743,7 +1749,7 @@ const startLoad=id=>{const l=emptyLoad(id);SHIPS[id].start.forEach(v=>{l[v.s]={t
 function freshSave(){const owned={};TYPES.forEach(t=>{owned[t]=0;});owned.laser=1;
   const ships={};SHIP_IDS.forEach(id=>{ships[id]={have:id==='standard',eq:emptyLoad(id)};});
   const lab={};LAB.forEach(o=>{lab[o.id]=0;});
-  const s={v:2,gold:300,owned,ships,cur:'standard',best:null,evo:{},lab,ach:{},book:{e:{}},st:1,unl:[],rec:{clears:0,bosses:0,goldTotal:0,wmax:{},sup5:[],cw:{},...REC0()}};
+  const s={v:2,gold:300,owned,ships,cur:'standard',best:null,evo:{},lab,ach:{},book:{e:{}},st:1,unl:[],lunl:[],rec:{clears:0,bosses:0,goldTotal:0,wmax:{},sup5:[],cw:{},...REC0()}};
   ensureSlots(s);return s;}
 /* #15 の解放の記録：出撃の回数（runs）・その品をつけてクリアした回数（cw：種類ごと）。大型の敵の種類ごとのたおした数は図鑑の book.e を使う
    #11 の解放の記録：大型の敵を30秒以内にたおした数・1出撃の撃破数の最高・HP半分以上でクリアした数・近接での撃破の合計・進化の回数・クリアしたステージ
@@ -1826,6 +1832,9 @@ function loadSave(){
         /* #15：お知らせ済みの品。#14 までのセーブは、持っている品＋もう条件を満たした品をだまって解放ずみにする（お知らせは出さない） */
         if(Array.isArray(o.unl))s.unl=o.unl.filter((t,i,a)=>MODS[t]&&MODS[t].unlock&&a.indexOf(t)===i);
         else s.unl=TYPES.filter(t=>MODS[t].unlock&&isUnl(t,s));
+        /* 研究所の解放（11/16）：お知らせ済み。前のセーブは、強化してある研究＋もう条件を満たした研究をだまって解放ずみにする */
+        if(Array.isArray(o.lunl))s.lunl=o.lunl.filter((id,i,a)=>LABK[id]&&LABK[id].unlock&&a.indexOf(id)===i);
+        else s.lunl=LAB.filter(x=>x.unlock&&labUnl(x.id,s)).map(x=>x.id);
       }}
   }catch(e){}
   SHIP_IDS.forEach(id=>{const sh=s.ships[id];TYPES.forEach(t=>{let n=0;sh.eq=sh.eq.map(v=>{if(v&&v.t===t){n++;if(n>s.owned[t])return null;}return v;});});});
@@ -1847,6 +1856,9 @@ const modProg=(t,s)=>progOf(MODS[t].unlock,s||save);
 function isUnl(t,s){s=s||save;const u=MODS[t].unlock;return !u||s.owned[t]>0||(s.unl||[]).includes(t)||condCur(u,s)>=u.n;}
 /* 新しく解放された品をお知らせ済みにして返す（出撃の結果で出す） */
 function syncUnl(){const got=TYPES.filter(t=>MODS[t].unlock&&!save.unl.includes(t)&&isUnl(t));if(got.length)save.unl=save.unl.concat(got);return got;}
+/* 研究所の解放（11/16）：最初からの4こ・強化してある研究・お知らせ済み・条件を満たした研究 */
+function labUnl(id,s){s=s||save;const u=LABK[id].unlock;return !u||s.lab[id]>0||(s.lunl||[]).includes(id)||condCur(u,s)>=u.n;}
+function syncLabUnl(){const got=LAB.filter(o=>o.unlock&&!save.lunl.includes(o.id)&&labUnl(o.id)).map(o=>o.id);if(got.length)save.lunl=save.lunl.concat(got);return got;}
 function setShip(id){save.cur=id;SLOTS=SHIPS[id].slots;save.load=save.ships[id].eq;}
 let save=loadSave();setShip(save.cur);
 /* ---------- 効果音（Web Audio でコードで作る・音のファイルは使わない） ---------- */
@@ -2223,11 +2235,7 @@ function openInfo(){
   const ul=el('ul','statl');
   shipRows(sh,true).concat([['装備の場所',sh.slots.length+'か所']]).forEach(([k,v])=>{const li=el('li');li.append(el('span',null,k),el('b','num',v));ul.appendChild(li);});
   s.appendChild(ul);
-  if(haveShip(view)){const eq=save.ships[view].eq.map((v,i)=>v?sh.slots[i].name+'：'+MODS[v.t].name+'（'+ARROW_NAME[v.d]+'）':null).filter(Boolean);
-    s.appendChild(el('p','dim','つけている装備：'+(eq.length?eq.join('　'):'なし')));}
-  const b=save.best,r=save.rec;
-  s.appendChild(el('p','dim','さいこう記録：'+(b?fmt(b.t)+' 生存・'+b.kills+'体'+(b.clear?'（クリア）':''):'まだなし')+'　クリア '+r.clears+'回・大型の敵 '+r.bosses+'体・かせいだ合計 '+r.goldTotal+'G'));
-}
+}/* 11/16：つけている装備（見ればわかる）と記録は出さない（しょーくん） */
 
 /* 左右スワイプで機体を切りかえ */
 bay.addEventListener('pointerdown',e=>{swipe={id:e.pointerId,x:e.clientX,y:e.clientY};});
@@ -2314,14 +2322,23 @@ function labEff(o,lv){if(lv<=0)return 'なし';
 function renderLab(){
   $('goldNum3').textContent=save.gold;$('labNote').textContent=labNote;
   const grid=$('labGrid');grid.textContent='';
-  LAB.forEach(o=>{const lv=save.lab[o.id],mx=lv>=o.max,pr=labPrice(o,lv),b=el('button','sitem lab');b.type='button';
+  const lock=LAB.filter(o=>!labUnl(o.id));
+  LAB.filter(o=>labUnl(o.id)).forEach(o=>{const lv=save.lab[o.id],mx=lv>=o.max,pr=labPrice(o,lv),b=el('button','sitem lab');b.type='button';
     b.style.setProperty('--c',mx?'#6e5a1c':'var(--edge)');
     const img=el('img');img.alt='';img.src=LICON[o.id];
     const pips=el('span','lpips');pips.setAttribute('aria-label','Lv '+lv+' / '+o.max);for(let i=0;i<o.max;i++)pips.appendChild(el('i',i<lv?'on':null));
     b.append(img,el('span',null,o.name),pips,mx?el('small','short','最大'):el('small',save.gold<pr?'short':null,pr+'G'));
     b.addEventListener('click',()=>openLabDetail(o.id));grid.appendChild(b);});
+  /* まだの研究（11/16）：ショップと同じ形。進みぐあいの大きい3こだけ（シルエット・条件・棒）と、のこりの数 */
+  if(lock.length){grid.appendChild(el('h3','soonh','もうすぐ解放'));
+    lock.map(o=>({o,p:progOf(o.unlock,save)})).sort((a,b)=>b.p.cur/b.p.n-a.p.cur/a.p.n||LAB_ORDER[a.o.id]-LAB_ORDER[b.o.id]).slice(0,3).forEach(({o,p})=>{
+      const c=el('div','lockc'),im=el('img'),mid=el('div'),pr=el('div','prog'),bar=el('i');im.alt='';labSil(o.id,im);
+      bar.style.width=(p.cur/p.n*100)+'%';pr.appendChild(bar);mid.append(el('p',null,o.unlock.txt),pr,el('p','dim num',p.cur+' / '+p.n));c.append(im,mid);grid.appendChild(c);});
+    if(lock.length>3)grid.appendChild(el('p','soonn','のこり '+(lock.length-3)+'こ'));}
 }
-function buyLab(id){const o=LABK[id],lv=save.lab[id];if(!o||lv>=o.max)return false;const pr=labPrice(o,lv);if(save.gold<pr)return false;
+/* 研究のシルエット（アイコンは data URL なので、読みこんでから影にする） */
+function labSil(id,im){const k='l'+id;if(SILC[k]){im.src=SILC[k];return;}const src=new Image();src.onload=()=>{im.src=silUrl(k,src);};src.src=LICON[id];}
+function buyLab(id){const o=LABK[id],lv=save.lab[id];if(!o||lv>=o.max||!labUnl(id))return false;const pr=labPrice(o,lv);if(save.gold<pr)return false;
   save.gold-=pr;save.lab[id]=lv+1;if(id==='r_slot')ensureSlots(save);persist();return true;}
 function openLabDetail(id){
   const o=LABK[id],lv=save.lab[id],mx=lv>=o.max,pr=labPrice(o,lv);
@@ -2331,7 +2348,8 @@ function openLabDetail(id){
   const ul=el('ul','statl'),row=(a,b)=>{const li=el('li');li.append(el('span',null,a),el('b',null,b));ul.appendChild(li);};
   row('レベル',lv+' / '+o.max);row('いまの効果',labEff(o,lv));if(!mx)row('次の効果',labEff(o,lv+1));s.appendChild(ul);
   const buy=el('button','buybig');buy.type='button';
-  if(mx){buy.disabled=true;buy.textContent='最大レベル';}
+  if(!labUnl(id)){buy.disabled=true;buy.textContent='解放の条件：'+o.unlock.txt;}
+  else if(mx){buy.disabled=true;buy.textContent='最大レベル';}
   else if(save.gold>=pr){buy.append(el('span','num',String(pr)),document.createTextNode('G で強化'));
     buy.addEventListener('click',()=>{if(!buyLab(id))return;SFX.play('buy');const got=checkAch();
       labNote=o.name+'を Lv'+save.lab[id]+' にした'+(id==='r_slot'?'。格納庫で機体の後ろに場所がふえた':'')+(got.length?'。'+achText(got):'');closeSheet();renderAll();});}
@@ -2391,7 +2409,7 @@ $('labBtn').addEventListener('click',openLab);$('labClose').addEventListener('cl
 $('bookBtn').addEventListener('click',openBook);$('bookClose').addEventListener('click',closeBook);
 $('achBtn').addEventListener('click',openAch);$('achClose').addEventListener('click',closeAch);
 $('debugGold').addEventListener('click',()=>{save.gold+=1000;persist();shopNote='試作用に1000Gふやした';renderAll();});
-$('debugUnl').addEventListener('click',()=>{save.unl=TYPES.filter(t=>MODS[t].unlock);persist();shopNote='試作用に全部の品を解放した';renderAll();});/* 試作用の2つのボタンは公開の前に消す（docs/design/unlocks.md） */
+$('debugUnl').addEventListener('click',()=>{save.unl=TYPES.filter(t=>MODS[t].unlock);save.lunl=LAB.filter(o=>o.unlock).map(o=>o.id);persist();shopNote='試作用に全部の品と研究所を解放した';renderAll();});/* 試作用の2つのボタンは公開の前に消す（docs/design/unlocks.md） */
 $('shipPrev').addEventListener('click',()=>stepShip(-1));$('shipNext').addEventListener('click',()=>stepShip(1));
 $('stPrev').addEventListener('click',()=>stepStage(-1));$('stNext').addEventListener('click',()=>stepStage(1));
 $('infoBtn').addEventListener('click',openInfo);
@@ -4137,7 +4155,7 @@ function endRun(clear,retreat){
   if(opened)save.st=R.stage+1;
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
   if(newly.length){save.seen=(save.seen||[]).concat(newly);}
-  const got=checkAch(),newU=syncUnl();/* #15：この出撃で解放された品 */
+  const got=checkAch(),newU=syncUnl(),newL=syncLabUnl();/* #15：この出撃で解放された品・11/16：研究所 */
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
   persist();
@@ -4148,10 +4166,12 @@ function endRun(clear,retreat){
     el('p','sub',clear?(S.final?'深淵の核をたおした':'5分 生きのびた'):retreat?'とちゅうで格納庫にもどった':'HPが0になった'));
   if(opened)overlay.appendChild(el('p','sub unl','ステージ'+(R.stage+1)+'「'+STAGES[R.stage].name+'」が解放された'));
   /* 解放された機体と品（#15・#16）：アイコンと名前を小さく並べる。ショップで買える */
-  if(newly.length||newU.length){const box=el('div','unlb'),ul=el('ul','unll');
+  /* 11/16：研究所の解放も同じ並びに（画面の高さをふやさない） */
+  if(newly.length||newU.length||newL.length){const box=el('div','unlb'),ul=el('ul','unll');
     const chip=(src,name,cls)=>{const li=el('li',cls),im=el('img');im.alt='';im.src=src;li.append(im,el('span',null,name));ul.appendChild(li);};
-    newly.forEach(id=>chip(urlOf('s'+id,SHIPSPR[id].img),SHIPS[id].name,'ship'));newU.forEach(t=>chip(ICON[t],MODS[t].name));
-    box.append(el('p',null,(newly.length?'機体と品':'品')+'の解放（ショップで買える）'),ul);overlay.appendChild(box);}
+    newly.forEach(id=>chip(urlOf('s'+id,SHIPSPR[id].img),SHIPS[id].name,'ship'));newU.forEach(t=>chip(ICON[t],MODS[t].name));newL.forEach(id=>chip(LICON[id],LABK[id].name,'lab'));
+    const head=newL.length?[newly.length?'機体':null,newU.length?'品':null,'研究'].filter(Boolean).join('・')+'の解放':(newly.length?'機体と品':'品')+'の解放（ショップで買える）';
+    box.append(el('p',null,head),ul);overlay.appendChild(box);}
   const ul=el('ul','stats');
   const row=(k,v,cls)=>{const li=el('li',cls||null);li.append(el('span',null,k),el('b',null,v));ul.appendChild(li);};
   row('ステージ',R.stg+' '+S.name);row((S.final&&clear?'クリアの時間':'生きのびた時間')+(isBest?'（新記録）':''),fmt(R.t),isBest?'best':null);row('撃破',R.kills+'体');row('到達レベル','Lv '+R.lv);
