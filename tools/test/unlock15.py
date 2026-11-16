@@ -102,7 +102,7 @@ def tutorial(pg):
 
 def comm(pg):
     """11/17：整備士の通信のようす（over＝押す所の穴に重なっている）"""
-    return pg.evaluate("""()=>{const c=document.getElementById('comm'),T=window.__T;const on=!c.hidden;const w=c.querySelector('.cwin').getBoundingClientRect(),h=document.querySelector('#tutDim .hole').getBoundingClientRect();
+    return pg.evaluate("""()=>{const c=document.getElementById('comm'),T=window.__T;const on=!c.hidden;const w=c.querySelector('.cmwin').getBoundingClientRect(),h=document.querySelector('#tutDim .hole').getBoundingClientRect();
       const cv=document.getElementById('cfaceCv');const face=cv.width>0&&cv.toDataURL().length>600;
       return {on,wait:c.classList.contains('wait'),key:T.COMM.key,name:document.getElementById('cname').textContent,text:document.getElementById('ctext').textContent,intro:T.TALK.intro,face,
         over:on&&!document.getElementById('tutDim').hidden&&!(w.bottom<=h.top||w.top>=h.bottom||w.right<=h.left||w.left>=h.right)}}""")

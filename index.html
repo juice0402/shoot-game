@@ -93,19 +93,19 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .tfinger.down img{transform:scaleY(-1);filter:drop-shadow(0 -2px 0 #000)}
 /* 整備士の通信（11/17）：顔（ドット・走査線）と名前とセリフ。.wait はタップで次へ（全体を暗く・ほかは押せない） */
 .comm{position:fixed;left:0;right:0;z-index:68;pointer-events:none;padding:0 8px}
-.comm.top{top:max(8px,env(safe-area-inset-top,0px))}.comm.bot{bottom:max(10px,env(safe-area-inset-bottom,0px))}
+.comm.cmtop{top:max(8px,env(safe-area-inset-top,0px))}.comm.cmbot{bottom:max(10px,env(safe-area-inset-bottom,0px))}/* 名前は cm ではじめる（.top・.cbody・.ctop はほかの所で使っている） */
 .comm.wait{inset:0;pointer-events:auto;background:rgba(3,4,10,.72);display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
-.comm.wait.top{justify-content:flex-start;padding-top:max(14px,env(safe-area-inset-top,0px))}
-.cwin{max-width:440px;margin:0 auto;display:flex;gap:10px;align-items:stretch;background:var(--deep);border:3px solid var(--edge);padding:8px;box-shadow:0 4px 0 #000}
-.cface{flex:none;width:88px;height:100px;position:relative;background:#081a2c;border:2px solid #1f6c94;overflow:hidden}
-.cface canvas{display:block;width:88px;height:100px;image-rendering:pixelated;image-rendering:crisp-edges}
-.cface::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(transparent 0 2px,rgba(0,8,20,.32) 2px 4px)}
-.cbody{flex:1;min-width:0;display:flex;flex-direction:column}
-.cname{margin:0 0 2px;font-size:12px;color:#5aaedc;letter-spacing:.04em}
-.ctext{margin:0;font-size:15px;line-height:1.5;color:var(--ink);min-height:4.5em;overflow-wrap:anywhere;word-break:auto-phrase;text-wrap:balance}
-.ctext i{font-style:normal;color:transparent}/* まだ出ていない文字（先に置いて、行がとちゅうで変わらないように） */
-.cnext{align-self:flex-end;width:12px;height:8px;margin-top:auto;background:var(--go);clip-path:polygon(0 0,100% 0,50% 100%)}
-.comm.fxin .cwin{animation:fxCommIn .22s ease-out both}
+.comm.wait.cmtop{justify-content:flex-start;padding-top:max(14px,env(safe-area-inset-top,0px))}
+.cmwin{max-width:440px;margin:0 auto;display:flex;gap:10px;align-items:stretch;background:var(--deep);border:3px solid var(--edge);padding:8px;box-shadow:0 4px 0 #000}
+.cmface{flex:none;width:88px;height:100px;position:relative;background:#081a2c;border:2px solid #1f6c94;overflow:hidden}
+.cmface canvas{display:block;width:88px;height:100px;image-rendering:pixelated;image-rendering:crisp-edges}
+.cmface::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(transparent 0 2px,rgba(0,8,20,.32) 2px 4px)}
+.cmbody{flex:1;min-width:0;display:flex;flex-direction:column}
+.cmname{margin:0 0 2px;font-size:12px;color:#5aaedc;letter-spacing:.04em}
+.cmtext{margin:0;font-size:15px;line-height:1.5;color:var(--ink);min-height:4.5em;white-space:pre-line;overflow-wrap:anywhere}/* 11/17：行はセリフの中で手で切る（1行12字まで＝幅320でも入る） */
+.cmtext i{font-style:normal;color:transparent}/* まだ出ていない文字（先に置いて、行がとちゅうで変わらないように） */
+.cmnext{align-self:flex-end;width:12px;height:8px;margin-top:auto;background:var(--go);clip-path:polygon(0 0,100% 0,50% 100%)}
+.comm.fxin .cmwin{animation:fxCommIn .22s ease-out both}
 @keyframes fxCommIn{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
 @keyframes tbob{50%{transform:translateY(var(--bob))}}
 .toast{position:absolute;left:8px;right:8px;bottom:26px;z-index:5;margin:0 auto;width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--scrim);border:2px solid var(--go);color:var(--go);font-size:14px;text-align:center;pointer-events:none}
@@ -458,7 +458,7 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
 
 <div id="sheetBg" class="sheetbg" hidden><div id="sheet" class="sheet" role="dialog" aria-modal="true"></div></div>
 <div id="tutDim" class="tutdim" hidden><i class="hole"></i><b class="blk"></b><b class="blk"></b><b class="blk"></b><b class="blk"></b><div class="tfinger" id="tfinger"></div></div>
-<div id="comm" class="comm" hidden><div class="cwin"><div class="cface"><canvas id="cfaceCv"></canvas></div><div class="cbody"><p class="cname" id="cname"></p><p class="ctext" id="ctext" aria-live="polite"></p><i class="cnext" id="cnext"></i></div></div></div>
+<div id="comm" class="comm" hidden><div class="cmwin"><div class="cmface"><canvas id="cfaceCv"></canvas></div><div class="cmbody"><p class="cmname" id="cname"></p><p class="cmtext" id="ctext" aria-live="polite"></p><i class="cmnext" id="cnext"></i></div></div></div>
 
 <div id="shopSheet" class="shopx" role="dialog" aria-label="ショップ" hidden>
   <header class="shead">
@@ -1071,9 +1071,8 @@ MAT.hair=['#140a12','#2e1420','#5a2632','#8e3e48','#d27a78'];MRAD.hair=2.6;MCOL.
 const MECH=(()=>{
   const W=40,H=46;
   const parts=[
-    /* 後ろ髪とポニーテール（左うしろ） */
-    {m:'hair',r:3,f:g=>{E(g,19.5,18,12.5,12.5);g.beginPath();g.moveTo(7.5,18);g.lineTo(32,18);g.lineTo(31,31);g.lineTo(27,33);g.lineTo(12,33);g.lineTo(8,31);g.closePath();g.fill();
-      g.beginPath();g.moveTo(8,12);g.quadraticCurveTo(-1,16,2,30);g.quadraticCurveTo(4,36,8,38);g.quadraticCurveTo(6,30,9,22);g.closePath();g.fill();}},
+    /* 後ろ髪（ショートカット・耳の下まで。11/17 しょーくん「ポニテはいらない。普通にショートカットでいい」） */
+    {m:'hair',r:3,f:g=>{E(g,19.5,17.5,12,12);g.beginPath();g.moveTo(7.6,17);g.lineTo(31.4,17);g.lineTo(31,25);g.lineTo(29.6,29.6);g.lineTo(27.6,26.6);g.lineTo(11.4,26.6);g.lineTo(9.4,29.6);g.lineTo(8,25);g.closePath();g.fill();}},
     /* つなぎ（肩と胸） */
     {m:'yel',r:2.4,p:[[4,45],[6,39],[11,35.5],[16,35],[23,35],[28,35.5],[33,39],[35,45]]},
     /* 首と、つなぎのえりの中（黒いシャツ） */
@@ -2325,16 +2324,16 @@ function tutLoop(){tutGuide();if(!save.tut)requestAnimationFrame(tutLoop);else{$
    ・note：お知らせ（押せる所はそのまま。どこかをタップ／しばらくで次へ）＝解放のお知らせ・研究所のはじめて */
 const TALK={
   name:'整備士 サラ',
-  intro:['格納庫へようこそ！ 整備士のサラ。この機体の整備はわたしの担当だよ。','さっそく出撃準備だ！ まずは機体に武器をつけよう！'],
-  t1:'機首の＋をタップ！ ここが武器をつける場所だよ。',
-  t2:'いま持っている武器は、このレーザー1つ。えらんで！',
-  t3:'次は撃つ向き。敵はほとんど前から来るから、上向きにしよう！',
-  t4:'装備完了！ 出撃をタップして……行ってらっしゃい！',
-  ship:(n,k)=>'新しい機体'+(k>1?'「'+n+'」ほか'+(k-1)+'機':'「'+n+'」')+'の設計図が届いたよ！ ショップで買えるようになった！',
-  item:(n,k)=>(k>1?'「'+n+'」ほか'+(k-1)+'つ':'「'+n+'」')+'がショップに入荷したよ！ 見てみて！',
-  lab:k=>'研究所に新しい研究が'+k+'つ増えたよ！ 強くなりたいなら、のぞいてみて！',
-  stage:n=>'「'+n+'」への航路がひらいたよ！ 準備ができたら行ってみよう！',
-  labIntro:['ここは研究所！ Gを使って、ずっと続く強化ができるよ。','新しい研究は、出撃で条件を満たすと増えていくからね！'],
+  intro:['格納庫へようこそ！\n整備士のサラだよ。\n機体の整備はまかせて！','さっそく出撃準備だ！\nまずは機体に\n武器をつけよう！'],
+  t1:'機首の＋をタップ！\nここが武器を\nつける場所だよ。',
+  t2:'持っている武器は\nこのレーザー1つ。\nえらんで！',
+  t3:'次は撃つ向き。\n敵は前から来るから\n上向きにしよう！',
+  t4:'装備完了！\n出撃をタップして……\n行ってらっしゃい！',
+  ship:(n,k)=>'「'+n+'」'+(k>1?'ほか'+(k-1)+'機':'の')+'\n設計図が届いたよ！\nショップで買えるよ。',
+  item:(n,k)=>'「'+n+'」'+(k>1?'\nほか'+(k-1)+'つが入荷したよ！\n':'が\nショップに入荷したよ！\n')+'見てみて！',
+  lab:k=>'研究所に新しい研究が\n'+k+'つ増えたよ！\nのぞいてみて！',
+  stage:n=>'「'+n+'」への\n航路がひらいたよ！\n準備ができたら行こう！',
+  labIntro:['ここは研究所！\nGを使って、ずっと\n続く強化ができるよ。','新しい研究は、\n出撃で条件を満たすと\n増えていくからね！'],
 };
 const COMM={mode:'',key:'',lines:null,k:0,i:0,timer:0,wait:0,done:null,intro:0,pend:null,typing:false,sid:0};
 function commFace(open){const c=$('cfaceCv');if(c.width!==MECH.w){c.width=MECH.w;c.height=MECH.h;}const g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.drawImage(open?MECH.open:MECH.shut,0,0);}
@@ -2347,7 +2346,7 @@ function commStatic(ms,then){const c=$('cfaceCv');if(c.width!==MECH.w){c.width=M
 function commShow(lines,o){
   o=o||{};const box=$('comm');clearInterval(COMM.timer);clearTimeout(COMM.wait);COMM.sid++;
   Object.assign(COMM,{mode:o.wait?'wait':o.note?'note':'tip',key:o.key||'',lines,k:0,done:o.done||null});
-  box.className='comm '+(o.pos==='top'?'top':'bot')+(o.wait?' wait':'');box.hidden=false;$('cname').textContent=TALK.name;
+  box.className='comm '+(o.pos==='top'?'cmtop':'cmbot')+(o.wait?' wait':'');box.hidden=false;$('cname').textContent=TALK.name;
   if(RM()){commLine();return;}
   void box.offsetWidth;box.classList.add('fxin');SFX.play('comm');$('ctext').textContent='';$('cnext').hidden=true;commStatic(150,commLine);
 }
