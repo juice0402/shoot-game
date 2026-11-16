@@ -602,7 +602,7 @@ const TYPES=Object.keys(MODS);
    そのほかは save.rec の名前（機体の解放と同じ）。お金や運では決まらない。分類ごとに、だいたいやさしい順（もうすぐ解放の並びに使う） */
 const UNLOCK={
   /* 攻撃（38） */
-  missile:['runs',0,1,'出撃1回'],ricochet:['bestKills',0,300,'1出撃で300体たおす'],fan:['wmax','laser',8,'レーザーをLv8'],hlaser:['wmax','laser',8,'レーザーをLv8'],
+  missile:['runs',0,1,'30秒以上の出撃1回'],ricochet:['bestKills',0,300,'1出撃で300体たおす'],fan:['wmax','laser',8,'レーザーをLv8'],hlaser:['wmax','laser',8,'レーザーをLv8'],
   mine:['bosses',0,1,'大型の敵を1体たおす'],thunder:['bosses',0,3,'大型の敵を合計3体たおす'],flame:['stageMax',0,1,'ステージ1クリア'],freeze:['kills',0,12000,'合計12000体たおす'],
   pulse:['wmax','gatling',8,'ガトリングをLv8'],needle:['wmax','gatling',8,'ガトリングをLv8'],gsword:['wmax','sword',8,'近接の剣をLv8'],twin:['wmax','sword',8,'近接の剣をLv8'],
   splitter:['wmax','shotgun',8,'散弾砲をLv8'],micro:['wmax','missile',8,'追撃ミサイルをLv8'],minefield:['wmax','mine',8,'機雷をLv8'],saw:['meleeK',0,300,'近接の武器で300体たおす'],
@@ -614,11 +614,11 @@ const UNLOCK={
   torpedo:['bosses',0,20,'大型の敵を合計20体たおす'],turret:['big','fort',1,'要塞砲台をたおす'],plasma:['big','snake',1,'機械の大蛇をたおす'],
   emp:['stageMax',0,4,'ステージ4クリア'],scythe:['big','core',1,'深淵の核をたおす'],
   /* 防御（11） */
-  iframe:['runs',0,2,'出撃2回'],reflector:['big','boss2',1,'紫の大蟹をたおす'],harmor:['cw','armor',1,'装甲板をつけてクリア'],fshield:['cw','shield',1,'シールドをつけてクリア'],
+  iframe:['runs',0,2,'30秒以上の出撃2回'],reflector:['big','boss2',1,'紫の大蟹をたおす'],harmor:['cw','armor',1,'装甲板をつけてクリア'],fshield:['cw','shield',1,'シールドをつけてクリア'],
   ebarrier:['clears',0,3,'合計3回クリア'],evade:['halfClear',0,3,'HPを半分以上のこして3回クリア'],spike:['kills',0,20000,'合計20000体たおす'],frost:['big','icebeast',1,'氷晶獣をたおす'],
   sdrone:['cw','fshield',1,'前面シールドをつけてクリア'],absorber:['nodmg',0,10,'無傷で大型の敵を合計10体たおす'],revive:['clears',0,10,'合計10回クリア'],
   /* 補助（12） */
-  cooler:['bestLv',0,10,'1出撃でLv10'],scope:['runs',0,3,'出撃3回'],xpamp:['kills',0,6000,'合計6000体たおす'],coin:['goldTotal',0,4000,'合計4000Gかせぐ'],
+  cooler:['bestLv',0,10,'1出撃でLv10'],scope:['runs',0,3,'30秒以上の出撃3回'],xpamp:['kills',0,6000,'合計6000体たおす'],coin:['goldTotal',0,4000,'合計4000Gかせぐ'],
   cdrone:['cw','magnet',1,'吸引装置をつけてクリア'],berserk:['bestSpc',0,1,'特別な強化を取る'],repair:['bosses',0,6,'大型の敵を合計6体たおす'],amp:['chests',0,8,'宝箱を合計8個ひらく'],
   reactor:['spTotal',0,25,'必殺技を合計25回出す'],crit:['bestKills',0,3500,'1出撃で3500体たおす'],multi:['bestLv',0,25,'1出撃でLv25'],dur:['goldTotal',0,30000,'合計30000Gかせぐ'],
 };
@@ -1806,6 +1806,7 @@ function loadSave(){
         if(o.owned)TYPES.forEach(t=>{if(Number.isFinite(o.owned[t]))s.owned[t]=clamp(Math.floor(o.owned[t]),0,99);});
         if(o.ships&&typeof o.ships==='object')SHIP_IDS.forEach(id=>{const v=o.ships[id];if(v&&typeof v==='object'){s.ships[id].have=id==='standard'||!!v.have;s.ships[id].eq=cleanLoad(id,v.eq);}});
         else if(Array.isArray(o.load))s.ships.standard.eq=cleanLoad('standard',o.load);   /* 試作4のセーブ：今の装備をスタンダード機へ */
+        if(o.ships&&typeof o.ships==='object'&&!(o.owned&&typeof o.owned==='object'))TYPES.forEach(t=>{const n=Math.max(...SHIP_IDS.map(id=>s.ships[id].eq.filter(v=>v&&v.t===t).length));if(n>s.owned[t])s.owned[t]=n;});/* 機体ごとの装備はあって持ち物の記録がないセーブ：つけている数まで持っていることにする（#15 の点検） */
         if(Array.isArray(o.load)&&!(o.owned&&typeof o.owned==='object'))s.owned.laser=2;/* 試作4のセーブ（持ち物の記録なし）：そのころのはじめのレーザー2つ */
         if(SHIPS[o.cur]&&s.ships[o.cur].have)s.cur=o.cur;
         if(o.tut)s.tut=1;
@@ -3489,7 +3490,7 @@ function ebClear(x,y,rad,c,small){for(const b of R.EB){if(b.dead||(small&&b.big)
 /* 四すみのかっこ（ねらいの印） */
 function bracket(g,x,y,r,c){g.fillStyle=c;x=Math.round(x);y=Math.round(y);r=Math.round(r);
   for(let i=0;i<4;i++){const sx=i&1?1:-1,sy=i&2?1:-1,cx=x+sx*r,cy=y+sy*r;g.fillRect(sx>0?cx-6:cx,sy>0?cy-1:cy,6,2);g.fillRect(sx>0?cx-1:cx,sy>0?cy-6:cy,2,6);}}
-function snipe(L){if(!L)return;let n=0;for(const e of L){if(e.dead)continue;n++;
+function snipe(L){if(!L)return;let n=0;ATK++;/* 1回の狙撃で1つの番号（#15 の点検） */for(const e of L){if(e.dead)continue;n++;
     R.TR.push({x0:R.x,y0:R.y-34,x1:e.x,y1:e.y,t:0,dur:0.35,c:'#bfe9ff',w:3,dead:false});hit(e,spDmg(120),0,-40*U);addX(e.x,e.y,EXPL.m,0.4);}
   if(n)SFX.play('spsnipe');}
 function escort(a,dt){
@@ -3499,7 +3500,7 @@ function escort(a,dt){
 const SPECIAL={
   /* 全方位レーザー：16本の光線。まわり320の敵に2回 */
   standard:{dur:1.1,start(s){s.n=0;s.a=Math.random()*TAU;},
-    up(s){if(s.n<2&&s.t>=0.15+s.n*0.45){s.n++;for(const e of R.E){if(!onScr(e))continue;const dx=e.x-R.x,dy=e.y-R.y,d=Math.hypot(dx,dy)||1;if(d<=320+e.r)hit(e,spDmg(40),dx/d*140*U,dy/d*140*U);}}},
+    up(s){if(s.n<2&&s.t>=0.15+s.n*0.45){s.n++;ATK++;for(const e of R.E){if(!onScr(e))continue;const dx=e.x-R.x,dy=e.y-R.y,d=Math.hypot(dx,dy)||1;if(d<=320+e.r)hit(e,spDmg(40),dx/d*140*U,dy/d*140*U);}}},
     draw(g,s,px,py){const L=320*Math.min(1,s.t/0.15),k=s.t>0.8?(1.1-s.t)/0.3:1;if(k<=0)return;
       for(let i=0;i<16;i++){g.save();g.translate(px,py);g.rotate(s.a+i*TAU/16+s.t*0.8);
         g.globalAlpha=k*0.35;g.fillStyle='#4588f2';g.fillRect(10,-5,L,10);g.globalAlpha=k*0.85;g.fillStyle='#8cc2ff';g.fillRect(10,-2,L,4);g.globalAlpha=k;g.fillStyle='#ffffff';g.fillRect(10,-1,L,2);g.restore();}
@@ -3572,7 +3573,7 @@ const SPECIAL={
       const k=s.t>3.5?(4-s.t)/0.5:1;g.fillStyle='#e6ff5c';for(let i=0;i<10;i++){const a=R.t*2+i*TAU/10,rr=40+((i*7+(R.t*20|0))%6);g.globalAlpha=0.7*k;px2(g,px+Math.cos(a)*rr,py+Math.sin(a)*rr);}g.globalAlpha=1;}},
   /* 主砲の一撃：0.5秒ためて、画面の敵すべてに大ダメージ＋敵の弾を消す */
   omega:{dur:1.4,start(s){s.f=0;},
-    up(s){if(s.f===0&&s.t>=0.5){s.f=1;for(const e of R.E)if(onScr(e))hit(e,spDmg(90),0,-60*U);for(const b of R.EB)if(!b.dead)ebGone(b,'#ffffff','w');
+    up(s){if(s.f===0&&s.t>=0.5){s.f=1;ATK++;for(const e of R.E)if(onScr(e))hit(e,spDmg(90),0,-60*U);for(const b of R.EB)if(!b.dead)ebGone(b,'#ffffff','w');
         for(let i=0;i<8;i++)addX(rand(30,GW-30),rand(30,GH*0.7),EXPL.m,rand(0.35,0.6));}},
     under(g,s,px,py){if(s.t<0.5){const q=s.t/0.5;for(let i=0;i<24;i++){const a=i*TAU/24+R.t*2,rr=(1-q)*120+6;g.fillStyle=i%2?'#fff6c0':'#ffffff';px3(g,px+Math.cos(a)*rr,py-36+Math.sin(a)*rr);}}},
     top(g,s,px,py){if(s.t<0.5)return;const k=Math.max(0,1-(s.t-0.5)/0.9),w=Math.round(90*k+10),h=Math.max(0,py-30);
@@ -3648,7 +3649,7 @@ function sup12(dt){
   if(S.thunder>0){R.thT-=dt;if(R.thT<=0){R.thT=SV('thunder','cd');const n=SV('thunder','n'),d=SV('thunder','d')*mul,used=new Set();
     for(let i=0;i<n;i++){const e=randOn(used);if(!e)break;used.add(e.id);const x0=clamp(e.x+rand(-40,40),12,GW-12);
       const pts=[[x0,8]],sn=Math.max(2,Math.round((e.y-8)/46));for(let q=1;q<sn;q++){const f=q/sn;pts.push([x0+(e.x-x0)*f+rand(-16,16),8+(e.y-8)*f]);}pts.push([e.x,e.y]);
-      R.Z.push({poly:jag(pts),t:0,big:1,sky:1,dead:false});R.TC.push({x:x0,t:0,dead:false});hit(e,d,0,0);}
+      R.Z.push({poly:jag(pts),t:0,big:1,sky:1,dead:false});R.TC.push({x:x0,t:0,dead:false});ATK++;hit(e,d,0,0);}/* 雷1本ごとに攻撃の番号（#15 の点検：前の攻撃の番号のままだと、同じダメージの別の攻撃と大蛇で重なって消えた） */
     if(used.size)SFX.play('zap');else R.thT=0.5;}}
   for(const c of R.TC){c.t+=dt;if(c.t>0.45)c.dead=true;}
   if(S.medic>0){const tx=R.x-40,ty=R.y+26+Math.sin(R.t*3)*3,k=Math.min(1,dt*6);if(R.mdx==null){R.mdx=tx;R.mdy=ty;}R.mdx+=(tx-R.mdx)*k;R.mdy+=(ty-R.mdy)*k;
@@ -4087,7 +4088,7 @@ function endRun(clear,retreat){
   TYPES.forEach(t=>{if(R.tlv[t]>(rc.wmax[t]||0))rc.wmax[t]=R.tlv[t];});
   Object.keys(SUP).forEach(k=>{if(R.sup[k]>=SUP[k].max&&!rc.sup5.includes(k))rc.sup5.push(k);});
   rc.fastBoss+=R.fastBoss;if(R.kills>rc.bestKills)rc.bestKills=R.kills;if(clear&&R.hp>=R.maxHp/2)rc.halfClear++;
-  rc.meleeK+=R.meleeK;rc.evos+=R.evoN;rc.runs++;
+  rc.meleeK+=R.meleeK;rc.evos+=R.evoN;if(R.t>=30)rc.runs++;/* 出撃の回数は30秒以上の出撃だけ（すぐ撤退するだけで解放できないように #15 の点検） */
   if(clear)new Set(R.mods.map(m=>m.t)).forEach(t=>{rc.cw[t]=(rc.cw[t]||0)+1;});/* #15：その品をつけてクリアした回数 */
   /* #12：実績の記録と図鑑（出会った敵・たおした数） */
   rc.kills+=R.kills;rc.bestLv=Math.max(rc.bestLv,R.lv-(R.lab.r_lv||0));/* 先行訓練の分は数えない（#12 の点検） */rc.chests+=R.chestN;rc.spTotal+=R.spN;rc.bestSpc=Math.max(rc.bestSpc,R.spcN);rc.nodmg+=R.nodmg||0;
