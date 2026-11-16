@@ -207,6 +207,7 @@ def main():
         print('%s: %d 項目' % (title, len(res)))
     with sync_playwright() as p:
         b = p.chromium.launch(); pg = b.new_page(viewport={'width': 390, 'height': 844})
+        pg.add_init_script('window.__NOFX=true')  # 11/16：作りこみの動き（数字のかぞえ上げ）を止めて、結果の数字をすぐ読む（harness14 と同じ）
         pg.on('pageerror', lambda e: errs.append('pageerror: ' + str(e)))
         pg.on('console', lambda m: errs.append('console: ' + m.text) if m.type == 'error' and 'ERR_FAILED' not in m.text else None)
         pg.route('**/*', lambda r: r.continue_() if r.request.url.startswith('file:') else r.abort())
