@@ -33,6 +33,6 @@
 ## 決まり
 - セーブのキーと形は変えない（古いセーブは loadSave で直す）
 - 動き（animation）の名前は fx ではじめる。copy16 は fx と案内の指だけ許す
-- 作りこみの動きの道具：openSheet のすぐ下に fxRestart（動きをはじめから）・tilesIn（タイルを左上から敷く）。RM() が true（reduced-motion か window.__NOFX）なら動かさない
+- 作りこみの動きの道具：openSheet のすぐ下に fxRestart（動きをはじめから）・countUp（数字のかぞえ上げ）・rollNum（お金の数を動かす）・tilesIn（タイルを左上から敷く）。closeSheet は写しを横へ出す。buyFx は buyLab のすぐ上。RM() が true（reduced-motion か window.__NOFX）なら動かさない
 - テストは fx を止めて動く（harness14 の open_page が window.__NOFX=true にする）。動かして点検するのは copy16 の fx_check（open_page(..., fx=True)）
 - 自動で作るファイル：docs/shots/・tools/test/__pycache__（読まない・手で直さない）
