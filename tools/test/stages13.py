@@ -72,7 +72,7 @@ RUN = r"""
     minHp=Math.min(minHp,R.hp/R.maxHp);if(R.state!=='over')R.hp=Math.max(R.hp,R.maxHp*0.5);
     if(R.t>secs+(n===5?240:1))break;}
   const res=document.getElementById('overlay').textContent;
-  return {n,strong,t:Math.round(R.t),state:R.state,clear:/クリア/.test(res),ending:/Thanks for playing/.test(res),kills:R.kills,lv:R.lv,bossKills:R.bossKills,
+  return {n,strong,t:Math.round(R.t),state:R.state,clear:/クリア/.test(res),ending:!!document.querySelector('#overlay .endt'),kills:R.kills,lv:R.lv,bossKills:R.bossKills,
     seen:Object.keys(seen).sort().join(','),big:Object.keys(big).join(','),book:Object.keys(T.save.book.e).join(','),hurt:window.__HURT-hp0,
     worst:+worst.toFixed(1),maxE,maxEB,lz,rocks:rocks>0,snow,chill,ms:Math.round(performance.now()-t0),stageMax:T.save.rec.stageMax,gold:T.save.gold};}
 """
@@ -148,7 +148,7 @@ UNLOCK = r"""
   {const R=window.__go(5,'standard',['laser']);R.bossAt=[];R.acc=-1e9;R.t=300;const b=T.addBig('core');for(let i=0;i<10;i++)T.update(1/60);T.hit(b,1e9,0,0);
     const g0=T.save.gold;for(let i=0;i<60*5&&R.state!=='over';i++){if(R.state!=='play'){window.__chestOk();continue;}T.update(1/60);}
     const ov=document.getElementById('overlay');const end=ov.textContent;
-    ok('最終ボスをたおすとクリア・エンディング',R.state==='over'&&/Thanks for playing/.test(end)&&/これまでの記録/.test(end),end.slice(0,60));
+    ok('最終ボスをたおすとクリア・エンディング',R.state==='over'&&!!ov.querySelector('.endt')&&/これまでの記録/.test(end),end.slice(0,60));
     ok('エンディングの画面に記録',['出撃した時間','クリア','たおした敵','実績','図鑑'].every(w=>end.includes(w)),'');
     ok('エンディングの文：「！」はクリアの表示だけ',(end.match(/！/g)||[]).length===1&&/全ステージクリア！/.test(end),'');
     ov.querySelector('.go').click();const rs=ov.textContent;

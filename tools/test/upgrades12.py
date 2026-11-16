@@ -267,7 +267,7 @@ ACHT = r"""
   T.save=T.freshSave();T.setShip('standard');T.save.rec.kills=999;T.save.rec.clears=0;const g=T.checkAch();ok('条件の手前では達成しない',!g.some(a=>a.id==='kill1k'),g.map(a=>a.id).join());
   /* 出撃のおわりで達成 → 結果の画面に出る */
   {window.__HOLD=1;T.save=T.freshSave();T.setShip('standard');T.save.load[1]={t:'laser',d:0};T.startRun();const R=T.R;R.kills=1000;R.t=300;const g0=T.save.gold;T.endRun(true,false);
-    const txt=document.getElementById('overlay').textContent;ok('出撃のおわり：はじめてのクリア・千体・余裕の帰還が結果に出る',T.save.ach.clear1&&T.save.ach.kill1k&&T.save.ach.half&&/実績「千体」/.test(txt)&&!/実績「[^」]*」[^+]*！/.test(txt),txt.slice(-120));}
+    const txt=document.getElementById('overlay').textContent;ok('出撃のおわり：はじめてのクリア・千体・余裕の帰還が結果に出る',T.save.ach.clear1&&T.save.ach.kill1k&&T.save.ach.half&&/実績(「[^」]*」)*「千体」/.test(txt)&&!/実績「[^」]*」[^+]*！/.test(txt),txt.slice(-120));}
   /* 実績の画面 */
   T.openAch();ok('実績の画面：24行・達成の数',document.querySelectorAll('#achBody .arow').length===24&&document.querySelectorAll('#achBody .arow.done').length===Object.keys(T.save.ach).length,document.getElementById('achAll').textContent);
   ok('実績の画面に「！」なし',!/[！!]/.test(document.getElementById('achSheet').textContent),'');T.closeAch();

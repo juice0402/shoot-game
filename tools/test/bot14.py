@@ -32,7 +32,7 @@ RUN = r"""
     if(R.state==='lvup'){pick();continue;}
     window.__bot(R,T.GW,T.GH,T.U);T.update(1/60);frames++;if(i%30===0){T.draw();T.hud();}
     if(R.state!=='over')minHp=Math.min(minHp,R.hp/R.maxHp);}
-  const ov=document.getElementById('overlay');let txt=ov.textContent;const ending=/Thanks for playing/.test(txt);
+  const ov=document.getElementById('overlay');let txt=ov.textContent;const ending=!!ov.querySelector('.endt');/* エンディング（#16 で「おわり」に） */
   if(ending){ov.querySelector('.go').click();txt=ov.textContent;}
   const g=txt.match(/かせいだお金\+(\d+)G/);
   return {id,n,mode,seed,clear:/クリア！/.test(txt),ending,hp:Math.max(0,Math.round(R.hp/R.maxHp*100)),t:Math.round(R.t),kills:R.kills,gold:g?+g[1]:-1,lv:R.lv,

@@ -21,8 +21,8 @@ PLAY = r"""
       let o=c.find(q=>q.evo)||(Math.random()<0.6&&c.find(q=>q.cat==='w'))||c.filter(q=>q.cat!=='x')[(Math.random()*c.length)|0]||c[0];T.pickChoice(o);}
     else{const b=document.querySelector('#overlay .btnrow .go');if(b){b.disabled=false;b.click();}}};
   for(let i=0;i<cap&&R.state!=='over';i++){if(R.state==='lvup'){pick();continue;}window.__bot(R,T.GW,T.GH,T.U);T.update(1/60);if(i%30===0){T.draw();T.hud();}}
-  const ov=document.getElementById('overlay');let txt=ov.textContent;if(/Thanks for playing/.test(txt)){ov.querySelector('.go').click();txt=ov.textContent;}
-  const g=txt.match(/かせいだお金\+(\d+)G/),unl=[...ov.querySelectorAll('.unll li')].map(li=>li.textContent.replace('解放：',''));
+  const ov=document.getElementById('overlay');let txt=ov.textContent;if(ov.querySelector('.endt')){ov.querySelector('.go').click();txt=ov.textContent;}
+  const g=txt.match(/かせいだお金\+(\d+)G/),unl=[...ov.querySelectorAll('.unll li:not(.ship)')].map(li=>li.textContent.replace('解放：',''));
   return {stg:R.stg,clear:/クリア！/.test(txt),t:Math.round(R.t),kills:R.kills,gold:g?+g[1]:-1,lv:R.lv,bosses:R.bossKills,unl,timeout:R.state!=='over'};}
 """
 

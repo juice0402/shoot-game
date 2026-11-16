@@ -43,7 +43,7 @@ ALLMAX = r"""
   for(const m of R.mods)R.tlv[m.t]=T.WMAX;for(const k in R.pas)R.pas[k]=T.PAS[k].max||5;for(const k in R.sup)for(let i=0;i<T.SUP[k].max;i++)T.supUp(k);
   for(const k of T.SPC_IDS)R.spc[k]=1;T.calcCS();let steps=0;
   for(let i=0;i<60*(n===5?420:300)*2&&steps<60*(n===5?420:300)+30&&R.state!=='over';i++){if(R.state!=='play'){window.__ui();continue;}T.update(1/60);steps++;if(i%15===0){T.draw();T.hud();}R.hp=Math.max(R.hp,R.maxHp*0.5);}
-  const ov=document.getElementById('overlay');if(/Thanks/.test(ov.textContent))ov.querySelector('.go').click();
+  const ov=document.getElementById('overlay');if(ov.querySelector('.endt'))ov.querySelector('.go').click();
   return {n,id,t:Math.round(R.t),kills:R.kills,lv:R.lv,state:R.state,clear:/クリア！/.test(ov.textContent)};}
 """
 
@@ -108,7 +108,7 @@ REVIEW = r"""
   /* エンディング：はじめてステージ5をクリアした回だけ */
   {const s0=T.freshSave();const R=window.__go(5,'standard',['laser']);T.save.rec.stageMax=5;R.bossAt=[];R.acc=-1e9;R.t=300;const b=T.addBig('core');for(let i=0;i<5;i++)T.update(1/60);T.hit(b,1e9,0,0);
     for(let i=0;i<60*5&&R.state!=='over';i++){if(R.state!=='play'){window.__ui();continue;}T.update(1/60);}
-    const t=document.getElementById('overlay').textContent;ok('2回目のステージ5クリア：エンディングなし・結果',R.state==='over'&&!/Thanks/.test(t)&&/クリア！/.test(t),t.slice(0,30));}
+    const t=document.getElementById('overlay').textContent;ok('2回目のステージ5クリア：エンディングなし・結果',R.state==='over'&&!document.querySelector('#overlay .endt')&&/クリア！/.test(t),t.slice(0,30));}
   return res;}
 """
 

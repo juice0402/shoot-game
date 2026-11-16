@@ -5,12 +5,14 @@
 - データ：最初から8こ（攻撃4・防御2・補助2）・のこり61こに条件（記録の名前・22字まで・使わない言葉なし）・条件の数の1つ手前では解放されず、数で解放される（61こ全部）
   ・どの品も、最初の8こから順に解放できる（Lv8・つけてクリアの相手がたどれる）・機体の解放と進化の相手もたどれる
 - ショップ：最初は8こだけ並ぶ・「もうすぐ解放」は3こ（シルエット・条件・棒）と「のこり ○こ」・買えるかの判定（印）は解放ずみだけ・まだの品のくわしくは買えない
-- 出撃の結果：その出撃で解放された品をアイコンつきで「解放：○○」。次の出撃ではもう出さない
+- 出撃の結果：その出撃で解放された品をアイコンと名前で（#16 で小さく並べる形に）。次の出撃ではもう出さない
 - 機体を買うとついてくる品は解放ずみ（お知らせなし）・図鑑のまだの品のヒントは解放の条件
 - 古いセーブ：持っている品＋条件を満たした品をだまって解放ずみ（お知らせなし）・試作4の形はレーザー2つ・保存 → 読みこみで同じ
 - 試作用：全部解放のボタン → 69こ全部が並ぶ
 - 出撃中に出てくる強化（レベルアップ・宝箱）は、つけている武器だけ
 - #14 の点検：同じダメージの武器2つが同じフレームに大蛇に当たると、両方効く
+- #15 の点検（#16 で直した）：hit を直接呼ぶ攻撃（支援の雷・狙撃・主砲・全方位レーザー）と near を通る攻撃（トゲ装甲）も、別の攻撃と同じフレーム・同じダメージで
+  大蛇に当たると両方効く・体のいくつもの節に当たっても1回の攻撃は1回／出撃の回数は30秒以上の出撃だけ／ships があって owned がない古いセーブは、つけている数まで持つ
 - --shots：幅320・360・390・430でショップ（もうすぐ解放）・はじめの案内・結果の画面 → docs/shots/15-*.png
 - コンソールのエラーと警告0
 """
@@ -20,7 +22,7 @@ import harness14
 from harness14 import write_build, open_page, ROOT
 from playwright.sync_api import sync_playwright
 
-harness14.EXPOSE = harness14.EXPOSE.replace("keys,", "keys,isUnl,syncUnl,modProg,tutStep,upPool,chestPicks,")
+harness14.EXPOSE = harness14.EXPOSE.replace("keys,", "keys,isUnl,syncUnl,modProg,tutStep,upPool,chestPicks,sup12,snipe,SPECIAL,spDmg,dmgMul,contact,get ATK(){return ATK},set ATK(v){ATK=v},")
 SHOTS = os.path.join(ROOT, 'docs', 'shots')
 TMP = os.environ.get('OUT', '/tmp')
 BASE8 = ['laser', 'gatling', 'shotgun', 'sword', 'armor', 'shield', 'magnet', 'booster']
@@ -166,23 +168,23 @@ def shop(pg):
 RESULT = r"""
 (p)=>{const T=window.__T;window.__HOLD=1;localStorage.clear();const s=T.freshSave();T.save=s;s.howto=1;s.tut=1;s.ships.standard.eq[0]={t:'laser',d:0};T.setShip('standard');
   T.startRun();const R=T.R;Object.assign(R,p);R.tlv.laser=p.lv8?8:R.tlv.laser;T.endRun(!!p.clear,!p.clear);
-  const ov=document.getElementById('overlay');const li=[...ov.querySelectorAll('.unll li')].map(l=>[l.textContent,!!(l.querySelector('img')&&l.querySelector('img').src.startsWith('data:'))]);
+  const ov=document.getElementById('overlay');const li=[...ov.querySelectorAll('.unll li:not(.ship)')].map(l=>[l.textContent,!!(l.querySelector('img')&&l.querySelector('img').src.startsWith('data:'))]);
   return {li,unl:T.save.unl.slice(),saved:JSON.parse(localStorage.getItem(T.KEY)).unl};}
 """
 
 
 def result(pg):
     pg.evaluate("()=>{document.getElementById('title').hidden=true;document.getElementById('hangar').hidden=true;document.getElementById('sortie').hidden=false;}")
-    r = pg.evaluate(RESULT, {'kills': 400, 'lv': 12, 'lv8': True})
-    want = ['解放：追撃ミサイル', '解放：扇レーザー', '解放：はね返り弾', '解放：追尾レーザー', '解放：冷却装置']
-    ok('結果の画面：解放された品をアイコンつきで（出撃1回・400体・Lv12・レーザーLv8）', sorted(x[0] for x in r['li']) == sorted(want) and all(x[1] for x in r['li']), r['li'])
+    r = pg.evaluate(RESULT, {'kills': 400, 'lv': 12, 'lv8': True, 't': 40})
+    want = ['追撃ミサイル', '扇レーザー', 'はね返り弾', '追尾レーザー', '冷却装置']
+    ok('結果の画面：解放された品をアイコンと名前で（30秒以上の出撃1回・400体・Lv12・レーザーLv8）', sorted(x[0] for x in r['li']) == sorted(want) and all(x[1] for x in r['li']), r['li'])
     ok('お知らせ済みを保存', sorted(r['unl']) == sorted(r['saved']) and len(r['unl']) == 5, r['unl'])
-    again = pg.evaluate("()=>{const T=window.__T;T.startRun();const R=T.R;R.kills=10;T.endRun(false,true);return [...document.querySelectorAll('#overlay .unll li')].map(l=>l.textContent);}")
-    ok('次の出撃では同じ品を出さない（出撃2回 → 無敵延長だけ）', again == ['解放：無敵延長'], again)
+    again = pg.evaluate("()=>{const T=window.__T;T.startRun();const R=T.R;R.kills=10;R.t=40;T.endRun(false,true);return [...document.querySelectorAll('#overlay .unll li:not(.ship)')].map(l=>l.textContent);}")
+    ok('次の出撃では同じ品を出さない（30秒以上の出撃2回 → 無敵延長だけ）', again == ['無敵延長'], again)
     # 機体を買うとついてくる品：解放ずみ・お知らせなし
     sh = pg.evaluate("""()=>{const T=window.__T;const s=T.save;s.rec.halfClear=1;s.gold=5000;T.openShop('phantom');document.querySelector('#sheet .buybig').click();T.closeShop();
       const a=[s.ships.phantom.have,s.owned.twin,s.unl.includes('twin'),T.isUnl('twin')];T.startRun();const R=T.R;T.endRun(false,true);
-      return a.concat([[...document.querySelectorAll('#overlay .unll li')].map(l=>l.textContent).join(',')]);}""")
+      return a.concat([[...document.querySelectorAll('#overlay .unll li:not(.ship)')].map(l=>l.textContent).join(',')]);}""")
     ok('機体を買うとついてくる品（ファントムの双剣）は解放ずみ・お知らせなし', sh[:4] == [True, 1, True, True] and '双剣' not in sh[4], sh)
     # 出撃中の強化は、つけている武器だけ
     pool = pg.evaluate("""()=>{const T=window.__T;window.__seed(3);const s=T.freshSave();T.save=s;s.unl=T.TYPES.filter(t=>T.MODS[t].unlock);s.owned.missile=1;
@@ -204,7 +206,10 @@ SAVES = r"""
   {const s=ld({gold:900,owned:{laser:2},ships:{standard:{have:true,eq:[null,{t:'laser',d:0}]}},tut:1,howto:1,
     rec:{clears:2,bosses:3,goldTotal:900,wmax:{laser:8},sup5:[],fastBoss:0,bestKills:400,halfClear:1,meleeK:0,evos:1,stageMax:1,kills:900,bestLv:12,time:700},best:{t:300,kills:400,clear:true}});
     T.save=s;out.p12=['fan','hlaser','mine','thunder','flame','ricochet','cooler','acid','missile','iframe','scope'].filter(t=>!s.unl.includes(t));out.p12runs=s.rec.runs;
-    T.setShip('standard');T.startRun();const R=T.R;T.endRun(false,true);out.p12ann=[...document.querySelectorAll('#overlay .unll li')].map(l=>l.textContent);}
+    T.setShip('standard');T.startRun();const R=T.R;T.endRun(false,true);out.p12ann=[...document.querySelectorAll('#overlay .unll li:not(.ship)')].map(l=>l.textContent);}
+  /* #15 の点検：ships があって owned がない形（レーザー2つ・ラピッドにガトリング）→ つけている数まで持っている */
+  {const s=ld({gold:100,ships:{standard:{have:true,eq:[{t:'laser',d:0},{t:'laser',d:0},null]},rapid:{have:true,eq:[{t:'gatling',d:0}]}},cur:'standard',tut:1,howto:1});
+    out.noOwned=[s.owned.laser,s.ships.standard.eq.filter(Boolean).length,s.owned.gatling,s.ships.rapid.eq.filter(Boolean).length];}
   /* 保存 → 読みこみで同じ（unl・runs・cw） */
   {const s=T.freshSave();s.unl=['fan','missile'];s.rec.runs=7;s.rec.cw={shield:2,laser:1};s.tut=1;T.save=s;T.persist();const b=T.loadSave();
     out.round=[b.unl.join(','),b.rec.runs,JSON.stringify(b.rec.cw)];}
@@ -219,6 +224,7 @@ def saves(pg):
     ok('試作4の形（持ち物の記録なし）：レーザー2つ', s['p4'] == [2, 2], s['p4'])
     ok('試作5の形：持っている品は解放ずみ・まだの品はまだ・出撃の回数は記録から', s['p5'] == [True, True, False, 1, False], s['p5'])
     ok('#12 の形：条件を満たした品をだまって解放ずみ（出撃の回数は記録から3）・次の出撃でお知らせなし', not s['p12'] and s['p12runs'] == 3 and s['p12ann'] == [], [s['p12'], s['p12runs'], s['p12ann']])
+    ok('#15 の点検：機体ごとの装備はあって持ち物の記録がない古いセーブ：つけている装備は外れない（レーザー2・ガトリング1）', s['noOwned'] == [2, 2, 1, 1], s['noOwned'])
     ok('保存 → 読みこみで同じ（お知らせ済み・出撃の回数・つけてクリア）', s['round'] == ['fan,missile', 7, '{"laser":1,"shield":2}'], s['round'])
     ok('こわれたお知らせ済み・記録は捨てる', s['bad'] == ['fan', '{"shield":2}', 0], s['bad'])
 
@@ -230,6 +236,37 @@ SNAKE = r"""
   const h0=b.hp;for(let k=0;k<12;k++){for(const m of R.mods)m.cd=0;for(let i=0;i<20;i++){T.update(1/60);R.x=240;R.y=600;b.x=240;b.y=200;b.vx=0;b.vy=0;for(const s of b.segs){s.x=240;s.y=200;}}}
   return h0-b.hp;}
 """
+
+
+RUNS = r"""
+()=>{const T=window.__T;window.__HOLD=1;const s=T.freshSave();T.save=s;s.howto=1;s.tut=1;s.ships.standard.eq[0]={t:'laser',d:0};T.setShip('standard');
+  const run=t=>{T.startRun();const R=T.R;R.t=t;T.endRun(false,true);return s.rec.runs;};
+  const a=[run(5),run(29.9),T.isUnl('missile'),run(30),T.isUnl('missile'),T.isUnl('iframe'),run(120),T.isUnl('iframe')];return [a,T.MODS.missile.unlock.txt,T.MODS.iframe.unlock.txt,T.MODS.scope.unlock.txt];}
+"""
+
+# 同じフレーム・同じダメージで、別の攻撃のあとに当てる（two）／その攻撃だけ（one）。大蛇の頭と体（11節）を同じ所に置く
+SAMEF = r"""
+([k,two])=>{const T=window.__T;const R=window.__go(4,'standard',['laser']);R.bossAt=[];R.acc=-1e9;R.lzAt=1e9;R.turT=1e9;R.E.length=0;R.x=240;R.y=420;R.inv=99;R.t=50;
+  const b=T.addBig('snake');b.hp=b.max=1e9;const put=(x,y)=>{b.x=x;b.y=y;b.vx=b.vy=0;for(const q of b.segs){q.x=x;q.y=y;}};put(240,300);
+  const A={thunder:()=>[T.SUP.thunder.v.d[0]*T.dmgMul(),()=>{R.sup.thunder=1;R.thT=0;T.sup12(0);}],
+    snipe:()=>[T.spDmg(120),()=>T.snipe([b])],
+    omega:()=>[T.spDmg(90),()=>T.SPECIAL.omega.up({f:0,t:0.5})],
+    standard:()=>[T.spDmg(40),()=>T.SPECIAL.standard.up({n:0,t:0.15})],
+    spike:()=>{put(240,410);R.cs.spike=1;T.buildGrid();return [15*T.dmgMul(),()=>{b.spk=-9;for(const q of b.segs)q.spk=-9;T.contact();}];}};
+  const [amt,fn]=A[k]();T.buildGrid();const h0=b.hp;if(two){T.ATK++;T.hit(b,amt,0,0);}fn();return [(h0-b.hp)/amt,R.t];}
+"""
+
+
+def review15(pg):
+    r = pg.evaluate(RUNS)
+    ok('#15 の点検：出撃の回数は30秒以上の出撃だけ（5秒・29.9秒の撤退は数えない → 30秒で追撃ミサイル・2回で無敵延長）',
+       r[0] == [0, 0, False, 1, True, False, 2, True] and r[1:] == ['30秒以上の出撃1回', '30秒以上の出撃2回', '30秒以上の出撃3回'], r)
+    bad = []
+    for k in ('thunder', 'snipe', 'omega', 'standard', 'spike'):
+        one = pg.evaluate(SAMEF, [k, False])[0]; two = pg.evaluate(SAMEF, [k, True])[0]
+        if not (abs(one - 1) < 0.01 and abs(two - 2) < 0.01):
+            bad.append([k, round(one, 3), round(two, 3)])
+    ok('#15 の点検：支援の雷・狙撃・主砲・全方位レーザー・トゲ装甲が、別の攻撃と同じフレーム・同じダメージでも大蛇に効く（体の11節に当たっても1回）', not bad, bad)
 
 
 def snake(pg):
@@ -295,6 +332,7 @@ def main():
         saves(pg)
         pg.evaluate(GO)
         snake(pg)
+        review15(pg)
         pg.close()
         if '--shots' in sys.argv:
             shots(b, pp, errs, warns)
