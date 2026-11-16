@@ -2330,6 +2330,7 @@ const isMelee=t=>t==='sword'||t==='saw'||!!MODS[t].melee;
 const wMul=t=>{const X=R.spc;let v=1;if(X.fury)v*=isMelee(t)?1.6:MODS[t].cat==='atk'?0.8:1;if(X.one&&R.cs.top&&!MODS[t].passive)v*=t===R.cs.top?1.4:0.85;return v;};
 const BOOM={mine:1,missile:1,grenade:1,cluster:1,torpedo:1,minefield:1,micro:1};
 let LKB=0;/* 弾が1発ずつ当てている間は1（大蛇の同じフレームの印を使わない） */
+let ATK=0;/* 攻撃ごとの番号（武器1つの発射・near の1回・必殺技の1回ごとに1ふえる）。大蛇の重複よけの印に使う（#14 の点検） */
 let HSRC=0;/* いま当てているのが近接の武器なら1（倒した数を数える） */
 function stat(t){const s=stat0(t);if(s){const k=csk(t);if(k)applyCS(k,s);}return s;}
 function stat0(t){
@@ -2482,7 +2483,7 @@ function buildGrid(){
     const cx=clamp(Math.floor((e.x+PADG)/CELL),0,gCols-1),cy=clamp(Math.floor((e.y+PADG)/CELL),0,gRows-1);
     grid[cy*gCols+cx].push(e);}
 }
-function near(x,y,r,fn){
+function near(x,y,r,fn){ATK++;
   const rr=r+gMaxR+2;/* 大型の敵（当たり54）もとらえる */
   const x0=clamp(Math.floor((x-rr+PADG)/CELL),0,gCols-1),x1=clamp(Math.floor((x+rr+PADG)/CELL),0,gCols-1);
   const y0=clamp(Math.floor((y-rr+PADG)/CELL),0,gRows-1),y1=clamp(Math.floor((y+rr+PADG)/CELL),0,gRows-1);
@@ -2502,7 +2503,7 @@ function showBanner(t,c){banner.textContent=t;banner.style.borderColor=c||'';ban
 function hit(e,amt,kx,ky){
   if(e.dead||e.hide)return;/* まぼろしが消えている間は当たらない */
   if(e.link){e.flash=0.07;e=e.link;if(e.dead)return;}/* 大蛇の体：頭の体力がへる */
-  if(e.segs&&!LKB){if(e.lkT===R.t&&e.lkA===amt)return;e.lkT=R.t;e.lkA=amt;}/* 大蛇：同じフレームの同じ攻撃（ビーム・範囲）は1回だけ。体は頭と同じ id なので、当たり済みの印も1つ（#13 の点検） */
+  if(e.segs&&!LKB){if(e.lkT===R.t&&e.lkA===amt&&e.lkK===ATK)return;e.lkT=R.t;e.lkA=amt;e.lkK=ATK;}/* 大蛇：同じフレームの同じ攻撃（ビーム・範囲）は1回だけ。別の武器は攻撃の番号でわける（#14 の点検）。体は頭と同じ id なので、当たり済みの印も1つ（#13 の点検） */
   amt*=1+e.vul+(e.son>0?e.sonV:0);/* ニードル砲の「もろさ」・音波砲 */
   if(e.shell)amt*=0.3;/* 岩やどり：岩をかぶっている間は30% */
   if(e.kind==='guard'){const kl=Math.hypot(kx,ky);if(kl>1e-3&&(kx*Math.cos(e.fa)+ky*Math.sin(e.fa))/kl<-0.35){amt*=0.3;/* 盾持ち：前からは30% */
@@ -2759,10 +2760,10 @@ function fire(dt){fireList(R.mods,dt);if(R.cmods.length)fireList(R.cmods,dt);}
 function fireList(list,dt){
   for(const m of list){
     const ev=R.evo[m.t]&&EFIRE[m.t],f=ev||FIRE[m.t];if(!f)continue;
-    R.fm=R.sh.front&&SLOTS[m.slot].front?R.sh.front:1;HSRC=isMelee(m.t)?1:0;
+    R.fm=R.sh.front&&SLOTS[m.slot].front?R.sh.front:1;HSRC=isMelee(m.t)?1:0;ATK++;
     const st=stat(m.t);
     if(m.bq>0&&!ev){m.bt-=dt;if(m.bt<=0){m.bq--;m.bt=st.gap;const [bx,by]=modPos(m),ba=dirAngle(m.d);BURST[m.t](m,st,bx,by,Math.cos(ba),Math.sin(ba));}}
-    m.cd-=dt;if(m.cd>0)continue;
+    m.cd-=dt;if(m.cd>0)continue;ATK++;
     const [ox,oy]=modPos(m),a=dirAngle(m.d);
     const ok=f(m,st,ox,oy,Math.cos(a),Math.sin(a))!==false;m.cd=ok?st.cd:0.15;if(ok)SFX.shot(ev?EVO[m.t].id:m.t);
   }
@@ -3032,7 +3033,7 @@ function reviveFx(){for(const b of R.EB){const dx=b.x-R.x,dy=b.y-R.y;if(dx*dx+dy
 
 /* 進化した武器の撃ち方（false＝撃たない：永久ノコと小さな太陽は evo10() で動く） */
 const EFIRE={
-  laser(m,st,ox,oy,ux,uy){m.bm=R.t;for(let k=0;k<st.n;k++){const off=(k-(st.n-1)/2)*(st.w+4),sx=ox+ux*14-uy*off,sy=oy+uy*14+ux*off;
+  laser(m,st,ox,oy,ux,uy){m.bm=R.t;for(let k=0;k<st.n;k++){ATK++;const off=(k-(st.n-1)/2)*(st.w+4),sx=ox+ux*14-uy*off,sy=oy+uy*14+ux*off;
     for(const e of R.E){if(e.dead)continue;const dx=e.x-sx,dy=e.y-sy,pr=dx*ux+dy*uy;if(pr<-e.r||pr>st.len)continue;if(Math.abs(dx*uy-dy*ux)<=st.w/2+e.r)hit(e,st.dmg,ux*6,uy*6);}}},
   gatling(m,st,ox,oy,ux,uy){const base=Math.atan2(uy,ux);for(let k=0;k<st.n;k++){const a=base+rand(-st.spread,st.spread),off=(k-(st.n-1)/2)*7;
     R.B.push(mkB(ox+ux*14-uy*off,oy+uy*14+ux*off,Math.cos(a)*st.spd,Math.sin(a)*st.spd,st.dmg,st.pierce,16,{kb:0.08}));}},
@@ -3431,7 +3432,7 @@ const SPECIAL={
   /* なぎはらい：画面を横切る3本の斬撃（はば±30）。弾も消す */
   blade:{dur:1.25,start(s){s.L=[0,1,2].map(i=>({y:clamp(R.y-50-i*120,30,GH-30),dir:i%2?-1:1,t0:i*0.2,x:null,hits:new Set()}));
       /* 自機が上のほうにいて重なったときは、上から60ずつはなす（#11 の点検） */for(let i=s.L.length-2;i>=0;i--)if(s.L[i].y-s.L[i+1].y<60)s.L[i].y=s.L[i+1].y+60;},
-    up(s){for(const l of s.L){const p=(s.t-l.t0)/0.35;if(p<0||p>1.2)continue;const q=Math.min(1,p),x1=l.dir>0?-40+q*(GW+80):GW+40-q*(GW+80),x0=l.x==null?(l.dir>0?-40:GW+40):l.x;l.x=x1;
+    up(s){for(const l of s.L){ATK++;const p=(s.t-l.t0)/0.35;if(p<0||p>1.2)continue;const q=Math.min(1,p),x1=l.dir>0?-40+q*(GW+80):GW+40-q*(GW+80),x0=l.x==null?(l.dir>0?-40:GW+40):l.x;l.x=x1;
         const lo=Math.min(x0,x1),hi=Math.max(x0,x1);
         for(const e of R.E){if(e.dead||l.hits.has(e.id)||Math.abs(e.y-l.y)>30+e.r||e.x<lo-e.r||e.x>hi+e.r)continue;l.hits.add(e.id);hit(e,spDmg(45),l.dir*120*U,0);}
         for(const b of R.EB)if(!b.dead&&Math.abs(b.y-l.y)<=34&&b.x>=lo-6&&b.x<=hi+6)ebGone(b,'#e6dcff','w');}},
@@ -3485,7 +3486,7 @@ const SPECIAL={
 function spStart(){const d=SPECIAL[R.id];R.sp={t:0,dur:d.dur};R.spN++;R.gauge=SPG.max;d.start(R.sp);SFX.play('sp_'+R.id);showBanner(R.sh.sp.name,R.sh.c);}
 function spUpdate(dt){
   if(!R.sp){gaugeAdd(SPG.time*dt);if(R.gauge>=SPG.max)spStart();}
-  else{const s=R.sp,d=SPECIAL[R.id];s.t+=dt;d.up(s,dt);if(s.t>=s.dur){if(d.end)d.end(s);R.sp=null;R.gauge=0;}}
+  else{const s=R.sp,d=SPECIAL[R.id];s.t+=dt;ATK++;d.up(s,dt);if(s.t>=s.dur){if(d.end)d.end(s);R.sp=null;R.gauge=0;}}
   for(const a of R.ES)escort(a,dt);
 }
 /* 必殺技の絵：はじめに画面を少し暗くして機体の色の光（spDark）／機体の下（spUnder）／機体の上（spDraw）／いちばん上（spTop） */
