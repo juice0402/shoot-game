@@ -24,6 +24,29 @@ button:focus-visible{outline:2px solid #4cc9ff;outline-offset:2px}
 button:disabled{cursor:not-allowed}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:0}
 
+/* ---------- title・遊び方 ---------- */
+#title{position:fixed;inset:0;z-index:30;background:var(--deep);overflow:hidden}
+#titleCv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated;image-rendering:crisp-edges}
+.tbox{position:relative;height:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;justify-content:space-between;
+  padding:calc(14vh + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.logo{margin:0;text-align:center;font-family:var(--f-num);font-weight:400;font-size:clamp(30px,10vw,46px);line-height:1.25;letter-spacing:.04em;color:#fff2a8;
+  text-shadow:0 3px 0 #b8600e,0 6px 0 #6e3006,0 0 18px rgba(255,205,72,.55)}
+.logo small{display:block;margin-top:14px;font-family:var(--f-ui);font-size:15px;letter-spacing:.12em;color:#cfeaff;text-shadow:0 2px 0 #060a1c}
+.tbtns{display:flex;flex-direction:column;gap:10px}
+.tbtns .hrow button{flex:1}
+.btn3.sq{width:44px;min-height:44px;padding:0;flex:none}
+.howbg{position:fixed;inset:0;z-index:70;background:rgba(5,6,15,.82);display:flex;align-items:center;justify-content:center;padding:16px}
+.howbox{width:100%;max-width:400px;background:var(--panel);border:3px solid var(--go);padding:14px;display:flex;flex-direction:column;gap:12px}
+.howcard{display:flex;flex-direction:column;gap:8px;text-align:center}
+.howcard h3{margin:0;font-weight:400;font-size:22px;color:var(--go)}
+.howcard p{margin:0;font-size:15px;line-height:1.6}
+.howno{color:var(--dim);font-size:14px!important}
+.howart{width:100%;aspect-ratio:160/110;image-rendering:pixelated;image-rendering:crisp-edges;border:3px solid var(--edge)}
+.howdots{display:flex;justify-content:center;gap:8px}
+.howdots i{width:9px;height:9px;background:var(--edge)}
+.howdots i.on{background:var(--go)}
+.howbox .hrow button:first-child{flex:none;width:30%}
+
 /* ---------- hangar（スマホ1画面：上＝お金とショップ／まんなか＝大きな機体／下＝出撃） ---------- */
 #hangar{height:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:8px;
   padding-block:calc(8px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-bottom,0px))}
@@ -31,6 +54,7 @@ button:disabled{cursor:not-allowed}
 .ttl{flex:1;min-width:0}
 h1{margin:0;font-size:22px;line-height:1.2;font-weight:400;letter-spacing:.08em}
 h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
+@media (max-width:430px){h1 small{display:none}}
 .gold{display:flex;align-items:center;gap:6px;height:44px;padding:0 10px;background:var(--panel);border:3px solid var(--edge);flex:none}
 .coin{width:16px;height:16px;image-rendering:pixelated;image-rendering:crisp-edges}
 .gold b{font-size:14px;font-weight:400}
@@ -190,8 +214,25 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
-<main id="hangar">
+<section id="title" hidden>
+  <canvas id="titleCv" aria-hidden="true"></canvas>
+  <div class="tbox">
+    <h1 class="logo"><span class="gname">SHOOT</span><small>シューティング × サバイバー</small></h1>
+    <div class="tbtns">
+      <button id="startBtn" class="go" type="button">スタート</button>
+      <div class="hrow"><button id="howBtn" class="btn3" type="button">遊び方</button><button id="sndBtn" class="btn3" type="button" aria-pressed="true">音 ON</button></div>
+    </div>
+  </div>
+</section>
+
+<div id="howto" class="howbg" hidden><div class="howbox" role="dialog" aria-label="遊び方">
+  <div id="howCard" class="howcard"></div>
+  <div class="hrow"><button id="howPrev" class="btn3" type="button">もどる</button><button id="howNext" class="go" type="button">次へ</button></div>
+</div></div>
+
+<main id="hangar" hidden>
   <header class="top">
+    <button id="toTitle" class="btn3 sq" type="button" aria-label="タイトルへ">◀</button>
     <div class="ttl"><h1>格納庫<small>試作5</small></h1></div>
     <div class="gold" aria-label="持っているお金"><img class="coin" alt=""><b id="goldNum" class="num">0</b><small>G</small></div>
     <button id="shopBtn" class="shopbtn" type="button">ショップ<span id="shopDot" class="badge" hidden></span></button>
@@ -257,6 +298,8 @@ const fmt=t=>{t=Math.floor(t);return String(Math.floor(t/60)).padStart(2,'0')+':
 
 /* ---------- data ---------- */
 /* 画面は横480ドット。U＝試作4（横320）からの倍率。距離・速さ・大きさはUをかけて、遊んだ手ごたえを同じに保つ */
+/* ゲームの名前（まだ仮）。ここ1か所で変えられる */
+const GAME_NAME='SHOOT（仮）';
 const U=1.5,RUN_LEN=300,MAXE=280,GW=480,CELL=48,PADG=150,BASE_HP=70,WMAX=8;
 const DIRV=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
 const ARROW=['↑','↗','→','↘','↓','↙','←','↖'];
@@ -770,6 +813,8 @@ function loadSave(){
         else if(Array.isArray(o.load))s.ships.standard.eq=cleanLoad('standard',o.load);   /* 試作4のセーブ：今の装備をスタンダード機へ */
         if(SHIPS[o.cur]&&s.ships[o.cur].have)s.cur=o.cur;
         if(o.tut)s.tut=1;
+        if(o.howto)s.howto=1;
+        if(o.snd===false)s.snd=false;
         if(Array.isArray(o.seen))s.seen=o.seen.filter(k=>SHIPS[k]);
         if(o.best&&Number.isFinite(o.best.t))s.best={t:o.best.t,kills:o.best.kills|0,clear:!!o.best.clear};
         const r=o.rec;if(r&&typeof r==='object'){
@@ -787,13 +832,88 @@ function shipProg(id){const u=SHIPS[id].unlock;if(!u)return {ok:true,cur:0,n:0};
   const cur=u.k==='wmax'?Math.max(r.wmax.sword||0,r.wmax.saw||0):u.k==='sup5'?r.sup5.length:r[u.k];return {ok:cur>=u.n,cur:Math.min(cur,u.n),n:u.n};}
 function setShip(id){save.cur=id;SLOTS=SHIPS[id].slots;save.load=save.ships[id].eq;}
 let save=loadSave();setShip(save.cur);
+/* ---------- 効果音（Web Audio でコードで作る・音のファイルは使わない） ---------- */
+const SFX=(()=>{
+  const VOLUME=0.32;            /* 全体の音の大きさはここ1か所 */
+  let ac=null,master=null,noiseBuf=null;const last={};let made=0;
+  function init(){
+    if(ac)return true;
+    try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return false;
+      try{if(navigator.audioSession)navigator.audioSession.type='ambient';}catch(_){}
+      ac=new A();master=ac.createGain();master.gain.value=VOLUME;
+      const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=6;master.connect(comp);comp.connect(ac.destination);
+      noiseBuf=ac.createBuffer(1,ac.sampleRate*0.6,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    }catch(e){ac=null;return false;}
+    return true;
+  }
+  /* 最初のタップで音を始める（iPhone の決まり） */
+  function unlock(){if(!init())return;if(ac.state!=='running'&&ac.state!=='closed')ac.resume().catch(()=>{});}
+  const on=()=>save.snd!==false&&ac&&ac.state!=='closed';
+  /* 1つの音：type・高さ f0→f1・長さ・大きさ・はじまりの遅れ */
+  function tone(type,f0,f1,dur,vol,delay){
+    const t=ac.currentTime+(delay||0),o=ac.createOscillator(),g=ac.createGain();
+    o.type=type;o.frequency.setValueAtTime(f0,t);if(f1!==f0)o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+Math.min(0.012,dur*0.2));g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.02);made++;
+  }
+  function noise(dur,vol,fType,f0,f1,delay,q){
+    const t=ac.currentTime+(delay||0),s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
+    s.buffer=noiseBuf;f.type=fType||'lowpass';f.frequency.setValueAtTime(f0,t);if(f1&&f1!==f0)f.frequency.exponentialRampToValueAtTime(f1,t+dur);f.Q.value=q||0.8;
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+0.02);made++;
+  }
+  /* 武器ごとに少しちがう撃つ音（何百発も撃つので、とくに小さく・間引く） */
+  const SHOT={
+    laser:()=>tone('square',1320,700,0.05,0.035),
+    gatling:()=>noise(0.03,0.04,'highpass',2400,2400),
+    mine:()=>tone('sine',220,110,0.09,0.06),
+    shotgun:()=>noise(0.09,0.07,'lowpass',2200,500),
+    freeze:()=>{tone('triangle',1800,2400,0.07,0.035);tone('sine',2600,2600,0.05,0.02,0.03);},
+    missile:()=>noise(0.16,0.045,'bandpass',600,2400,0,2),
+    flame:()=>noise(0.08,0.022,'lowpass',900,500),
+    sword:()=>noise(0.12,0.07,'bandpass',800,3200,0,3),
+    saw:()=>tone('sawtooth',500,700,0.08,0.03),
+    thunder:()=>{noise(0.14,0.07,'highpass',1500,800);tone('square',90,60,0.08,0.03);},
+    gravity:()=>tone('sine',300,90,0.22,0.06),
+    cannon:()=>{tone('sawtooth',160,50,0.3,0.08);noise(0.25,0.06,'lowpass',1800,200);},
+  };
+  const GAP={shot:0.07,hit:0.045,kill:0.035,xp:0.04,btn:0.05};
+  const SND={
+    hit:()=>tone('square',260,180,0.025,0.025),
+    kill:()=>{noise(0.07,0.06,'lowpass',1800,300);tone('square',420,140,0.06,0.025);},
+    boss:()=>{noise(1.1,0.22,'lowpass',1600,60);tone('sine',90,30,1.0,0.25);tone('square',140,40,0.5,0.06,0.15);},
+    xp:p=>tone('sine',900+p*40,1300+p*40,0.05,0.03),
+    coin:()=>{tone('square',1320,1320,0.06,0.04);tone('square',1760,1760,0.14,0.04,0.06);},
+    lvup:()=>[523,659,784,1047].forEach((f,i)=>tone('triangle',f,f,0.14,0.07,i*0.07)),
+    hurt:()=>{tone('square',240,70,0.18,0.08);noise(0.12,0.06,'lowpass',900,200);},
+    barrier:()=>tone('triangle',700,1400,0.16,0.06),
+    buy:()=>{tone('square',988,988,0.07,0.05);tone('square',1319,1319,0.2,0.05,0.07);tone('triangle',1976,1976,0.18,0.03,0.12);},
+    btn:()=>tone('triangle',660,880,0.04,0.035),
+    clear:()=>[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone('triangle',f,f,i===6?0.5:0.14,0.08,i*0.11)),
+    over:()=>[392,330,262,196].forEach((f,i)=>tone('triangle',f,f*0.97,i===3?0.6:0.2,0.07,i*0.16)),
+    start:()=>{tone('sawtooth',220,880,0.35,0.05);noise(0.4,0.05,'bandpass',400,3000,0,1.5);},
+  };
+  function play(name,arg){
+    if(!on())return;const now=ac.currentTime,gap=GAP[name]||0.02;
+    if(last[name]!=null&&now-last[name]<gap)return;last[name]=now;
+    try{SND[name](arg||0);}catch(_){}
+  }
+  function shot(t){
+    if(!on()||!SHOT[t])return;const now=ac.currentTime;
+    if(last.shot!=null&&now-last.shot<GAP.shot)return;
+    const k='s_'+t,g=t==='gatling'||t==='flame'?0.12:t==='laser'?0.1:0.08;if(last[k]!=null&&now-last[k]<g)return;
+    last.shot=now;last[k]=now;try{SHOT[t]();}catch(_){}
+  }
+  return {unlock,play,shot,get made(){return made},get ready(){return !!ac}};
+})();
+
 
 /* ---------- hangar ---------- */
 /* タップだけで使う（ドラッグはなし）：空いている場所の「＋」→ 下から一覧 → つく ／ ついている装備 → 向き（大きな矢印8つ）と外す */
 const hangar=$('hangar'),sortie=$('sortie'),bay=$('bay'),edCv=$('editor'),ed=edCv.getContext('2d');
 const SS=112,SC=56;
 const ssCv=document.createElement('canvas');ssCv.width=SS;ssCv.height=SS;const ssg=ssCv.getContext('2d');
-const FINGERURL=paint(16,20,[{m:'yel',r:2,p:[[5,0],[8,0],[8,9],[13,9],[15,12],[15,19],[3,19],[1,13],[3,10],[5,10]]},{m:'gold',r:1,p:[[8,10],[9,10],[9,14],[8,14]]}],{}).img.toDataURL();
+const FINGER=paint(16,20,[{m:'yel',r:2,p:[[5,0],[8,0],[8,9],[13,9],[15,12],[15,19],[3,19],[1,13],[3,10],[5,10]]},{m:'gold',r:1,p:[[8,10],[9,10],[9,14],[8,14]]}],{}),FINGERURL=FINGER.img.toDataURL();
 let EV={dpr:1,k:1,ox:0,oy:0,W:1,H:1,css:1},noteT=0,view=save.cur,swipe=null,swipeAt=0;
 const used=t=>save.load.reduce((n,v)=>n+(v&&v.t===t?1:0),0);
 const avail=t=>save.owned[t]-used(t);
@@ -983,6 +1103,7 @@ function openDetail(k){
   else if(isShip&&!shipProg(k).ok){buy.disabled=true;buy.textContent='まだ解放されていない';}
   else if(save.gold>=it.price){buy.append(el('span','num',String(it.price)),document.createTextNode('G で買う'));
     buy.addEventListener('click',()=>{
+      SFX.play('buy');
       if(isShip){if(!buyShip(k))return;shopNote=it.name+'を手に入れた！格納庫で ◀ ▶ をおして切りかえてね';view=k;setShip(k);}
       else{if(save.gold<it.price)return;save.gold-=it.price;save.owned[k]++;persist();shopNote=it.name+'を買ったよ！格納庫の「＋」をタップしてつけてね';}
       closeSheet();renderAll();});}
@@ -1115,7 +1236,7 @@ function showBanner(t){banner.textContent=t;banner.hidden=false;clearTimeout(ban
 /* damage */
 function hit(e,amt,kx,ky){
   if(e.dead)return;
-  e.hp-=amt;e.flash=0.07;
+  e.hp-=amt;e.flash=0.07;SFX.play('hit');
   const res=e.kind==='boss'?0.08:e.kind==='tank'?0.5:1;e.kx+=kx*res;e.ky+=ky*res;
   if(e.hp<=0){e.dead=true;killed(e);}
 }
@@ -1126,15 +1247,15 @@ function blast(x,y,rad,dmg,kb,cols){
 function addGem(x,y,v,big,vx,vy){if(R.G.length>320){gainXp(v);return;}R.G.push({x,y,v,big,vx:vx||0,vy:vy||0,dead:false,pull:false,sp:70*U});}
 function killed(e){
   R.kills++;const k=KIND[e.kind];
-  if(e.kind==='boss'){for(let i=0;i<10;i++)addGem(e.x+rand(-30,30),e.y+rand(-20,20),3,true,rand(-68,68),rand(-68,27));R.bossKills++;showBanner('大型の敵をたおした！');
+  if(e.kind==='boss'){for(let i=0;i<10;i++)addGem(e.x+rand(-30,30),e.y+rand(-20,20),3,true,rand(-68,68),rand(-68,27));R.bossKills++;showBanner('大型の敵をたおした！');SFX.play('boss');
     addX(e.x,e.y,EXPL.b,0.8);for(let i=0;i<5;i++)addX(e.x+rand(-60,60),e.y+rand(-45,45),EXPL.m,rand(0.4,0.7));}
-  else{addGem(e.x,e.y,k.xp,k.xp>=3);addX(e.x,e.y,e.kind==='bug'?EXPL.s:EXPL.m,e.kind==='bug'?0.36:0.5);}
+  else{SFX.play('kill');addGem(e.x,e.y,k.xp,k.xp>=3);addX(e.x,e.y,e.kind==='bug'?EXPL.s:EXPL.m,e.kind==='bug'?0.36:0.5);}
   burst(e.x,e.y,e.kind==='boss'?50:e.kind==='tank'?16:8,k.col);
 }
 function hurt(d){
   if(R.inv>0)return;
-  if(R.bar){R.bar=false;R.barCd=Math.max(5,14-3*(R.sup.barrier-1));R.inv=0.6;burst(R.x,R.y,14,['#c4ffe3','#5dffb0','#ffffff']);return;}
-  R.hp=Math.max(0,R.hp-d);R.inv=0.55;R.hurtFx=0.18;burst(R.x,R.y,10,['#ff2d6f','#ffffff']);
+  if(R.bar){R.bar=false;R.barCd=Math.max(5,14-3*(R.sup.barrier-1));R.inv=0.6;burst(R.x,R.y,14,['#c4ffe3','#5dffb0','#ffffff']);SFX.play('barrier');return;}
+  R.hp=Math.max(0,R.hp-d);R.inv=0.55;R.hurtFx=0.18;SFX.play('hurt');burst(R.x,R.y,10,['#ff2d6f','#ffffff']);
   if(R.hp<=0&&R.guts){R.guts=false;R.hp=1;R.inv=1.2;showBanner('がんばり！ HP1 でたえた');}
 }
 function gainXp(v){R.xp+=v*(1+0.1*R.pas.xp);while(R.xp>=R.need){R.xp-=R.need;R.lv++;R.need=xpNeed(R.lv);R.pending++;}}
@@ -1231,7 +1352,7 @@ function fire(dt){
     const f=FIRE[m.t];if(!f)continue;
     const st=stat(m.t);m.cd-=dt;if(m.cd>0)continue;
     const [ox,oy]=modPos(m),a=dirAngle(m.d);
-    m.cd=f(m,st,ox,oy,Math.cos(a),Math.sin(a))===false?0.15:st.cd;
+    const ok=f(m,st,ox,oy,Math.cos(a),Math.sin(a))!==false;m.cd=ok?st.cd:0.15;if(ok)SFX.shot(m.t);
   }
 }
 const SPK={0:'#bfefff',1:'#c4ffe3',3:'#e9f8ff',4:'#ffffff',5:'#c9d6ff',6:'#ffe2a8'};
@@ -1392,7 +1513,7 @@ function gems(dt){
     const dx=R.x-g.x,dy=R.y-g.y,d=Math.hypot(dx,dy)||1;
     if(g.pull||d<mag){g.pull=true;g.sp+=460*U*dt;const st=Math.min(g.sp*dt,d);g.x+=dx/d*st;g.y+=dy/d*st;}
     else{g.vx*=damp;g.vy*=damp;g.x+=g.vx*dt;g.y+=(g.vy+18*U)*dt;}
-    if(Math.hypot(R.x-g.x,R.y-g.y)<13.5){g.dead=true;gainXp(g.v);}else if(g.y>GH+15)g.dead=true;}
+    if(Math.hypot(R.x-g.x,R.y-g.y)<13.5){g.dead=true;gainXp(g.v);SFX.play('xp',(R.xp/R.need*12)|0);}else if(g.y>GH+15)g.dead=true;}
 }
 function parts(dt){for(const p of R.P){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=0.94;p.vy*=0.94;p.life-=dt;if(p.life<=0)p.dead=true;}}
 /* 背景：星3層（ちがう速さ）＋星雲＋遠くの惑星 */
@@ -1571,6 +1692,7 @@ function buildSummary(){
 }
 let lvChoices=null;
 function openLevelUp(){
+  SFX.play('lvup');
   R.state='lvup';sdrag=null;R.target=null;
   overlay.textContent='';
   const wrap=el('div','cards');
@@ -1597,7 +1719,8 @@ function openPause(){
   R.state='pause';sdrag=null;R.target=null;overlay.textContent='';
   const row=el('div','btnrow'),c=el('button','go','続ける'),q=el('button','btn2','撤退して格納庫へ');
   c.type='button';q.type='button';c.addEventListener('click',resume);q.addEventListener('click',()=>endRun(false,true));
-  row.append(c,q);
+  const sb=el('button','btn2',save.snd===false?'音 OFF':'音 ON');sb.type='button';sb.addEventListener('click',()=>{save.snd=save.snd===false;persist();sb.textContent=save.snd===false?'音 OFF':'音 ON';});
+  row.append(c,sb,q);
   overlay.append(el('h2',null,'一時停止'),el('p','sub',fmt(R.t)+' ・ 撃破 '+R.kills+'体 ・ Lv '+R.lv),buildSummary(),row);
   overlay.hidden=false;
 }
@@ -1616,6 +1739,7 @@ function endRun(clear,retreat){
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
   persist();
+  if(!retreat){SFX.play(clear?'clear':'over');if(clear)setTimeout(()=>SFX.play('coin'),900);}
   overlay.textContent='';
   overlay.append(el('h2',null,clear?'クリア！':retreat?'撤退':'撃墜…'),
     el('p','sub',clear?'5分 生きのびた！':retreat?'とちゅうで格納庫にもどったよ':'組みなおして、また出撃しよう'));
@@ -1662,6 +1786,86 @@ window.addEventListener('blur',()=>keys.clear());
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&R&&R.state==='play')openPause();});
 
 document.querySelectorAll('img.coin').forEach(i=>{i.src=COINURL;});
-layoutEditor();renderAll();
+/* ---------- title・遊び方 ---------- */
+const titleEl=$('title'),tCv=$('titleCv'),tg=tCv.getContext('2d');
+let TS=null,tRaf=0,tLast=0;
+function titleBg(){
+  const r=titleEl.getBoundingClientRect(),h=clamp(Math.round(GW*Math.max(1,r.height)/Math.max(1,r.width)),660,1200);
+  tCv.width=GW;tCv.height=h;tg.imageSmoothingEnabled=false;
+  const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,h),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
+  TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0};
+}
+function titleFrame(ts){
+  if(titleEl.hidden){tRaf=0;return;}
+  tRaf=requestAnimationFrame(titleFrame);
+  let dt=(ts-tLast)/1000;tLast=ts;if(!(dt>0))dt=0;dt=Math.min(dt,0.05);
+  const S=TS,g=tg,h=S.h;S.t+=dt;
+  for(const s of S.stars){s.y+=STAR_SP[s.l]*dt*1.6;if(s.y>h){s.y-=h;s.x=rand(0,GW);}}
+  S.neb=(S.neb+12*dt)%NEB.height;S.pl.y+=9*dt;if(S.pl.y>h+10){S.pl.i=(S.pl.i+1)%PLANETS.length;S.pl.y=-PLANETS[S.pl.i].height-40;S.pl.x=rand(0,GW-PLANETS[S.pl.i].width);}
+  const px=Math.round(GW/2+Math.sin(S.t*0.9)*70),py=Math.round(h*0.66+Math.sin(S.t*1.7)*14);
+  S.cd-=dt;if(S.cd<=0){S.cd=0.16;S.shots.push({x:px-14,y:py-20},{x:px+14,y:py-20});}
+  for(const b of S.shots)b.y-=600*dt;S.shots=S.shots.filter(b=>b.y>-20);
+  const keep=R;R={t:S.t,neb:S.neb,pl:S.pl,stars:S.stars};
+  const gh=GH;GH=h;drawBg(g);GH=gh;R=keep;
+  for(const b of S.shots){for(let k=6;k>=0;k--){g.fillStyle=k<2?'#ffffff':k<4?'#4adcf6':'#168fb8';g.fillRect(b.x-1,Math.round(b.y+k*2)-1,3,3);}}
+  const sp=SHIPSPR[save.cur],fl=sp.fl[((S.t*14)|0)%sp.fl.length];
+  g.drawImage(fl,px-sp.cx,py-sp.cy);g.drawImage(sp.img,px-sp.cx,py-sp.cy);
+}
+function showTitle(){
+  hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
+  titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
+}
+function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;view=save.cur;layoutEditor();renderAll();}
+function renderSnd(){const b=$('sndBtn');b.textContent=save.snd===false?'音 OFF':'音 ON';b.setAttribute('aria-pressed',save.snd===false?'false':'true');}
+$('sndBtn').addEventListener('click',()=>{save.snd=save.snd===false;persist();renderSnd();SFX.unlock();SFX.play('btn');});
+$('startBtn').addEventListener('click',()=>{SFX.play('start');if(!save.howto)openHowto(true);else toHangarFromTitle();});
+$('howBtn').addEventListener('click',()=>openHowto(false));
+$('toTitle').addEventListener('click',showTitle);
+window.addEventListener('resize',()=>{if(!titleEl.hidden)titleBg();});
+
+/* 遊び方（絵つき4枚・1回目のスタートのときにも出す） */
+const HOWTO=[
+  {t:'指でなぞって動く'},
+  {t:'撃つのは自動'},
+  {t:'レベルアップで強くなる'},
+  {t:'お金で買って組み合わせる'},
+];
+let howPage=0,howFirst=false;
+function howArt(i){
+  const c=document.createElement('canvas');c.width=160;c.height=110;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+  g.fillStyle='#05060f';g.fillRect(0,0,160,110);g.drawImage(NEB,0,200,160,110,0,0,160,110);
+  const sp=SHIPSPR.standard,DS2=(s,x,y)=>g.drawImage(s.img||s,Math.round(x-(s.w||s.width)/2),Math.round(y-(s.h||s.height)/2));
+  const sh=(x,y,k)=>{g.save();g.translate(x,y);g.scale(k,k);g.drawImage(sp.fl[0],-sp.cx,-sp.cy);g.drawImage(sp.img,-sp.cx,-sp.cy);g.restore();};
+  if(i===0){sh(64,60,0.75);g.drawImage(FINGER.img,118,64,24,30);}
+  if(i===1){sh(80,82,0.62);DS2(ESPR.bug,50,22);DS2(ESPR.bug,110,16);DS2(ESPR.shooter,82,20);
+    for(const x of [70,90])for(let y=40;y<64;y+=9){g.fillStyle='#4adcf6';g.fillRect(x,y,3,6);g.fillStyle='#fff';g.fillRect(x+1,y,1,2);}}
+  if(i===2){[[40,50],[60,64],[50,82],[76,44]].forEach(([x,y])=>DS2(GEMS,x,y));DS2(GEMB,70,78);
+    g.fillStyle='#14163a';g.fillRect(96,20,56,72);g.strokeStyle='#2e3277';g.lineWidth=2;g.strokeRect(97,21,54,70);
+    g.fillStyle='#5aa2ff';for(let k=0;k<3;k++){g.fillRect(104,32+k*20,10,10);g.fillStyle=k?'#2e3277':'#ffd23f';g.fillRect(118,35+k*20,26,4);g.fillStyle='#5aa2ff';}}
+  if(i===3){sh(52,58,0.7);DS2(MISC.coin,110,22);DS2(MISC.coin,126,30);DS2(MISC.coin,98,32);
+    DS2(MSPR.missile[0],104,66);DS2(MSPR.shield[0],132,66);DS2(MSPR.sword[1],118,92);}
+  return c;
+}
+function renderHowto(){
+  const box=$('howCard'),p=HOWTO[howPage];box.textContent='';
+  const art=howArt(howPage);art.className='howart';art.setAttribute('aria-hidden','true');
+  box.append(el('p','howno num',(howPage+1)+' / '+HOWTO.length),art,el('h3',null,p.t));
+  const dots=el('div','howdots');HOWTO.forEach((_,k)=>dots.appendChild(el('i',k===howPage?'on':null)));box.appendChild(dots);
+  $('howPrev').disabled=howPage===0;
+  $('howNext').textContent=howPage<HOWTO.length-1?'次へ':howFirst?'はじめる':'とじる';
+}
+function openHowto(first){howFirst=first;howPage=0;$('howto').hidden=false;renderHowto();}
+$('howPrev').addEventListener('click',()=>{if(howPage>0){howPage--;renderHowto();}});
+$('howNext').addEventListener('click',()=>{
+  if(howPage<HOWTO.length-1){howPage++;renderHowto();return;}
+  save.howto=1;persist();$('howto').hidden=true;if(howFirst)toHangarFromTitle();
+});
+/* 最初のタップで音を始める・ボタンの音 */
+document.addEventListener('pointerdown',()=>SFX.unlock(),{capture:true});
+document.addEventListener('click',e=>{SFX.unlock();const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;
+  if(b.id==='startBtn'||b.id==='sndBtn'||b.classList.contains('buybig'))return;SFX.play('btn');},{capture:true});
+
+document.querySelectorAll('.gname').forEach(e=>{e.textContent=GAME_NAME;});
+layoutEditor();renderAll();showTitle();
 })();
 </script>
