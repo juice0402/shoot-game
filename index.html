@@ -34,7 +34,9 @@ button:disabled{cursor:not-allowed}
 .logo small{display:block;margin-top:14px;font-family:var(--f-ui);font-size:15px;letter-spacing:.12em;color:#cfeaff;text-shadow:0 2px 0 #060a1c}
 .tbtns{display:flex;flex-direction:column;gap:10px}
 .tbtns .hrow button{flex:1}
-.btn3.sq{width:44px;min-height:44px;padding:0;flex:none}
+.btn3.sq{width:44px;min-height:44px;padding:0;flex:none;display:grid;place-items:center}
+/* ◀ ▶ ✕ と向きの矢印（#16）：文字の記号ではなく、点で描いた小さな絵（pixIcon） */
+.pix{display:block;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
 .howbg{position:fixed;inset:0;z-index:70;background:rgba(5,6,15,.82);display:flex;align-items:center;justify-content:center;padding:16px}
 .howbox{width:100%;max-width:400px;background:var(--panel);border:3px solid var(--go);padding:14px;display:flex;flex-direction:column;gap:12px}
 .howcard{display:flex;flex-direction:column;gap:8px;text-align:center}
@@ -60,38 +62,40 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .gold b{font-size:14px;font-weight:400}
 .gold small{color:var(--dim);font-size:14px}
 .shopbtn{position:relative;flex:none;height:44px;padding:0 14px;background:var(--panel);border:3px solid var(--go);color:var(--go);font-size:16px}
-.badge{position:absolute;top:-7px;right:-7px;width:14px;height:14px;background:var(--hurt);border:2px solid var(--void);border-radius:50%}
 .bay{flex:1;min-height:250px;position:relative;background:var(--deep);border:3px solid var(--edge);overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 #editor{position:absolute;inset:0;width:100%;height:100%;display:block}
 .shipcap{position:absolute;left:52px;right:52px;top:6px;margin:0;text-align:center;pointer-events:none;line-height:1.3}
 .shipcap b{display:block;font-size:20px;font-weight:400;letter-spacing:.06em}
 .shipcap small{display:block;font-size:14px;color:var(--dim)}
-.navb{position:absolute;top:50%;z-index:3;width:44px;height:72px;margin-top:-36px;background:rgba(20,22,58,.88);border:3px solid var(--edge);font-size:18px}
+.navb{position:absolute;top:50%;z-index:3;width:44px;height:72px;margin-top:-36px;background:rgba(20,22,58,.88);border:3px solid var(--edge);display:grid;place-items:center;padding:0}
 #shipPrev{left:4px}#shipNext{right:4px}
 .dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:8px;pointer-events:none}
 .dots i{width:9px;height:9px;background:var(--edge)}
 .dots i.on{background:var(--ink)}
 .slots{position:absolute;inset:0;z-index:2;pointer-events:none}
 .slotb{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:transparent;border:0;pointer-events:auto;padding:0}
-.slotb.empty{border:3px dashed #8fd0ff;background:rgba(10,30,70,.55);color:#cfeaff;font-size:24px;line-height:1;animation:plus 1.2s ease-in-out infinite}
+.slotb.empty{border:3px dashed #8fd0ff;background:rgba(10,30,70,.55);color:#cfeaff;font-size:24px;line-height:1}
 .slotb.full:active{background:rgba(255,255,255,.15)}
-@keyframes plus{50%{box-shadow:0 0 0 4px rgba(90,170,255,.35),0 0 16px 4px rgba(90,170,255,.55);border-color:#ffffff}}
 .lockbox{position:absolute;left:52px;right:52px;bottom:26px;z-index:3;background:var(--scrim);border:3px solid var(--edge);padding:8px 10px;text-align:center;font-size:14px;line-height:1.4}
 .lockbox p{margin:0}
 .prog{height:12px;background:var(--panel);border:2px solid var(--edge);margin:6px 0}
 .prog i{display:block;height:100%;background:var(--go)}
 .lockbox .btn3{margin-top:6px;width:100%}
-.finger{position:absolute;z-index:4;translate:-50% 0;pointer-events:none;display:flex;flex-direction:column;align-items:center;animation:tap 1s ease-in-out infinite}
-.finger span{font-size:30px;line-height:1;filter:drop-shadow(0 2px 0 #000)}
-.finger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
-@keyframes tap{50%{transform:translateY(6px)}}
+/* はじめの案内：押す所だけ明るく、ほかは暗くする。ほかの所は押せない。指は押す所に向かって動く */
+.tutdim{position:fixed;inset:0;z-index:65;pointer-events:none}
+.tutdim .hole{position:absolute;box-shadow:0 0 0 200vmax rgba(3,4,10,.72);pointer-events:none}
+.tutdim .blk{position:absolute;pointer-events:auto;touch-action:none}
+.tfinger{position:absolute;display:flex;flex-direction:column;align-items:center;gap:2px;translate:-50% 0;pointer-events:none;--bob:-8px;animation:tbob .8s ease-in-out infinite}
+.tfinger img{width:32px;height:40px;image-rendering:pixelated;filter:drop-shadow(0 2px 0 #000)}
+.tfinger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
+.tfinger.down{flex-direction:column-reverse;--bob:8px}
+.tfinger.down img{transform:scaleY(-1);filter:drop-shadow(0 -2px 0 #000)}
+@keyframes tbob{50%{transform:translateY(var(--bob))}}
 .toast{position:absolute;left:8px;right:8px;bottom:26px;z-index:5;margin:0 auto;width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--scrim);border:2px solid var(--go);color:var(--go);font-size:14px;text-align:center;pointer-events:none}
 .hrow{display:flex;gap:8px}
-/* ステージのえらび方（#13）：出撃の上に1行。左右の矢印は線で描く */
+/* ステージのえらび方（#13）：出撃の上に1行。左右の矢印は点の絵（#16） */
 .stsel{display:flex;align-items:center;gap:6px;min-height:58px;padding:4px;background:var(--panel);border:3px solid var(--edge)}
 .stnav{flex:none;width:44px;height:44px;padding:0;display:grid;place-items:center;background:var(--panel-2);border:3px solid var(--edge)}
-.stnav::before{content:"";width:10px;height:10px;border-left:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:translateX(2px) rotate(45deg)}
-.stnav.next::before{transform:translateX(-2px) rotate(-135deg)}
 .stnav:disabled{opacity:.3}
 .stinfo{flex:1;min-width:0;text-align:center;line-height:1.3}
 .stname{margin:0;display:flex;align-items:baseline;justify-content:center;gap:8px}
@@ -108,14 +112,13 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 /* 下から出る板（装備の一覧・向き・くわしく・ショップのくわしく） */
 .sheetbg{position:fixed;inset:0;z-index:60;background:rgba(5,6,15,.62);display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:460px;max-height:82%;overflow-y:auto;overscroll-behavior:contain;background:var(--panel);border:3px solid var(--c,var(--edge));border-bottom:0;
-  padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:up .16s ease-out}
-@keyframes up{from{transform:translateY(40px);opacity:.4}}
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
 .sheet h3{margin:0;font-weight:400;font-size:18px;display:flex;align-items:center;gap:8px;min-height:44px}
 .sheet h3 small{font-size:14px;color:var(--dim)}
-.sheet .x{margin-left:auto;flex:none;width:44px;height:44px;background:var(--panel-2);border:3px solid var(--edge);font-size:18px}
+.sheet .x{margin-left:auto;flex:none;width:44px;height:44px;padding:0;background:var(--panel-2);border:3px solid var(--edge);display:grid;place-items:center}
 .sheet p{margin:0;font-size:14px;line-height:1.5}
 .sheet .dim{color:var(--dim)}
-.irow{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;min-height:62px;padding:6px 10px;background:var(--panel-2);border:3px solid var(--edge);border-left:8px solid var(--c);text-align:left;width:100%}
+.irow{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;min-height:62px;padding:6px 10px;background:var(--panel-2);border:3px solid var(--edge);text-align:left;width:100%}
 .irow img{width:48px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges}
 .irow b{display:block;font-size:16px;font-weight:400;line-height:1.3}
 .irow small{display:block;font-size:14px;color:var(--dim);line-height:1.35}
@@ -123,8 +126,8 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .irow:disabled{opacity:.45}
 .irow.now{border-color:var(--go)}
 .dirs{display:grid;grid-template-columns:repeat(3,68px);grid-auto-rows:68px;gap:8px;justify-content:center}
-.dirs button{font-size:28px;background:var(--panel-2);border:3px solid var(--edge)}
-.dirs button[aria-pressed="true"]{border-color:var(--go);color:var(--go);background:#2a2a5a}
+.dirs button{padding:0;display:grid;place-items:center;background:var(--panel-2);border:3px solid var(--edge)}
+.dirs button[aria-pressed="true"]{border-color:var(--go);background:#2a2a5a}
 .dirs .mid{display:grid;place-items:center;background:var(--deep);border:3px solid var(--edge)}
 .dirs .mid img{width:56px;height:56px;image-rendering:pixelated;image-rendering:crisp-edges}
 .sbtns{display:flex;gap:8px}
@@ -151,7 +154,14 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .sitem small{font-size:14px;color:var(--go);line-height:1.3}
 .sitem small.short{color:var(--dim)}
 .sitem i{position:absolute;top:4px;right:4px;font-style:normal;font-size:14px;line-height:1;color:var(--ink);background:var(--edge);padding:4px 6px}
-.sitem.can::after{content:"";position:absolute;top:6px;left:6px;width:10px;height:10px;background:var(--go);border-radius:50%}
+.soonh{grid-column:1/-1;margin:10px 0 0;font-weight:400;font-size:16px;color:var(--dim)}
+.lockc{grid-column:1/-1;display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;background:var(--scrim);border:3px solid var(--edge);padding:8px 10px;font-size:14px;line-height:1.4}
+.lockc img{width:48px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain}
+.lockc p{margin:0}
+.lockc .prog{margin:4px 0}
+.soonn{grid-column:1/-1;margin:0;text-align:center;font-size:14px;color:var(--dim)}
+.dbgrow{display:flex;flex-wrap:wrap;gap:6px}
+.dbgrow .linkbtn{flex:1 1 200px;width:auto}
 .dtop{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
 .dtop img{width:76px;height:76px;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;background:var(--deep);border:3px solid var(--c)}
 .dtop b{font-weight:400;font-size:19px;line-height:1.3}
@@ -200,8 +210,14 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .overlay h2{margin:0;text-align:center;font-weight:400;font-size:26px;letter-spacing:.08em}
 .overlay .sub{margin:0 auto;max-width:460px;text-align:center;color:var(--dim);font-size:13px}
 .overlay .sub.unl{color:var(--go);font-size:14px}
+/* 出撃の結果の「解放」（#16）：アイコンと名前を小さく並べる（6こでもボタンが1画面に入るように） */
+.unlb{margin:0 auto;max-width:420px;width:100%;display:flex;flex-direction:column;gap:4px}
+.unlb p{margin:0;text-align:center;font-size:14px;color:var(--go)}
+.unll{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+.unll li{display:flex;align-items:center;gap:4px;padding:1px 8px 1px 1px;background:var(--panel);border:2px solid var(--edge);font-size:13px;line-height:1.3;white-space:nowrap}
+.unll img{width:24px;height:24px;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain}
 /* エンディング（#13） */
-.endt{margin:0;text-align:center;font-family:var(--f-num);font-size:clamp(15px,5.2vw,24px);line-height:1.6;color:#fff2a8}
+.endt{margin:0;text-align:center;font-size:clamp(28px,9vw,40px);line-height:1.3;letter-spacing:.3em;text-indent:.3em;color:#fff2a8}
 .endh{margin:8px 0 0;text-align:center;font-weight:400;font-size:16px}
 .overlay.endg .go{flex:none;max-width:320px;margin-inline:auto}
 .cards{display:flex;flex-direction:column;gap:10px;max-width:420px;width:100%;margin:0 auto}
@@ -216,9 +232,8 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .pips{display:flex;align-items:center;gap:3px}
 .pips i{width:12px;height:6px;background:var(--edge)}
 .pips i.on{background:var(--c)}
-.pips i.nx{background:#ffffff;animation:pip .8s steps(2) infinite}
+.pips i.nx{background:#ffffff}
 .pips small{font-family:var(--f-num);font-size:8px;color:var(--dim);margin-left:6px}
-@keyframes pip{50%{background:var(--c)}}
 .card .d{font-size:13px;color:var(--dim);line-height:1.4}
 .card.evo{border-width:4px;background:#1c1838}
 .card .d2{font-size:12px;color:var(--ink);line-height:1.3}
@@ -230,11 +245,18 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .build li .ch{width:22px;height:22px;display:grid;place-items:center;font-size:13px;color:var(--c)}
 .build li b{font-family:var(--f-num);font-weight:400;font-size:8px}
 .btnrow{display:flex;flex-direction:column;gap:10px;max-width:320px;width:100%;margin:0 auto}
+/* 結果の画面のボタン（#16）：横に2つ。中身が多くて画面からあふれるときも、下にのこる */
+.btnrow.end{flex-direction:row;max-width:420px}
+.btnrow.end .btn2{flex:none;width:36%;padding:0 6px;white-space:nowrap}
+.overlay.over .btnrow.end{position:sticky;bottom:0;z-index:1;padding-block:10px 20px;margin-bottom:-20px;background:var(--deep)}
 .stats{list-style:none;margin:0 auto;padding:12px 14px;max-width:320px;width:100%;background:var(--panel);border:3px solid var(--edge);display:flex;flex-direction:column;gap:6px}
 .stats li{display:flex;justify-content:space-between;gap:10px;font-size:14px}
 .stats li b{font-family:var(--f-num);font-weight:400;font-size:11px;align-self:center;white-space:nowrap}
 .stats li.total{border-top:2px dashed var(--edge);padding-top:8px;color:var(--go)}
-.tagnew{display:block;margin:0 auto;padding:2px 10px;background:var(--go);color:var(--go-ink);font-size:13px;width:max-content}
+.stats li.best{color:var(--go)}
+.gotl li>span{text-wrap:balance}
+.gotl li>span span{display:inline-block}/* 実績の名前の途中では折り返さない */
+.overlay .stats{gap:4px;padding:10px 14px}
 
 /* ---------- #12：研究所・図鑑・実績の入口／レベルアップの色の枠・特別・宝箱・えらび直し ---------- */
 .labbtn{flex:none;height:44px;padding:0 10px;background:var(--panel);border:3px solid var(--edge);font-size:16px}
@@ -279,7 +301,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .lvacts button[aria-pressed="true"]{border-color:#ff6a7a;color:#ffb0c4}
 .lvacts button:disabled{opacity:.4}
 .gotl{list-style:none;margin:0 auto;padding:0;max-width:320px;width:100%;display:flex;flex-direction:column;gap:4px}
-.gotl li{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;background:var(--panel);border:2px solid #6e5a1c;font-size:14px}
+.gotl li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 10px;background:var(--panel);border:2px solid #6e5a1c;font-size:14px;line-height:1.4}
 .gotl li b{font-family:var(--f-num);font-weight:400;font-size:11px;color:var(--go);align-self:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* ---------- #14 の点検：せまい画面（幅320〜380）で、はみ出す・2行になる・最後の1字だけ下の行に行く、を直す ---------- */
@@ -330,10 +352,10 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
 
 <main id="hangar" hidden>
   <header class="top">
-    <button id="toTitle" class="btn3 sq" type="button" aria-label="タイトルへ">◀</button>
+    <button id="toTitle" class="btn3 sq" type="button" aria-label="タイトルへ"></button>
     <div class="ttl"><h1>格納庫<small>試作6</small></h1></div>
     <div class="gold" aria-label="持っているお金"><img class="coin" alt=""><b id="goldNum" class="num">0</b><small>G</small></div>
-    <button id="shopBtn" class="shopbtn" type="button">ショップ<span id="shopDot" class="badge" hidden></span></button>
+    <button id="shopBtn" class="shopbtn" type="button">ショップ</button>
     <button id="labBtn" class="labbtn" type="button">研究所</button>
   </header>
 
@@ -341,10 +363,9 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
     <canvas id="editor" aria-hidden="true"></canvas>
     <p class="shipcap"><b id="shipName">スタンダード</b><small id="shipSkill"></small></p>
     <div class="slots" id="slots"></div>
-    <button id="shipPrev" class="navb" type="button" aria-label="前の機体">◀</button>
-    <button id="shipNext" class="navb" type="button" aria-label="次の機体">▶</button>
+    <button id="shipPrev" class="navb" type="button" aria-label="前の機体"></button>
+    <button id="shipNext" class="navb" type="button" aria-label="次の機体"></button>
     <div class="lockbox" id="lockbox" hidden></div>
-    <div class="finger" id="finger" hidden><span aria-hidden="true">👆</span><b>ここをタップ</b></div>
     <div class="dots" id="dots"></div>
     <p class="toast" id="note" aria-live="polite" hidden></p>
   </div>
@@ -363,6 +384,7 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
 </main>
 
 <div id="sheetBg" class="sheetbg" hidden><div id="sheet" class="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="tutDim" class="tutdim" hidden><i class="hole"></i><b class="blk"></b><b class="blk"></b><b class="blk"></b><b class="blk"></b><div class="tfinger" id="tfinger"><b>ここをタップ</b></div></div>
 
 <div id="shopSheet" class="shopx" role="dialog" aria-label="ショップ" hidden>
   <header class="shead">
@@ -373,7 +395,7 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
   <nav class="stabs" id="shopTabs" role="tablist"></nav>
   <div class="sgrid" id="shopGrid"></div>
   <p class="snote" id="shopNote" aria-live="polite"></p>
-  <button id="debugGold" class="linkbtn" type="button">試作用：1000G もらう</button>
+  <div class="dbgrow"><button id="debugGold" class="linkbtn" type="button">試作用：1000G もらう</button><button id="debugUnl" class="linkbtn" type="button">試作用：全部解放</button></div>
 </div>
 
 <div id="labSheet" class="shopx" role="dialog" aria-label="研究所" hidden>
@@ -439,38 +461,38 @@ const fmt=t=>{t=Math.floor(t);return String(Math.floor(t/60)).padStart(2,'0')+':
 const GAME_NAME='SHOOT（仮）';
 const U=1.5,RUN_LEN=300,MAXE=280,GW=480,CELL=48,PADG=150,BASE_HP=70,WMAX=8;
 const DIRV=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
-const ARROW=['↑','↗','→','↘','↓','↙','←','↖'];
 const ARROW_NAME=['上','右上','右','右下','下','左下','左','左上'];
 const dirAngle=d=>-Math.PI/2+d*Math.PI/4;
 const angToDir=a=>((Math.round((a+Math.PI/2)/(Math.PI/4))%8)+8)%8;
 
 const CATS={atk:'攻撃',def:'防御',sup:'補助'};
-/* rate = [威力, 連射, 射程] 1〜5 / eff = 補助・防御の効き目 */
+/* rate = [威力, 連射, 射程] 1〜5 / eff = 補助・防御の効き目
+   はじめの12種とシールド・反射板の gt：レベルアップの文に出す％だけの表（強さは stat0 の式。gt はその式から出した数字で、強さには使わない #16） */
 const MODS={
   laser:{name:'レーザー',cat:'atk',c:'#4cc9ff',price:200,rate:[2,4,4],desc:'向いた方へビームを連射する',
-    up:{2:'威力と連射がアップ',3:'ビームが2本になる',4:'弾が2体まで当たる',5:'威力と連射がアップ',6:'ビームが3本になる',7:'弾が3体まで当たる',8:'威力が大きくアップ'}},
+    up:{3:'ビームが2本になる',4:'弾が2体まで当たる',6:'ビームが3本になる',7:'弾が3体まで当たる'},gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:44},r:{2:11,5:11,8:11}}},
   gatling:{name:'ガトリング',cat:'atk',c:'#7d9cff',price:250,rate:[1,5,3],desc:'小さな弾をばらまくように高速で連射する',
-    up:{2:'威力アップ',3:'連射アップ',4:'威力アップ',5:'2列で撃つ',6:'連射アップ',7:'威力アップ',8:'弾が2体まで当たる'}},
+    up:{5:'2列で撃つ',8:'弾が2体まで当たる'},gt:{d:{2:23,3:19,4:16,5:14,6:12,7:11,8:10},r:{2:4,3:18,4:4,6:18,7:4}}},
   mine:{name:'機雷',cat:'atk',c:'#8ea0c8',price:280,rate:[4,1,2],desc:'向いた方へ機雷をまく。敵が近づくと爆発する',
-    up:{2:'威力と速さがアップ',3:'2個ずつまく',4:'威力アップ',5:'爆発が大きくなる',6:'威力と速さがアップ',7:'3個ずつまく',8:'威力が大きくアップ'}},
-  shotgun:{name:'散弾砲',cat:'atk',c:'#e8c07a',price:300,rate:[4,2,1],desc:'近くの敵に散弾をまとめて撃ちこむ。よくはじき飛ばす',
-    up:{2:'威力と連射がアップ',3:'弾が7発になる',4:'届く距離がのびる',5:'威力と連射がアップ',6:'弾が9発になる',7:'届く距離がさらにのびる',8:'弾が2体まで当たる'}},
+    up:{3:'2個ずつまく',5:'爆発が大きくなる',7:'3個ずつまく'},rl:'まく速さ',gt:{d:{2:35,3:26,4:20,5:17,6:15,7:13,8:30},r:{2:9,4:9,6:9,8:9}}},
+  shotgun:{name:'散弾砲',cat:'atk',c:'#e8c07a',price:300,rate:[4,2,1],desc:'近くの敵に散弾を撃ちこみ、はじき飛ばす',
+    up:{3:'弾が7発になる',4:'届く距離がのびる',6:'弾が9発になる',7:'届く距離がさらにのびる',8:'弾が2体まで当たる'},gt:{d:{2:28,3:22,4:18,5:15,6:13,7:12,8:10},r:{2:8,5:8}}},
   freeze:{name:'冷凍砲',cat:'atk',c:'#bfe9ff',price:320,rate:[2,3,4],desc:'当たった敵をこおらせて、動きを遅くする',
-    up:{2:'威力と連射がアップ',3:'こおる時間がのびる',4:'2発ずつ撃つ',5:'もっと遅くする',6:'威力と連射がアップ',7:'弾が2体まで当たる',8:'威力が大きくアップ'}},
+    up:{3:'こおる時間がのびる',4:'2発ずつ撃つ',5:'もっと遅くする',7:'弾が2体まで当たる'},gt:{d:{2:38,3:27,4:21,5:18,6:15,7:13,8:58},r:{2:9,6:9,8:9}}},
   missile:{name:'追撃ミサイル',cat:'atk',c:'#ffd23f',price:350,rate:[3,2,5],desc:'近くの敵を追いかけて爆発する',
-    up:{2:'威力と発射の速さがアップ',3:'2発ずつ撃つ',4:'爆発が大きくなる',5:'3発ずつ撃つ',6:'威力と発射の速さがアップ',7:'爆発がさらに大きくなる',8:'4発ずつ撃つ'}},
+    up:{3:'2発ずつ撃つ',4:'爆発が大きくなる',5:'3発ずつ撃つ',7:'爆発がさらに大きくなる',8:'4発ずつ撃つ'},gt:{d:{2:38,3:27,4:21,5:18,6:15,7:13,8:12},r:{2:9,6:9}}},
   flame:{name:'火炎放射',cat:'atk',c:'#6af0ff',price:380,rate:[3,5,1],desc:'青い炎をふき出して、近くの敵をまとめて焼く',
-    up:{2:'威力アップ',3:'炎が長くなる',4:'威力アップ',5:'炎が広がる',6:'威力アップ',7:'炎がさらに長くなる',8:'威力が大きくアップ'}},
+    up:{3:'炎が長くなる',5:'炎が広がる',7:'炎がさらに長くなる'},gt:{d:{2:28,3:22,4:18,5:15,6:13,7:12,8:38}}},
   sword:{name:'近接の剣',cat:'atk',c:'#b48cff',price:400,rate:[5,2,1],desc:'向いた方を大きく斬りはらう',
-    up:{2:'威力と振る速さがアップ',3:'届く距離がのびる',4:'威力アップ',5:'ひと振りが大きくなる',6:'振る速さがアップ',7:'届く距離がさらにのびる',8:'2回つづけて斬る'}},
-  saw:{name:'回転ノコ',cat:'atk',c:'#c9d1e8',price:420,rate:[3,2,3],desc:'回るノコギリを投げる。行って帰ってくる間ずっと切る',
-    up:{2:'威力と速さがアップ',3:'威力アップ',4:'2枚投げる',5:'刃が大きくなる',6:'威力と速さがアップ',7:'3枚投げる',8:'威力が大きくアップ'}},
-  thunder:{name:'雷撃コイル',cat:'atk',c:'#e6ff5c',price:450,rate:[3,2,4],desc:'向いた側の敵にいなずまを落とし、近くの敵へつながる',
-    up:{2:'威力と速さがアップ',3:'つながる敵が1体ふえる',4:'届く距離がのびる',5:'威力と速さがアップ',6:'つながる敵が1体ふえる',7:'威力アップ',8:'つながる敵が2体ふえる'}},
+    up:{3:'届く距離がのびる',5:'ひと振りが大きくなる',7:'届く距離がさらにのびる',8:'2回つづけて斬る'},rl:'振る速さ',gt:{d:{2:41,3:29,4:23,5:18,6:16,7:13,8:12},r:{2:9,4:9,6:9}}},
+  saw:{name:'回転ノコ',cat:'atk',c:'#c9d1e8',price:420,rate:[3,2,3],desc:'回るノコギリを投げる。行きも帰りも切る',
+    up:{4:'2枚投げる',5:'刃が大きくなる',7:'3枚投げる'},rl:'投げる速さ',gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:41},r:{2:9,3:9,6:9,8:9}}},
+  thunder:{name:'雷撃コイル',cat:'atk',c:'#e6ff5c',price:450,rate:[3,2,4],desc:'向いた側の敵に雷を落とし、近くの敵へつなぐ',
+    up:{3:'つながる敵が1体ふえる',4:'届く距離がのびる',6:'つながる敵が1体ふえる',8:'つながる敵が2体ふえる'},gt:{d:{2:36,3:26,4:21,5:17,6:15,7:13,8:11},r:{2:9,5:9,7:9}}},
   gravity:{name:'重力弾',cat:'atk',c:'#7a5cff',price:480,rate:[2,1,3],desc:'ゆっくり進む玉が、まわりの敵を吸いこんで削る',
-    up:{2:'威力と速さがアップ',3:'吸いこむ範囲が広がる',4:'長く残る',5:'威力と速さがアップ',6:'吸いこむ範囲がさらに広がる',7:'威力アップ',8:'最後に大爆発する'}},
-  cannon:{name:'ビーム砲',cat:'atk',c:'#5cffef',price:520,rate:[5,1,5],desc:'力をためて、太いビームで一直線にまとめて撃ちぬく',
-    up:{2:'威力アップ',3:'ビームが太くなる',4:'ためる時間が短くなる',5:'威力アップ',6:'ビームがさらに太くなる',7:'ためる時間が短くなる',8:'威力が大きくアップ'}},
+    up:{3:'吸いこむ範囲が広がる',4:'長く残る',6:'吸いこむ範囲がさらに広がる',8:'最後に大爆発する'},gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:11},r:{2:9,5:9,7:9}}},
+  cannon:{name:'ビーム砲',cat:'atk',c:'#5cffef',price:520,rate:[5,1,5],desc:'ためてから、太いビームで一直線に撃ちぬく',
+    up:{3:'ビームが太くなる',6:'ビームがさらに太くなる'},gt:{d:{2:30,3:23,4:19,5:16,6:14,7:12,8:38},r:{2:5,4:20,5:5,7:20,8:5}}},
   /* 試作6で足した攻撃30種（docs/design/parts.md）。g＝レベルごとの強さの表（d 威力・r 連射 の％）。
      レベルアップの文は up の文に g の数字をつないで作る（下の「レベルアップの文」）。stat() も同じ g を使うので、文と強さがずれない */
   /* 射撃 */
@@ -541,9 +563,9 @@ const MODS={
     g:{d:{3:30,5:30,6:30,8:50}},up:{2:'とどく広さ ＋15%',3:'止める時間が1.3秒に',4:'5秒ごとに出す',5:'とどく広さ ＋15%',6:'止める時間が1.6秒に',7:'4秒ごとに出す'}},
   armor:{name:'装甲板',cat:'def',c:'#8d93c9',price:150,passive:true,eff:'最大HP ＋15',desc:'機体をかたくする。いくつでも重ねてつけられる'},
   shield:{name:'シールド',cat:'def',c:'#5dffb0',price:300,eff:'向いた側の弾を消す・敵をはじく',desc:'向いた側に盾を張る。弾を消して、敵をはじく',
-    up:{2:'盾が広くなる',3:'はじく威力がアップ',4:'盾がさらに広くなる',5:'盾が大きくなる',6:'はじく回数がふえる',7:'はじく威力がアップ',8:'いちばん大きな盾'}},
-  reflector:{name:'反射板',cat:'def',c:'#e3e5ff',price:350,eff:'敵の弾をはね返して当てる',desc:'向いた側に板を張る。敵の弾をはね返し、さわった敵を押しもどす',
-    up:{2:'板が広くなる',3:'はね返す威力がアップ',4:'はね返す弾が速くなる',5:'板が大きくなる',6:'はね返した弾が2体まで当たる',7:'はね返す威力がアップ',8:'いちばん大きな板'}},
+    up:{2:'盾が広くなる',4:'盾がさらに広くなる',5:'盾が大きくなる',6:'はじく回数がふえる',8:'いちばん大きな盾'},gt:{d:{2:60,3:38,4:27,5:21,6:18,7:15,8:13}}},
+  reflector:{name:'反射板',cat:'def',c:'#e3e5ff',price:350,eff:'敵の弾をはね返して当てる',desc:'向いた側の板で、弾をはね返し敵を押しもどす',
+    up:{2:'板が広くなる',4:'はね返す弾が速くなる',5:'板が大きくなる',6:'はね返す弾が2体まで当たる',8:'いちばん大きな板'},gt:{d:{2:40,3:29,4:22,5:18,6:15,7:33,8:10}}},
   magnet:{name:'吸引装置',cat:'sup',c:'#5aa2ff',price:180,passive:true,eff:'吸いよせる距離 ＋30%',desc:'経験値の結晶を遠くから吸いよせる'},
   booster:{name:'ブースター',cat:'sup',c:'#ff9f43',price:200,passive:true,eff:'動く速さ ＋10%',desc:'機体が速く動けるようになる'},
   coin:{name:'集金装置',cat:'sup',c:'#ffcf5a',price:250,passive:true,eff:'かせぐお金 ＋10%',desc:'出撃でかせぐお金がふえる'},
@@ -573,10 +595,36 @@ const MODS={
   berserk:{name:'怒りの回路',cat:'sup',c:'#ffaa4a',price:280,passive:true,eff:'威力 最大 ＋30%',desc:'HPが減るほど威力が上がる。最大 ＋30%'},
 };
 const TYPES=Object.keys(MODS);
+/* ショップの品の解放（#15・docs/design/unlocks.md）。ここにない8こ（レーザー・ガトリング・散弾砲・近接の剣・装甲板・シールド・吸引装置・ブースター）は最初から。
+   [記録, 種類, 数, 条件の文]。記録：runs 出撃の回数・wmax 武器の最高Lv（種類ごと）・big 大型の敵（種類ごと・図鑑のたおした数）・cw その品をつけてクリアした回数・
+   そのほかは save.rec の名前（機体の解放と同じ）。お金や運では決まらない。分類ごとに、だいたいやさしい順（もうすぐ解放の並びに使う） */
+const UNLOCK={
+  /* 攻撃（38） */
+  missile:['runs',0,1,'30秒以上の出撃1回'],ricochet:['bestKills',0,300,'1出撃で300体たおす'],fan:['wmax','laser',8,'レーザーをLv8'],hlaser:['wmax','laser',8,'レーザーをLv8'],
+  mine:['bosses',0,1,'大型の敵を1体たおす'],thunder:['bosses',0,3,'大型の敵を合計3体たおす'],flame:['stageMax',0,1,'ステージ1クリア'],freeze:['kills',0,12000,'合計12000体たおす'],
+  pulse:['wmax','gatling',8,'ガトリングをLv8'],needle:['wmax','gatling',8,'ガトリングをLv8'],gsword:['wmax','sword',8,'近接の剣をLv8'],twin:['wmax','sword',8,'近接の剣をLv8'],
+  splitter:['wmax','shotgun',8,'散弾砲をLv8'],micro:['wmax','missile',8,'追撃ミサイルをLv8'],minefield:['wmax','mine',8,'機雷をLv8'],saw:['meleeK',0,300,'近接の武器で300体たおす'],
+  acid:['evos',0,1,'武器を1回進化させる'],sonic:['stageMax',0,2,'ステージ2クリア'],grenade:['big','gnaw',1,'岩喰いをたおす'],gravity:['big','gnaw2',1,'双頭の岩喰いをたおす'],
+  sniper:['fastBoss',0,5,'大型の敵を30秒以内に合計5体たおす'],shockwave:['nodmg',0,4,'無傷で大型の敵を合計4体たおす'],
+  rail:['stageMax',0,3,'ステージ3クリア'],cannon:['big','icequeen',1,'氷の女王をたおす'],whip:['meleeK',0,1500,'近接の武器で1500体たおす'],
+  napalm:['wmax','flame',8,'火炎放射をLv8'],prism:['wmax','fan',8,'扇レーザーをLv8'],lance:['wmax','twin',8,'双剣をLv8'],chainsaw:['wmax','saw',8,'回転ノコをLv8'],
+  cluster:['wmax','grenade',8,'グレネード砲をLv8'],hammer:['wmax','gsword',8,'大剣をLv8'],satellite:['sup5',0,2,'支援を2つ最大レベルにする'],halo:['chests',0,15,'宝箱を合計15個ひらく'],
+  torpedo:['bosses',0,20,'大型の敵を合計20体たおす'],turret:['big','fort',1,'要塞砲台をたおす'],plasma:['big','snake',1,'機械の大蛇をたおす'],
+  emp:['stageMax',0,4,'ステージ4クリア'],scythe:['big','core',1,'深淵の核をたおす'],
+  /* 防御（11） */
+  iframe:['runs',0,2,'30秒以上の出撃2回'],reflector:['big','boss2',1,'紫の大蟹をたおす'],harmor:['cw','armor',1,'装甲板をつけてクリア'],fshield:['cw','shield',1,'シールドをつけてクリア'],
+  ebarrier:['clears',0,3,'合計3回クリア'],evade:['halfClear',0,3,'HPを半分以上のこして3回クリア'],spike:['kills',0,20000,'合計20000体たおす'],frost:['big','icebeast',1,'氷晶獣をたおす'],
+  sdrone:['cw','fshield',1,'前面シールドをつけてクリア'],absorber:['nodmg',0,10,'無傷で大型の敵を合計10体たおす'],revive:['clears',0,10,'合計10回クリア'],
+  /* 補助（12） */
+  cooler:['bestLv',0,10,'1出撃でLv10'],scope:['runs',0,3,'30秒以上の出撃3回'],xpamp:['kills',0,6000,'合計6000体たおす'],coin:['goldTotal',0,4000,'合計4000Gかせぐ'],
+  cdrone:['cw','magnet',1,'吸引装置をつけてクリア'],berserk:['bestSpc',0,1,'特別な強化を取る'],repair:['bosses',0,6,'大型の敵を合計6体たおす'],amp:['chests',0,8,'宝箱を合計8個ひらく'],
+  reactor:['spTotal',0,25,'必殺技を合計25回出す'],crit:['bestKills',0,3500,'1出撃で3500体たおす'],multi:['bestLv',0,25,'1出撃でLv25'],dur:['goldTotal',0,30000,'合計30000Gかせぐ'],
+};
+const UNL_ORDER={};Object.keys(UNLOCK).forEach((t,i)=>{const [k,x,n,txt]=UNLOCK[t];MODS[t].unlock={k,t:x||null,n,txt};UNL_ORDER[t]=i;});
 const RATE_NAMES=['威力','連射','射程'];
-/* レベルアップの文：up の文のあとに「威力 ＋30%」「連射 ＋15%」を g からつなぐ */
-for(const t of TYPES){const m=MODS[t];if(!m.g)continue;const u={};
-  for(let L=2;L<=WMAX;L++){const a=[];if(m.up[L])a.push(m.up[L]);if(m.g.d&&m.g.d[L])a.push('威力 ＋'+m.g.d[L]+'%');if(m.g.r&&m.g.r[L])a.push((m.rl||'連射')+' ＋'+m.g.r[L]+'%');u[L]=a.join('・');}
+/* レベルアップの文：up の文のあとに「威力 ＋30%」「連射 ＋15%」を g（はじめの12種などは gt）からつなぐ */
+for(const t of TYPES){const m=MODS[t],G=m.g||m.gt;if(!G)continue;const u={};
+  for(let L=2;L<=WMAX;L++){const a=[];if(m.up[L])a.push(m.up[L]);if(G.d&&G.d[L])a.push('威力 ＋'+G.d[L]+'%');if(G.r&&G.r[L])a.push((m.rl||'連射')+' ＋'+G.r[L]+'%');u[L]=a.join('・');}
   m.up=u;}
 /* g の％をそのレベルまでかけ合わせた倍率（k：'d' 威力・'r' 連射） */
 const GR=(t,k,lv)=>{const o=MODS[t].g&&MODS[t].g[k];let v=1;if(o)for(let L=2;L<=lv;L++)if(o[L])v*=1+o[L]/100;return v;};
@@ -617,20 +665,21 @@ const EVO={
 /* 機体の強化（道中だけ） */
 const PAS={
   magnet:{name:'吸い寄せ',ic:'吸',c:'#5aa2ff',max:5,desc:'経験値を吸い取る距離が40%のびる'},
-  speed:{name:'機体スピード',ic:'速',c:'#7af7d9',max:5,desc:'動く速さが12%アップ'},
+  speed:{name:'機体スピード',ic:'速',c:'#7af7d9',max:5,desc:'動く速さ＋12%'},
   armor:{name:'装甲',ic:'甲',c:'#e3e5ff',max:5,desc:'最大HP＋20、HPも20回復'},
   clock:{name:'オーバークロック',ic:'連',c:'#ff9f43',max:5,desc:'すべての武器の発射が8%速くなる'},
-  power:{name:'火力アップ',ic:'力',c:'#ff9f43',max:5,desc:'すべての攻撃の威力が10%アップ'},
+  power:{name:'火力アップ',ic:'力',c:'#ff9f43',max:5,desc:'すべての攻撃の威力＋10%'},
   regen:{name:'自動修理',ic:'修',c:'#7af7d9',max:5,desc:'HPが少しずつ回復する（1秒に＋0.4）'},
   xp:{name:'経験値アップ',ic:'経',c:'#5aa2ff',max:5,desc:'もらえる経験値が10%ふえる'},
   gold:{name:'収入アップ',ic:'金',c:'#ffd23f',max:5,desc:'この出撃でかせぐお金が15%ふえる'},
 };
 /* 支援（道中だけ） */
 const SUP={
-  wing:{name:'援軍',c:'#5dffb0',max:5,first:'ときどき横から味方の戦闘機が2機飛んできて撃つ',more:'援軍が1機ふえて、来るのが早くなる'},
-  drone:{name:'子機',c:'#5dffb0',max:5,first:'機体のまわりを回って、近くの敵を撃つ',more:'子機が1機ふえる',last:'子機の連射がアップ'},
-  strike:{name:'空爆',ic:'撃',c:'#ffd23f',max:5,first:'敵が集まっている所に、上から光の柱を落とす',more:'威力と範囲がアップ、落ちるのが早くなる'},
-  barrier:{name:'バリア',ic:'障',c:'#c4ffe3',max:3,first:'敵の攻撃を1回ふせぐ。しばらくすると張りなおす',more:'張りなおすのが早くなる'},
+  wing:{name:'援軍',c:'#5dffb0',max:5,first:'ときどき横から味方の戦闘機が2機来て撃つ',more:'援軍が1機ふえて、来るのが早くなる'},
+  drone:{name:'子機',c:'#5dffb0',max:5,first:'機体のまわりを回って、近くの敵を撃つ',more:'子機が1機ふえる',last:'子機の連射＋50%'},
+  strike:{name:'空爆',ic:'撃',c:'#ffd23f',max:5,
+    at:['敵が集まっている所に、上から光の柱を落とす','柱の威力＋50%・間かく7.8秒','柱の威力＋33%・間かく6.6秒','柱の威力＋25%・間かく5.4秒','柱の威力＋20%・間かく4.2秒']},
+  barrier:{name:'バリア',ic:'障',c:'#c4ffe3',max:3,first:'敵の攻撃を1回ふせぐ。少したつと張りなおす',more:'張りなおすのが早くなる'},
 };
 /* ---------- #12 道中の強化（docs/design/upgrades.md）。数字は calcCS と sup12 の1か所 ---------- */
 /* 機体の強化：8 → 20種。desc は次のレベルの文（at があればレベルごと） */
@@ -705,6 +754,12 @@ const LAB=[
   {id:'r_revive',name:'予備の機体',max:1,p:2500,per:'1出撃に1回、HP50%で復活',u:1,unit:'回'},
 ];
 const LABK={};LAB.forEach(o=>{LABK[o.id]=o;});
+/* 研究所の解放（11/16 しょーくん「研究所もアンロックは段階的に」）。ここにない4こ（機体の補強・火力の研究・磁力・商売）は最初から。
+   形はショップの品と同じ [記録, 種類, 数, 条件の文]（お金や運では決まらない）。だいたいやさしい順（もうすぐ解放の並びに使う） */
+const LAB_UNLOCK={r_rate:['runs',0,2,'30秒以上の出撃2回'],r_xp:['runs',0,3,'30秒以上の出撃3回'],r_spd:['bosses',0,1,'大型の敵を1体たおす'],r_reroll:['bestLv',0,10,'1出撃でLv10'],
+  r_regen:['stageMax',0,1,'ステージ1クリア'],r_skip:['bosses',0,3,'大型の敵を合計3体たおす'],r_ban:['stageMax',0,2,'ステージ2クリア'],r_lv:['clears',0,3,'合計3回クリア'],
+  r_skill:['spTotal',0,10,'必殺技を合計10回出す'],r_revive:['stageMax',0,3,'ステージ3クリア'],r_slot:['stageMax',0,4,'ステージ4クリア']};
+const LAB_ORDER={};Object.keys(LAB_UNLOCK).forEach((id,i)=>{const [k,x,n,txt]=LAB_UNLOCK[id];LABK[id].unlock={k,t:x||null,n,txt};LAB_ORDER[id]=i;});
 const labPrice=(o,lv)=>Math.round(o.p*Math.pow(1.6,lv)/10)*10;
 /* 図鑑：敵（ステージの順。st＝はじめて出るステージ） */
 const BOOK_E=[
@@ -744,7 +799,7 @@ const stOpen=n=>n<=1||save.rec.stageMax>=n-1;
 const SL=(name,x,y,out,front)=>({name,x,y,out,front:!!front});
 const SHIPS={
   standard:{name:'スタンダード',c:'#4588f2',hp:1,spd:1,mag:1,rate:1,pow:1,gold:1,price:0,
-    desc:'バランス型。こまったときの1台',skill:'がんばり：やられそうなとき1回だけ HP1 でたえる',sp:{name:'全方位レーザー',desc:'360°に光線を出し、まわりの敵を焼く'},
+    desc:'はじめの機体。性能はすべてふつう',skill:'がんばり：やられても1回だけ HP1 で残る',sp:{name:'全方位レーザー',desc:'360°に光線を出し、まわりの敵を焼く'},
     start:[{t:'laser',s:1,d:0},{t:'laser',s:2,d:0}],
     slots:[SL('機首',0,-34,0),SL('左肩',-14,-10,7),SL('右肩',14,-10,1),SL('左翼',-25,8,6),SL('右翼',25,8,2),SL('左尾',-12,25,5),SL('右尾',12,25,3)]},
   rapid:{name:'ラピッド',c:'#ffcd48',hp:0.8,spd:1.05,mag:1,rate:1.25,pow:1,gold:1,price:800,
@@ -760,11 +815,11 @@ const SHIPS={
     start:[{t:'magnet',s:6,d:4}],unlock:{k:'goldTotal',n:5000,txt:'合計5000Gかせぐ'},
     slots:[SL('機首',0,-30,0),SL('左腕',-22,-18,7),SL('右腕',22,-18,1),SL('左翼',-22,12,6),SL('右翼',22,12,2),SL('左尾',-12,25,5),SL('右尾',12,25,3)]},
   blade:{name:'ブレード',c:'#a98bff',hp:0.9,spd:1.2,mag:1,rate:1,pow:1,gold:1,price:1500,blade:1.4,
-    desc:'速い。近くで戦うのが得意',skill:'刃：剣・ノコ・ムチなど近接の武器の威力＋40%',sp:{name:'なぎはらい',desc:'画面を横切る3本の斬撃。弾も消す'},
-    start:[{t:'sword',s:1,d:7},{t:'sword',s:2,d:1}],unlock:{k:'wmax',n:8,txt:'近接の剣か回転ノコをLv8にする'},
+    desc:'速い。近くで戦うのが得意',skill:'刃：剣・ノコ・ムチなど近接の威力＋40%',sp:{name:'なぎはらい',desc:'画面を横切る3本の斬撃。弾も消す'},
+    start:[{t:'sword',s:1,d:7},{t:'sword',s:2,d:1}],unlock:{k:'wmax',t:['sword','saw'],n:8,txt:'近接の剣か回転ノコをLv8にする'},
     slots:[SL('機首',0,-34,0),SL('左肩',-12,-12,7),SL('右肩',12,-12,1),SL('左刃',-26,-10,7),SL('右刃',26,-10,1),SL('左尾',-12,24,5),SL('右尾',12,24,3)]},
   carrier:{name:'キャリア',c:'#18b0b4',hp:1.1,spd:0.95,mag:1,rate:1,pow:1,gold:1,price:2000,carrier:1,
-    desc:'支援の味方といっしょに戦う',skill:'母艦：はじめから子機つき・レベルアップで支援が出やすい',sp:{name:'艦載機発進',desc:'味方の戦闘機6機が8秒間いっしょに戦う'},
+    desc:'支援の味方といっしょに戦う',skill:'母艦：はじめから子機つき・支援が出やすい',sp:{name:'艦載機発進',desc:'味方の戦闘機6機が8秒間いっしょに戦う'},
     start:[{t:'laser',s:0,d:0}],unlock:{k:'sup5',n:3,txt:'支援を3つ最大レベルにする'},
     slots:[SL('機首',0,-36,0),SL('左肩',-16,-10,7),SL('右肩',16,-10,1),SL('左翼',-28,10,6),SL('右翼',28,10,2),SL('左尾',-17,28,5),SL('右尾',17,28,3)]},
   marksman:{name:'スナイパー',c:'#bfe9ff',hp:0.9,spd:1,mag:1,rate:0.85,pow:1.2,gold:1,range:1.3,focus:1,price:1100,
@@ -1690,14 +1745,16 @@ const PLANETS=[planet(56,['#120c2a','#22184a','#3a2a6e','#5a4496','#8a74c4'],5,[
 const KEY='shoot-proto-v1';
 const emptyLoad=id=>SHIPS[id].slots.map(()=>null);
 const startLoad=id=>{const l=emptyLoad(id);SHIPS[id].start.forEach(v=>{l[v.s]={t:v.t,d:v.d};});return l;};
-function freshSave(){const owned={};TYPES.forEach(t=>{owned[t]=0;});owned.laser=2;
-  const ships={};SHIP_IDS.forEach(id=>{ships[id]={have:id==='standard',eq:id==='standard'?startLoad(id):emptyLoad(id)};});
+/* 新しいセーブ（#15）：レーザーを1つだけ持ち、どの機体の場所も空き（はじめの案内でつける）。SHIPS.standard.start は前の版のセーブとテストで使う */
+function freshSave(){const owned={};TYPES.forEach(t=>{owned[t]=0;});owned.laser=1;
+  const ships={};SHIP_IDS.forEach(id=>{ships[id]={have:id==='standard',eq:emptyLoad(id)};});
   const lab={};LAB.forEach(o=>{lab[o.id]=0;});
-  const s={v:2,gold:300,owned,ships,cur:'standard',best:null,evo:{},lab,ach:{},book:{e:{}},st:1,rec:{clears:0,bosses:0,goldTotal:0,wmax:{},sup5:[],...REC0()}};
+  const s={v:2,gold:300,owned,ships,cur:'standard',best:null,evo:{},lab,ach:{},book:{e:{}},st:1,unl:[],lunl:[],rec:{clears:0,bosses:0,goldTotal:0,wmax:{},sup5:[],cw:{},...REC0()}};
   ensureSlots(s);return s;}
-/* #11 の解放の記録：大型の敵を30秒以内にたおした数・1出撃の撃破数の最高・HP半分以上でクリアした数・近接での撃破の合計・進化の回数・クリアしたステージ
+/* #15 の解放の記録：出撃の回数（runs）・その品をつけてクリアした回数（cw：種類ごと）。大型の敵の種類ごとのたおした数は図鑑の book.e を使う
+   #11 の解放の記録：大型の敵を30秒以内にたおした数・1出撃の撃破数の最高・HP半分以上でクリアした数・近接での撃破の合計・進化の回数・クリアしたステージ
    #12 の実績の記録：撃破の合計・1出撃の最高レベル・ひらいた宝箱・必殺技の回数・1出撃の特別な強化の最高・ノーダメージでたおした大型の敵 */
-const REC0=()=>({fastBoss:0,bestKills:0,halfClear:0,meleeK:0,evos:0,stageMax:0,kills:0,bestLv:0,chests:0,spTotal:0,bestSpc:0,nodmg:0,time:0});/* time＝出撃した時間の合計（#13・エンディングの記録） */
+const REC0=()=>({fastBoss:0,bestKills:0,halfClear:0,meleeK:0,evos:0,stageMax:0,kills:0,bestLv:0,chests:0,spTotal:0,bestSpc:0,nodmg:0,time:0,runs:0});/* time＝出撃した時間の合計（#13・エンディングの記録）・runs＝出撃の回数（#15） */
 /* 研究所の「増設」：全機体の後ろ（いちばん後ろの場所より13下）に場所を1つ足す。装備の配列の長さもそろえる */
 const XSLOT={};
 function ensureSlots(s){const on=!!(s&&s.lab&&s.lab.r_slot>0);
@@ -1753,6 +1810,8 @@ function loadSave(){
         if(o.owned)TYPES.forEach(t=>{if(Number.isFinite(o.owned[t]))s.owned[t]=clamp(Math.floor(o.owned[t]),0,99);});
         if(o.ships&&typeof o.ships==='object')SHIP_IDS.forEach(id=>{const v=o.ships[id];if(v&&typeof v==='object'){s.ships[id].have=id==='standard'||!!v.have;s.ships[id].eq=cleanLoad(id,v.eq);}});
         else if(Array.isArray(o.load))s.ships.standard.eq=cleanLoad('standard',o.load);   /* 試作4のセーブ：今の装備をスタンダード機へ */
+        if(o.ships&&typeof o.ships==='object'&&!(o.owned&&typeof o.owned==='object'))TYPES.forEach(t=>{const n=Math.max(...SHIP_IDS.map(id=>s.ships[id].eq.filter(v=>v&&v.t===t).length));if(n>s.owned[t])s.owned[t]=n;});/* 機体ごとの装備はあって持ち物の記録がないセーブ：つけている数まで持っていることにする（#15 の点検） */
+        if(Array.isArray(o.load)&&!(o.owned&&typeof o.owned==='object'))s.owned.laser=2;/* 試作4のセーブ（持ち物の記録なし）：そのころのはじめのレーザー2つ */
         if(SHIPS[o.cur]&&s.ships[o.cur].have)s.cur=o.cur;
         if(o.tut)s.tut=1;
         if(o.howto)s.howto=1;
@@ -1763,11 +1822,19 @@ function loadSave(){
         const r=o.rec;if(r&&typeof r==='object'){
           ['clears','bosses','goldTotal'].concat(Object.keys(REC0())).forEach(k=>{if(Number.isFinite(r[k]))s.rec[k]=Math.max(0,Math.floor(r[k]));});
           if(r.wmax)TYPES.forEach(t=>{if(Number.isFinite(r.wmax[t]))s.rec.wmax[t]=clamp(r.wmax[t]|0,0,WMAX);});
+          if(r.cw&&typeof r.cw==='object')TYPES.forEach(t=>{if(Number.isFinite(r.cw[t])&&r.cw[t]>=1)s.rec.cw[t]=Math.floor(r.cw[t]);});
           if(Array.isArray(r.sup5))s.rec.sup5=r.sup5.filter(k=>SUP[k]).filter((k,i,a)=>a.indexOf(k)===i);}
         if(!(r&&Number.isFinite(r.evos)))s.rec.evos=Object.keys(s.evo).length;/* #10 までのセーブ：進化させた武器の数から */
+        if(!(r&&Number.isFinite(r.runs))){const rc=s.rec;rc.runs=Math.max(rc.clears,Math.ceil(rc.time/RUN_LEN),s.best?1:0);}/* #14 までのセーブ：出撃の回数はクリアの回数・出撃した時間から少なめに */
         /* #13：ステージ。#10 までのセーブはクリアしていればステージ1をクリアしたことにする。えらんだステージは解放されている所まで */
         s.rec.stageMax=Math.min(STAGES.length,s.rec.stageMax);if(s.rec.clears>0&&s.rec.stageMax<1)s.rec.stageMax=1;
         if(Number.isFinite(o.st))s.st=clamp(Math.floor(o.st),1,Math.min(STAGES.length,s.rec.stageMax+1));
+        /* #15：お知らせ済みの品。#14 までのセーブは、持っている品＋もう条件を満たした品をだまって解放ずみにする（お知らせは出さない） */
+        if(Array.isArray(o.unl))s.unl=o.unl.filter((t,i,a)=>MODS[t]&&MODS[t].unlock&&a.indexOf(t)===i);
+        else s.unl=TYPES.filter(t=>MODS[t].unlock&&isUnl(t,s));
+        /* 研究所の解放（11/16）：お知らせ済み。前のセーブは、強化してある研究＋もう条件を満たした研究をだまって解放ずみにする */
+        if(Array.isArray(o.lunl))s.lunl=o.lunl.filter((id,i,a)=>LABK[id]&&LABK[id].unlock&&a.indexOf(id)===i);
+        else s.lunl=LAB.filter(x=>x.unlock&&labUnl(x.id,s)).map(x=>x.id);
       }}
   }catch(e){}
   SHIP_IDS.forEach(id=>{const sh=s.ships[id];TYPES.forEach(t=>{let n=0;sh.eq=sh.eq.map(v=>{if(v&&v.t===t){n++;if(n>s.owned[t])return null;}return v;});});});
@@ -1775,8 +1842,23 @@ function loadSave(){
 }
 function persist(){try{const o=Object.assign({},save);delete o.load;localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
 /* 解放の条件と進み */
-function shipProg(id){const u=SHIPS[id].unlock;if(!u)return {ok:true,cur:0,n:0};const r=save.rec;
-  const cur=u.k==='wmax'?Math.max(r.wmax.sword||0,r.wmax.saw||0):u.k==='sup5'?r.sup5.length:r[u.k];return {ok:cur>=u.n,cur:Math.min(cur,u.n),n:u.n};}
+/* 条件の「いまの数」（機体と品で共通）。wmax＝武器の最高Lv（t は1つか配列）・sup5＝最大にした支援の数・big＝その大型の敵をたおした数・cw＝その品をつけてクリアした回数 */
+function condCur(u,s){const r=s.rec;
+  if(u.k==='wmax')return Math.max(0,...[].concat(u.t).map(t=>r.wmax[t]||0));
+  if(u.k==='sup5')return r.sup5.length;
+  if(u.k==='big')return s.book.e[u.t]||0;
+  if(u.k==='cw')return r.cw[u.t]||0;
+  return r[u.k]||0;}
+const progOf=(u,s)=>{if(!u)return {ok:true,cur:0,n:0};const cur=condCur(u,s);return {ok:cur>=u.n,cur:Math.min(cur,u.n),n:u.n};};
+function shipProg(id){return progOf(SHIPS[id].unlock,save);}
+/* 品の解放（#15）：最初からの8こ・持っている品（機体についてきた品も）・お知らせ済み・条件を満たした品 */
+const modProg=(t,s)=>progOf(MODS[t].unlock,s||save);
+function isUnl(t,s){s=s||save;const u=MODS[t].unlock;return !u||s.owned[t]>0||(s.unl||[]).includes(t)||condCur(u,s)>=u.n;}
+/* 新しく解放された品をお知らせ済みにして返す（出撃の結果で出す） */
+function syncUnl(){const got=TYPES.filter(t=>MODS[t].unlock&&!save.unl.includes(t)&&isUnl(t));if(got.length)save.unl=save.unl.concat(got);return got;}
+/* 研究所の解放（11/16）：最初からの4こ・強化してある研究・お知らせ済み・条件を満たした研究 */
+function labUnl(id,s){s=s||save;const u=LABK[id].unlock;return !u||s.lab[id]>0||(s.lunl||[]).includes(id)||condCur(u,s)>=u.n;}
+function syncLabUnl(){const got=LAB.filter(o=>o.unlock&&!save.lunl.includes(o.id)&&labUnl(o.id)).map(o=>o.id);if(got.length)save.lunl=save.lunl.concat(got);return got;}
 function setShip(id){save.cur=id;SLOTS=SHIPS[id].slots;save.load=save.ships[id].eq;}
 let save=loadSave();setShip(save.cur);
 /* ---------- 効果音（Web Audio でコードで作る・音のファイルは使わない） ---------- */
@@ -1951,6 +2033,20 @@ const hangar=$('hangar'),sortie=$('sortie'),bay=$('bay'),edCv=$('editor'),ed=edC
 const SS=112,SC=56;
 const ssCv=document.createElement('canvas');ssCv.width=SS;ssCv.height=SS;const ssg=ssCv.getContext('2d');
 const FINGER=paint(16,20,[{m:'yel',r:2,p:[[5,0],[8,0],[8,9],[13,9],[15,12],[15,19],[3,19],[1,13],[3,10],[5,10]]},{m:'gold',r:1,p:[[8,10],[9,10],[9,14],[8,14]]}],{}),FINGERURL=FINGER.img.toDataURL();
+/* ◀ ▶ ✕ と向きの矢印（#16）：文字の記号の代わりに、点で描いた小さな絵。1マスを画面の3〜4px で出す。
+   l＝左（右は左右を反転）・x＝とじる・u＝上・ur＝右上（ほかの向きは90度ずつ回す） */
+const PIXI={l:['...##','..##.','.##..','##...','.##..','..##.','...##'],
+  x:['##...##','###.###','.#####.','..###..','.#####.','###.###','##...##'],
+  u:['...#...','..###..','.#####.','#######','..###..','..###..','..###..'],
+  ur:['..#####','....###','...####','..###.#','.###...','###....','.#.....']};
+const pixRot=r=>r[0].split('').map((_,x)=>r.map((_,y)=>r[r.length-1-y][x]).join(''));/* 90度（時計回り） */
+const PIXC={};
+function pixUrl(key,col){const k=key+col;if(PIXC[k])return PIXC[k];
+  let r=key==='r'?PIXI.l.map(t=>t.split('').reverse().join('')):PIXI[key];
+  if(!r){const d=+key.slice(1);r=PIXI[d%2?'ur':'u'];for(let i=0;i<d>>1;i++)r=pixRot(r);}/* 'd0'〜'd7'：向き（ARROW_NAME の順） */
+  const c=document.createElement('canvas');c.width=r[0].length;c.height=r.length;const g=c.getContext('2d');g.fillStyle=col;
+  r.forEach((t,y)=>{for(let x=0;x<t.length;x++)if(t[x]==='#')g.fillRect(x,y,1,1);});return PIXC[k]=c.toDataURL();}
+function pixIcon(key,k,col){const im=el('img','pix'),r=key==='x'||key[0]==='d'?7:5;im.alt='';im.src=pixUrl(key,col||'#eceaff');im.width=r*k;im.height=7*k;return im;}
 /* かぎの絵（まだのステージ） */
 const LOCKI=paint(14,16,[{m:'metal',r:1,f:g=>{g.beginPath();g.arc(6.5,6.5,5,Math.PI,0);g.lineTo(9.2,6.5);g.arc(6.5,6.5,2.6,0,Math.PI,true);g.closePath();g.fill();}},
   {m:'gold',r:2,p:[[0,7],[13,7],[13,15],[0,15]]},{m:'edark',r:1,flat:'#3a2604',p:[[6,9],[7,9],[7,13],[6,13]]}],{}).img.toDataURL();
@@ -1959,8 +2055,6 @@ const used=t=>save.load.reduce((n,v)=>n+(v&&v.t===t?1:0),0);
 const avail=t=>save.owned[t]-used(t);
 const defaultDir=(t,i)=>(t==='shield'||t==='sword'||t==='reflector'||t==='armor'||MODS[t].melee)?SLOTS[i].out:0;/* 近接は外向きから */
 const haveShip=id=>save.ships[id].have;
-/* 印は「まだ持っていなくて、いま買える物」があるときだけ */
-const affordable=()=>TYPES.some(t=>save.owned[t]===0&&save.gold>=MODS[t].price)||SHIP_IDS.some(id=>!haveShip(id)&&shipProg(id).ok&&save.gold>=SHIPS[id].price);
 
 function toast(msg){const n=$('note');n.textContent=msg;n.hidden=false;clearTimeout(noteT);noteT=setTimeout(()=>{n.hidden=true;},2200);}
 
@@ -1996,22 +2090,50 @@ function renderSlots(){
     b.addEventListener('click',()=>{if(performance.now()-swipeAt<350)return;v?openAim(i):openList(i);});
     box.appendChild(b);
   });
-  /* はじめての人：指のマークで「ここをタップ」（1回目だけ） */
-  const f=$('finger'),first=SHIPS[view].slots.findIndex((_,i)=>!save.load[i]);
-  if(!save.tut&&own&&first>=0&&$('sheetBg').hidden){const [x,y]=slotCss(first);f.style.left=x+'px';f.style.top=(y+20)+'px';f.hidden=false;}else f.hidden=true;
+  tutGuide();
 }
+/* はじめの案内の段（0＝なし・1＝枠をタップ・4＝出撃をタップ。②一覧のレーザー・③向きは板の中で1のまま）。
+   案内がまだのセーブは、格納庫に入るときにスタンダード機の装備を外して①から（tutReset）。つけたあとは④ */
+function tutStep(){if(save.tut||!haveShip(view))return 0;if(save.load.some(Boolean))return stOpen(save.st||1)?4:0;return TYPES.some(t=>avail(t)>0)?1:0;}
+const tutSlot=()=>save.load[0]?SHIPS[view].slots.findIndex((_,i)=>!save.load[i]):0;/* 機首（前に撃つ枠）から */
+/* 前の版のセーブ（案内がまだ）：スタンダード機の装備を持ち物にもどして、①（機首の＋）からはじめる（11/16 しょーくん） */
+function tutReset(){if(save.tut||!save.ships.standard.have)return;save.ships.standard.eq=emptyLoad('standard');setShip('standard');view='standard';persist();}
+/* はじめの案内の見た目：押す所（① 枠・② 一覧のレーザー・③ 向きの矢印・④ 出撃）のまわりだけ明るくし、ほかは暗くして押せなくする。
+   指は押す所の下（入らなければ上）に置いて、押す所に向かって動かす。毎フレーム場所を合わせる（tut=1 で止まる） */
+const TUTB={d:''};
+function tutGuide(){
+  const d=$('tutDim');let tg=null;
+  if(!save.tut&&save.load&&!hangar.hidden&&$('shopSheet').hidden&&$('labSheet').hidden&&$('title').hidden&&$('howto').hidden){
+    const st=tutStep();
+    if(!sheetBg.hidden){if(st===1)tg=sheet.querySelector('.tut');}
+    else if(st===1)tg=$('slots').children[tutSlot()]||null;
+    else if(st===4)tg=$('launchBtn');
+  }
+  if(!tg){if(!d.hidden)d.hidden=true;TUTB.d='';return;}
+  const r=tg.getBoundingClientRect();if(r.width<1){d.hidden=true;return;}
+  if(d.hidden)d.hidden=false;
+  const P=6,l=Math.round(r.left-P),t=Math.round(r.top-P),w=Math.round(r.width+P*2),h=Math.round(r.height+P*2),W=innerWidth,H=innerHeight;
+  const f=$('tfinger'),fh=f.offsetHeight||64,down=t+h+fh+12>H,key=l+','+t+','+w+','+h+','+W+','+H+','+down;
+  if(key===TUTB.d)return;TUTB.d=key;
+  const [hole,...bk]=d.children,box=(e,x,y,a,b)=>{e.style.left=x+'px';e.style.top=y+'px';e.style.width=Math.max(0,a)+'px';e.style.height=Math.max(0,b)+'px';};
+  box(hole,l,t,w,h);hole.style.borderRadius=getComputedStyle(tg).borderRadius==='50%'?'50%':'0';
+  box(bk[0],0,0,W,t);box(bk[1],0,t+h,W,H-t-h);box(bk[2],0,t,l,h);box(bk[3],l+w,t,W-l-w,h);
+  f.classList.toggle('down',down);
+  f.style.left=clamp(r.left+r.width/2,64,W-64)+'px';f.style.top=(down?t-fh-4:t+h+4)+'px';
+}
+function tutLoop(){tutGuide();if(!save.tut)requestAnimationFrame(tutLoop);else $('tutDim').hidden=true;}
 function renderEquip(){
   const own=haveShip(view),sh=SHIPS[view],pg=shipProg(view);
   $('shipName').textContent=sh.name;$('shipName').style.color=own||pg.ok?sh.c:'var(--dim)';$('shipSkill').textContent=own?sh.desc:'まだ持っていない機体';
   const dots=$('dots');dots.textContent='';SHIP_IDS.forEach(id=>dots.appendChild(el('i',id===view?'on':null)));
   const lb=$('lockbox');lb.textContent='';lb.hidden=own;
   if(!own){
-    if(pg.ok){lb.append(el('p',null,'解放できた！ '+sh.price+'G で買える'));const b=el('button','btn3','ショップで見る');b.type='button';b.addEventListener('click',()=>openShop(view));lb.appendChild(b);}
+    if(pg.ok){lb.append(el('p',null,'解放ずみ・'+sh.price+'G で買える'));const b=el('button','btn3','ショップで見る');b.type='button';b.addEventListener('click',()=>openShop(view));lb.appendChild(b);}
     else{lb.append(el('p',null,'解放の条件：'+sh.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);lb.append(pr,el('p','dim num',pg.cur+' / '+pg.n));}
   }
   drawEditor();renderSlots();
   const any=own&&save.load.some(Boolean),btn=$('launchBtn'),op=stOpen(save.st||1);
-  btn.disabled=!any||!op;btn.textContent=!own?'まだ持っていない機体':!op?'まだ解放されていない':any?'出撃':'＋をタップして装備をつけてね';
+  btn.disabled=!any||!op;btn.textContent=!own?'まだ持っていない機体':!op?'まだ解放されていない':any?'出撃':'＋に装備をつける';
   renderStage();
 }
 /* ステージのえらび方（#13）：まだのステージは、かぎの絵と解放の条件 */
@@ -2023,7 +2145,7 @@ function stepStage(d){const n=clamp((save.st||1)+d,1,STAGES.length);if(n===(save
 function viewShip(id){view=id;if(haveShip(id)){setShip(id);persist();}closeSheet();renderAll();}
 function stepShip(d){const i=SHIP_IDS.indexOf(view);viewShip(SHIP_IDS[(i+d+SHIP_IDS.length)%SHIP_IDS.length]);}
 function renderAll(){
-  $('goldNum').textContent=save.gold;$('shopDot').hidden=!affordable();
+  $('goldNum').textContent=save.gold;
   $('bookNum').textContent=bookCount(save)+'/'+BOOK_N();$('achNum').textContent=ACH.filter(a=>save.ach[a.id]).length+'/'+ACH.length;
   if(!haveShip(view)&&!SHIPS[view])view=save.cur;
   renderEquip();
@@ -2036,8 +2158,8 @@ const sheetBg=$('sheetBg'),sheet=$('sheet');let sheetOn=null;
 function openSheet(title,sub,c,onClose){
   sheet.textContent='';sheet.style.setProperty('--c',c||'var(--edge)');
   const h=el('h3');h.append(el('span',null,title));if(sub)h.append(el('small',null,sub));
-  const x=el('button','x','✕');x.type='button';x.setAttribute('aria-label','とじる');x.addEventListener('click',closeSheet);h.appendChild(x);
-  sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;$('finger').hidden=true;return sheet;
+  const x=el('button','x');x.appendChild(pixIcon('x',3));x.type='button';x.setAttribute('aria-label','とじる');x.addEventListener('click',closeSheet);h.appendChild(x);
+  sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;return sheet;
 }
 function closeSheet(){if(sheetBg.hidden)return;sheetBg.hidden=true;sheet.textContent='';const f=sheetOn;sheetOn=null;if(f)f();else if(!hangar.hidden)renderSlots();}
 sheetBg.addEventListener('click',e=>{if(e.target===sheetBg)closeSheet();});
@@ -2045,11 +2167,10 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheetBg.hidden)close
 
 function shortEff(t){const m=MODS[t];return m.eff||m.desc;}
 function openList(i){
-  const s=SLOTS[i],cur=save.load[i];
-  if(!save.tut){save.tut=1;persist();}/* 指の案内は1回だけ */
+  const s=SLOTS[i],cur=save.load[i],tut=tutStep()===1;let tutAt=null;/* はじめの案内②：一覧の中で、つけられる品（レーザー）に印（tutGuide がそこだけ明るくする） */
   const sh=openSheet(s.name+'につける装備',cur?'いま：'+MODS[cur.t].name:null);
   const list=TYPES.filter(t=>save.owned[t]>0);
-  if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていないよ。ショップで買ってね'));
+  if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていない。ショップで買える'));
   list.forEach(t=>{
     const m=MODS[t],a=avail(t),isCur=cur&&cur.t===t,b=el('button','irow'+(isCur?' now':''));b.type='button';b.style.setProperty('--c',m.c);
     const im=el('img');im.alt='';im.src=ICON[t];
@@ -2058,30 +2179,47 @@ function openList(i){
     b.disabled=!isCur&&a<=0;
     b.addEventListener('click',()=>{if(isCur){closeSheet();return;}mountAt(i,t);});
     sh.appendChild(b);
+    if(tut&&!tutAt&&!b.disabled){b.classList.add('tut');tutAt=b;}
   });
   const go=el('button','btn3','ショップで装備を買う');go.type='button';go.addEventListener('click',()=>{closeSheet();openShop();});sh.appendChild(go);
 }
+/* 一覧で品をえらぶ → 向きのある品は、向きをえらんでからつける（11/16 しょーくん「必ず向き選択を挟む」）。向きに関係のない品はすぐつける */
 function mountAt(j,t){
   const prev=save.load[j];
-  if(avail(t)<=0&&!(prev&&prev.t===t)){toast(MODS[t].name+'はぜんぶつけているよ');return;}
-  save.load[j]={t,d:prev?prev.d:defaultDir(t,j)};
-  if(!save.tut)save.tut=1;
-  persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけたよ');renderEquip();
+  if(avail(t)<=0&&!(prev&&prev.t===t)){toast(MODS[t].name+'はぜんぶつけている');return;}
+  if(MODS[t].passive){putMod(j,t,prev?prev.d:defaultDir(t,j));return;}
+  openDir(j,t);
+}
+function putMod(j,t,d){save.load[j]={t,d};persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけた'+(MODS[t].passive?'':'（'+ARROW_NAME[d]+'向き）'));renderEquip();}
+/* 向きをえらぶ板（つける前）。矢印をタップでつける。まんなかは品の絵（いまの向き・はじめは前向きか外向き）。✕ でつけずに閉じる */
+function openDir(j,t){
+  const prev=save.load[j],m=MODS[t],d0=prev?prev.d:defaultDir(t,j),tut=tutStep()===1;
+  const sh=openSheet(SLOTS[j].name+'：'+m.name,'向きをえらぶ',m.c);
+  const grid=el('div','dirs');
+  DIR_GRID.forEach(d=>{
+    if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[t][d0].url;c.appendChild(im);grid.appendChild(c);return;}
+    const b=el('button');b.appendChild(pixIcon('d'+d,4,prev&&prev.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');
+    if(prev)b.setAttribute('aria-pressed',prev.d===d?'true':'false');
+    if(tut&&d===d0)b.classList.add('tut');/* はじめの案内③：前向きの矢印だけ明るく */
+    b.addEventListener('click',()=>putMod(j,t,d));grid.appendChild(b);});
+  sh.appendChild(grid);
+  sh.appendChild(el('p','dim','向いた方へ攻撃する'));
+  const back=el('button','btn3','装備をえらびなおす');back.type='button';back.addEventListener('click',()=>{sheetOn=null;openList(j);});sh.appendChild(back);
 }
 const DIR_GRID=[7,0,1,6,-1,2,5,4,3];
 function openAim(i){
   const v=save.load[i];if(!v)return;
-  const m=MODS[v.t],sh=openSheet(SLOTS[i].name+'：'+m.name,'向きをえらんでね',m.c);
+  const m=MODS[v.t],sh=openSheet(SLOTS[i].name+'：'+m.name,'向きをえらぶ',m.c);
   const grid=el('div','dirs');
   const draw=()=>{grid.textContent='';DIR_GRID.forEach(d=>{
     if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[v.t][v.d].url;c.appendChild(im);grid.appendChild(c);return;}
-    const b=el('button',null,ARROW[d]);b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
+    const b=el('button');b.appendChild(pixIcon('d'+d,4,v.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
     b.addEventListener('click',()=>{v.d=d;persist();draw();drawEditor();});grid.appendChild(b);});};
   draw();sh.appendChild(grid);
-  sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効くよ':'向いた方へ攻撃するよ'));
+  sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効く':'向いた方へ攻撃する'));
   const row=el('div','sbtns'),ch=el('button','btn3','装備をかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
   ch.addEventListener('click',()=>{sheetOn=null;openList(i);});
-  off.addEventListener('click',()=>{save.load[i]=null;persist();closeSheet();toast(SLOTS[i].name+'の'+m.name+'を外したよ');renderEquip();});
+  off.addEventListener('click',()=>{save.load[i]=null;persist();closeSheet();toast(SLOTS[i].name+'の'+m.name+'を外した');renderEquip();});
   row.append(ch,off);sh.appendChild(row);
 }
 /* 機体の性能の表（ふつうと同じ数字の行は、full でないときは出さない） */
@@ -2097,11 +2235,7 @@ function openInfo(){
   const ul=el('ul','statl');
   shipRows(sh,true).concat([['装備の場所',sh.slots.length+'か所']]).forEach(([k,v])=>{const li=el('li');li.append(el('span',null,k),el('b','num',v));ul.appendChild(li);});
   s.appendChild(ul);
-  if(haveShip(view)){const eq=save.ships[view].eq.map((v,i)=>v?sh.slots[i].name+'：'+MODS[v.t].name+' '+ARROW[v.d]:null).filter(Boolean);
-    s.appendChild(el('p','dim','つけている装備：'+(eq.length?eq.join('　'):'なし')));}
-  const b=save.best,r=save.rec;
-  s.appendChild(el('p','dim','さいこう記録：'+(b?fmt(b.t)+' 生存・'+b.kills+'体'+(b.clear?'（クリア）':''):'まだなし')+'　クリア '+r.clears+'回・大型の敵 '+r.bosses+'体・かせいだ合計 '+r.goldTotal+'G'));
-}
+}/* 11/16：つけている装備（見ればわかる）と記録は出さない（しょーくん） */
 
 /* 左右スワイプで機体を切りかえ */
 bay.addEventListener('pointerdown',e=>{swipe={id:e.pointerId,x:e.clientX,y:e.clientY};});
@@ -2113,16 +2247,16 @@ bay.addEventListener('pointercancel',()=>{swipe=null;});
 let shopCat='atk',shopNote='';
 const SHOP_TABS=[['ship','機体'],['atk','攻撃'],['def','防御'],['sup','補助']];
 const tabOf=k=>SHIPS[k]?'ship':MODS[k]?MODS[k].cat:null;
-const canBuy=k=>SHIPS[k]?(!haveShip(k)&&shipProg(k).ok&&save.gold>=SHIPS[k].price):(save.owned[k]===0&&save.gold>=MODS[k].price);
+const canBuy=k=>SHIPS[k]?(!haveShip(k)&&shipProg(k).ok&&save.gold>=SHIPS[k].price):(save.owned[k]===0&&isUnl(k)&&save.gold>=MODS[k].price);/* 品は解放ずみだけ（#15） */
 function shopList(cat){return cat==='ship'?SHIP_IDS:TYPES.filter(t=>MODS[t].cat===cat);}
 function renderShop(){
   $('goldNum2').textContent=save.gold;$('shopNote').textContent=shopNote;
   const tabs=$('shopTabs');tabs.textContent='';
   SHOP_TABS.forEach(([k,label])=>{const b=el('button',null,label);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',shopCat===k?'true':'false');
-    if(shopList(k).some(canBuy)){const d=el('span','badge');b.appendChild(d);}
     b.addEventListener('click',()=>{shopCat=k;shopNote='';renderShop();$('shopGrid').scrollTop=0;});tabs.appendChild(b);});
   const grid=$('shopGrid');grid.textContent='';
-  shopList(shopCat).forEach(k=>{
+  const all=shopList(shopCat),isS=shopCat==='ship',lock=isS?[]:all.filter(t=>!isUnl(t));
+  all.filter(k=>isS||isUnl(k)).forEach(k=>{
     const isShip=!!SHIPS[k],it=isShip?SHIPS[k]:MODS[k],b=el('button','sitem'+(canBuy(k)?' can':''));b.type='button';b.style.setProperty('--c',it.c);
     const img=el('img');img.alt='';
     let price;
@@ -2133,9 +2267,15 @@ function renderShop(){
     b.addEventListener('click',()=>openDetail(k));
     grid.appendChild(b);
   });
+  /* まだの品（#15）：進みぐあいの大きい3こだけ（シルエット・条件・棒）と、のこりの数 */
+  if(lock.length){grid.appendChild(el('h3','soonh','もうすぐ解放'));
+    lock.map(t=>({t,p:modProg(t)})).sort((a,b)=>b.p.cur/b.p.n-a.p.cur/a.p.n||UNL_ORDER[a.t]-UNL_ORDER[b.t]).slice(0,3).forEach(({t,p})=>{
+      const c=el('div','lockc'),im=el('img'),mid=el('div'),pr=el('div','prog'),bar=el('i');im.alt='';im.src=silUrl('m'+t,MSPR[t][0].img);
+      bar.style.width=(p.cur/p.n*100)+'%';pr.appendChild(bar);mid.append(el('p',null,MODS[t].unlock.txt),pr,el('p','dim num',p.cur+' / '+p.n));c.append(im,mid);grid.appendChild(c);});
+    if(lock.length>3)grid.appendChild(el('p','soonn','のこり '+(lock.length-3)+'こ'));}
 }
 function buyShip(id){const sh=SHIPS[id];if(haveShip(id)||!shipProg(id).ok||save.gold<sh.price)return false;
-  save.gold-=sh.price;save.ships[id].have=true;sh.start.forEach(v=>{if(save.owned[v.t]<sh.start.filter(w=>w.t===v.t).length)save.owned[v.t]++;});
+  save.gold-=sh.price;save.ships[id].have=true;sh.start.forEach(v=>{if(save.owned[v.t]<sh.start.filter(w=>w.t===v.t).length)save.owned[v.t]++;if(MODS[v.t].unlock&&!save.unl.includes(v.t))save.unl.push(v.t);});/* ついてきた品は解放ずみ（お知らせなし） */
   save.ships[id].eq=startLoad(id);persist();return true;}
 function openDetail(k){
   const isShip=!!SHIPS[k],it=isShip?SHIPS[k]:MODS[k];
@@ -2143,13 +2283,13 @@ function openDetail(k){
   const top=el('div','dtop'),img=el('img');img.alt='';
   const info=el('div');
   if(isShip){const pg=shipProg(k);img.src=(haveShip(k)||pg.ok?SHIPSPR[k].img:shipSil(k)).toDataURL();
-    info.append(el('p',null,it.desc+'。'),el('p',null,'能力：'+it.skill+'。'+(it.skill2?it.skill2+'。':'')),el('p',null,'必殺：'+it.sp.name+'。'+it.sp.desc+'。'),el('p',null,'装備の場所 '+it.slots.length+'か所・はじめの武器 '+it.start.map(v=>MODS[v.t].name).join('と')));}
+    info.append(el('p',null,it.desc+'。'),el('p',null,'能力：'+it.skill+'。'+(it.skill2?it.skill2+'。':'')),el('p',null,'必殺：'+it.sp.name+'。'+it.sp.desc+'。'),el('p',null,'装備の場所 '+it.slots.length+'か所'+(it.price?'・はじめの武器 '+it.start.map(v=>MODS[v.t].name).join('と'):'')));}/* スタンダードは、はじめのレーザー1つを自分でつける（#15） */
   else{img.src=ICON[k];info.append(el('p',null,it.desc));}
   top.append(img,info);s.appendChild(top);
   if(isShip){
     const ul=el('ul','statl'),pc=v=>(v>=1?'+':'')+Math.round((v-1)*100)+'%';
     shipRows(it,false).forEach(([a,b])=>{const li=el('li');li.append(el('span',null,a),el('b','num',b));ul.appendChild(li);});s.appendChild(ul);
-    if(it.unlock){const pg=shipProg(k);s.appendChild(el('p',null,'解放の条件：'+it.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);s.append(pr,el('p','dim num',pg.cur+' / '+pg.n+(pg.ok?'　達成！':'')));}
+    if(it.unlock){const pg=shipProg(k);s.appendChild(el('p',null,'解放の条件：'+it.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);s.append(pr,el('p','dim num',pg.cur+' / '+pg.n+(pg.ok?'　達成':'')));}
   }else if(it.rate){const r=el('div','drate');it.rate.forEach((v,i)=>{const rt=el('div','rt');rt.appendChild(el('span',null,RATE_NAMES[i]));
       const bars=el('span','bars');for(let q=0;q<5;q++)bars.appendChild(el('i',q<v?'on':null));rt.appendChild(bars);r.appendChild(rt);});s.appendChild(r);}
   else{const p=el('p','eff');p.append(el('span',null,'こうか：'),document.createTextNode(it.eff+(it.passive?'（1つにつき）':'')));s.appendChild(p);}
@@ -2159,11 +2299,12 @@ function openDetail(k){
   const buy=el('button','buybig');buy.type='button';
   if(isShip&&haveShip(k)){buy.disabled=true;buy.textContent='持っている';}
   else if(isShip&&!shipProg(k).ok){buy.disabled=true;buy.textContent='まだ解放されていない';}
+  else if(!isShip&&!isUnl(k)){buy.disabled=true;buy.textContent='まだ解放されていない';s.appendChild(el('p',null,'解放の条件：'+it.unlock.txt));}
   else if(save.gold>=it.price){buy.append(el('span','num',String(it.price)),document.createTextNode('G で買う'));
     buy.addEventListener('click',()=>{
       SFX.play('buy');
-      if(isShip){if(!buyShip(k))return;shopNote=it.name+'を手に入れた！格納庫で ◀ ▶ をおして切りかえてね';view=k;setShip(k);}
-      else{if(save.gold<it.price)return;save.gold-=it.price;save.owned[k]++;persist();shopNote=it.name+'を買ったよ！格納庫の「＋」をタップしてつけてね';}
+      if(isShip){if(!buyShip(k))return;shopNote=it.name+'を手に入れた。出撃する機体にした';view=k;setShip(k);}
+      else{if(save.gold<it.price)return;save.gold-=it.price;save.owned[k]++;persist();shopNote=it.name+'を買った。格納庫の「＋」からつけられる';}
       const got=checkAch();if(got.length)shopNote+='　'+achText(got);
       closeSheet();renderAll();});}
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(it.price-save.gold)),document.createTextNode('G'));}
@@ -2181,14 +2322,23 @@ function labEff(o,lv){if(lv<=0)return 'なし';
 function renderLab(){
   $('goldNum3').textContent=save.gold;$('labNote').textContent=labNote;
   const grid=$('labGrid');grid.textContent='';
-  LAB.forEach(o=>{const lv=save.lab[o.id],mx=lv>=o.max,pr=labPrice(o,lv),b=el('button','sitem lab');b.type='button';
+  const lock=LAB.filter(o=>!labUnl(o.id));
+  LAB.filter(o=>labUnl(o.id)).forEach(o=>{const lv=save.lab[o.id],mx=lv>=o.max,pr=labPrice(o,lv),b=el('button','sitem lab');b.type='button';
     b.style.setProperty('--c',mx?'#6e5a1c':'var(--edge)');
     const img=el('img');img.alt='';img.src=LICON[o.id];
     const pips=el('span','lpips');pips.setAttribute('aria-label','Lv '+lv+' / '+o.max);for(let i=0;i<o.max;i++)pips.appendChild(el('i',i<lv?'on':null));
     b.append(img,el('span',null,o.name),pips,mx?el('small','short','最大'):el('small',save.gold<pr?'short':null,pr+'G'));
     b.addEventListener('click',()=>openLabDetail(o.id));grid.appendChild(b);});
+  /* まだの研究（11/16）：ショップと同じ形。進みぐあいの大きい3こだけ（シルエット・条件・棒）と、のこりの数 */
+  if(lock.length){grid.appendChild(el('h3','soonh','もうすぐ解放'));
+    lock.map(o=>({o,p:progOf(o.unlock,save)})).sort((a,b)=>b.p.cur/b.p.n-a.p.cur/a.p.n||LAB_ORDER[a.o.id]-LAB_ORDER[b.o.id]).slice(0,3).forEach(({o,p})=>{
+      const c=el('div','lockc'),im=el('img'),mid=el('div'),pr=el('div','prog'),bar=el('i');im.alt='';labSil(o.id,im);
+      bar.style.width=(p.cur/p.n*100)+'%';pr.appendChild(bar);mid.append(el('p',null,o.unlock.txt),pr,el('p','dim num',p.cur+' / '+p.n));c.append(im,mid);grid.appendChild(c);});
+    if(lock.length>3)grid.appendChild(el('p','soonn','のこり '+(lock.length-3)+'こ'));}
 }
-function buyLab(id){const o=LABK[id],lv=save.lab[id];if(!o||lv>=o.max)return false;const pr=labPrice(o,lv);if(save.gold<pr)return false;
+/* 研究のシルエット（アイコンは data URL なので、読みこんでから影にする） */
+function labSil(id,im){const k='l'+id;if(SILC[k]){im.src=SILC[k];return;}const src=new Image();src.onload=()=>{im.src=silUrl(k,src);};src.src=LICON[id];}
+function buyLab(id){const o=LABK[id],lv=save.lab[id];if(!o||lv>=o.max||!labUnl(id))return false;const pr=labPrice(o,lv);if(save.gold<pr)return false;
   save.gold-=pr;save.lab[id]=lv+1;if(id==='r_slot')ensureSlots(save);persist();return true;}
 function openLabDetail(id){
   const o=LABK[id],lv=save.lab[id],mx=lv>=o.max,pr=labPrice(o,lv);
@@ -2198,7 +2348,8 @@ function openLabDetail(id){
   const ul=el('ul','statl'),row=(a,b)=>{const li=el('li');li.append(el('span',null,a),el('b',null,b));ul.appendChild(li);};
   row('レベル',lv+' / '+o.max);row('いまの効果',labEff(o,lv));if(!mx)row('次の効果',labEff(o,lv+1));s.appendChild(ul);
   const buy=el('button','buybig');buy.type='button';
-  if(mx){buy.disabled=true;buy.textContent='最大レベル';}
+  if(!labUnl(id)){buy.disabled=true;buy.textContent='解放の条件：'+o.unlock.txt;}
+  else if(mx){buy.disabled=true;buy.textContent='最大レベル';}
   else if(save.gold>=pr){buy.append(el('span','num',String(pr)),document.createTextNode('G で強化'));
     buy.addEventListener('click',()=>{if(!buyLab(id))return;SFX.play('buy');const got=checkAch();
       labNote=o.name+'を Lv'+save.lab[id]+' にした'+(id==='r_slot'?'。格納庫で機体の後ろに場所がふえた':'')+(got.length?'。'+achText(got):'');closeSheet();renderAll();});}
@@ -2215,7 +2366,7 @@ function silUrl(key,src){if(SILC[key])return SILC[key];const c=document.createEl
 const URLC={};const urlOf=(key,c)=>URLC[key]||(URLC[key]=c.toDataURL());
 function bookSections(){
   return [
-    {name:'装備',c:CATC.w,list:TYPES.map(t=>({found:save.owned[t]>0,img:()=>ICON[t],sil:()=>silUrl('m'+t,MSPR[t][0].img),name:MODS[t].name,sub:CATS[MODS[t].cat],desc:MODS[t].desc,c:MODS[t].c,hint:'ショップで買うと記録される'}))},
+    {name:'装備',c:CATC.w,list:TYPES.map(t=>({found:save.owned[t]>0,img:()=>ICON[t],sil:()=>silUrl('m'+t,MSPR[t][0].img),name:MODS[t].name,sub:CATS[MODS[t].cat],desc:MODS[t].desc,c:MODS[t].c,hint:isUnl(t)?'ショップで買うと記録される':'解放の条件：'+MODS[t].unlock.txt}))},
     {name:'進化',c:CATC.e,list:Object.keys(EVO).map(t=>({found:!!save.evo[t],img:()=>ICONE[t],sil:()=>silUrl('e'+t,MSPRE[t][0].img),name:EVO[t].name,sub:MODS[t].name+'の進化',desc:EVO[t].desc,c:MODS[t].c,hint:'武器を進化させると記録される'}))},
     {name:'機体',c:CATC.p,list:SHIP_IDS.map(k=>({found:haveShip(k),img:()=>urlOf('s'+k,SHIPSPR[k].img),sil:()=>urlOf('ss'+k,shipSil(k)),name:SHIPS[k].name,sub:'機体',desc:SHIPS[k].desc,c:SHIPS[k].c,hint:'機体を手に入れると記録される'}))},
     {name:'敵',c:'#ff4a5e',list:BOOK_E.map(b=>({found:save.book.e[b.k]!=null,img:()=>urlOf('n'+b.k,ESPR[b.k].img),sil:()=>silUrl('n'+b.k,ESPR[b.k].img),name:b.name,sub:'敵',desc:b.desc,c:'#ff4a5e',
@@ -2257,14 +2408,16 @@ $('shopClose').addEventListener('click',closeShop);
 $('labBtn').addEventListener('click',openLab);$('labClose').addEventListener('click',closeLab);
 $('bookBtn').addEventListener('click',openBook);$('bookClose').addEventListener('click',closeBook);
 $('achBtn').addEventListener('click',openAch);$('achClose').addEventListener('click',closeAch);
-$('debugGold').addEventListener('click',()=>{save.gold+=1000;persist();shopNote='試作用に1000Gふやしたよ';renderAll();});
+$('debugGold').addEventListener('click',()=>{save.gold+=1000;persist();shopNote='試作用に1000Gふやした';renderAll();});
+$('debugUnl').addEventListener('click',()=>{save.unl=TYPES.filter(t=>MODS[t].unlock);save.lunl=LAB.filter(o=>o.unlock).map(o=>o.id);persist();shopNote='試作用に全部の品と研究所を解放した';renderAll();});/* 試作用の2つのボタンは公開の前に消す（docs/design/unlocks.md） */
 $('shipPrev').addEventListener('click',()=>stepShip(-1));$('shipNext').addEventListener('click',()=>stepShip(1));
 $('stPrev').addEventListener('click',()=>stepStage(-1));$('stNext').addEventListener('click',()=>stepStage(1));
 $('infoBtn').addEventListener('click',openInfo);
-$('launchBtn').addEventListener('click',()=>{if(haveShip(view))startRun();});
+$('launchBtn').addEventListener('click',()=>{if(!haveShip(view))return;if(!save.tut&&save.load.some(Boolean)){save.tut=1;persist();}/* はじめの案内は出撃で終わり */startRun();});
 if(window.ResizeObserver)new ResizeObserver(()=>{layoutEditor();renderSlots();}).observe(bay);
 else window.addEventListener('resize',()=>{layoutEditor();renderSlots();});
-document.querySelectorAll('.finger span').forEach(s=>{const im=el('img');im.alt='';im.src=FINGERURL;im.style.cssText='width:32px;height:40px;image-rendering:pixelated';s.replaceWith(im);});
+{const im=el('img');im.alt='';im.src=FINGERURL;$('tfinger').prepend(im);}/* はじめの案内の指 */requestAnimationFrame(tutLoop);
+$('toTitle').appendChild(pixIcon('l',3));$('shipPrev').appendChild(pixIcon('l',3));$('shipNext').appendChild(pixIcon('r',3));$('stPrev').appendChild(pixIcon('l',3));$('stNext').appendChild(pixIcon('r',3));
 
 /* ---------- sortie ---------- */
 const stage=$('stage'),cv=$('game'),ctx=cv.getContext('2d'),overlay=$('overlay'),banner=$('banner');
@@ -2330,6 +2483,7 @@ const isMelee=t=>t==='sword'||t==='saw'||!!MODS[t].melee;
 const wMul=t=>{const X=R.spc;let v=1;if(X.fury)v*=isMelee(t)?1.6:MODS[t].cat==='atk'?0.8:1;if(X.one&&R.cs.top&&!MODS[t].passive)v*=t===R.cs.top?1.4:0.85;return v;};
 const BOOM={mine:1,missile:1,grenade:1,cluster:1,torpedo:1,minefield:1,micro:1};
 let LKB=0;/* 弾が1発ずつ当てている間は1（大蛇の同じフレームの印を使わない） */
+let ATK=0;/* 攻撃ごとの番号（武器1つの発射・near の1回・必殺技の1回ごとに1ふえる）。大蛇の重複よけの印に使う（#14 の点検） */
 let HSRC=0;/* いま当てているのが近接の武器なら1（倒した数を数える） */
 function stat(t){const s=stat0(t);if(s){const k=csk(t);if(k)applyCS(k,s);}return s;}
 function stat0(t){
@@ -2482,7 +2636,7 @@ function buildGrid(){
     const cx=clamp(Math.floor((e.x+PADG)/CELL),0,gCols-1),cy=clamp(Math.floor((e.y+PADG)/CELL),0,gRows-1);
     grid[cy*gCols+cx].push(e);}
 }
-function near(x,y,r,fn){
+function near(x,y,r,fn){ATK++;
   const rr=r+gMaxR+2;/* 大型の敵（当たり54）もとらえる */
   const x0=clamp(Math.floor((x-rr+PADG)/CELL),0,gCols-1),x1=clamp(Math.floor((x+rr+PADG)/CELL),0,gCols-1);
   const y0=clamp(Math.floor((y-rr+PADG)/CELL),0,gRows-1),y1=clamp(Math.floor((y+rr+PADG)/CELL),0,gRows-1);
@@ -2502,7 +2656,7 @@ function showBanner(t,c){banner.textContent=t;banner.style.borderColor=c||'';ban
 function hit(e,amt,kx,ky){
   if(e.dead||e.hide)return;/* まぼろしが消えている間は当たらない */
   if(e.link){e.flash=0.07;e=e.link;if(e.dead)return;}/* 大蛇の体：頭の体力がへる */
-  if(e.segs&&!LKB){if(e.lkT===R.t&&e.lkA===amt)return;e.lkT=R.t;e.lkA=amt;}/* 大蛇：同じフレームの同じ攻撃（ビーム・範囲）は1回だけ。体は頭と同じ id なので、当たり済みの印も1つ（#13 の点検） */
+  if(e.segs&&!LKB){if(e.lkT===R.t&&e.lkA===amt&&e.lkK===ATK)return;e.lkT=R.t;e.lkA=amt;e.lkK=ATK;}/* 大蛇：同じフレームの同じ攻撃（ビーム・範囲）は1回だけ。別の武器は攻撃の番号でわける（#14 の点検）。体は頭と同じ id なので、当たり済みの印も1つ（#13 の点検） */
   amt*=1+e.vul+(e.son>0?e.sonV:0);/* ニードル砲の「もろさ」・音波砲 */
   if(e.shell)amt*=0.3;/* 岩やどり：岩をかぶっている間は30% */
   if(e.kind==='guard'){const kl=Math.hypot(kx,ky);if(kl>1e-3&&(kx*Math.cos(e.fa)+ky*Math.sin(e.fa))/kl<-0.35){amt*=0.3;/* 盾持ち：前からは30% */
@@ -2530,7 +2684,7 @@ function killed(e){
   if(e.kind==='boss'&&R.t-e.born<=30)R.fastBoss++;
   const ak=e.art||e.kind;R.kE[ak]=(R.kE[ak]||0)+1;R.seenE[ak]=1;
   if(e.kind==='boss'){R.CH.push({x:clamp(e.x,30,GW-30),y:e.y,vy:-60,t:0,dead:false,pull:false,sp:70*U});if(R.hurtN===e.hn)R.nodmg=(R.nodmg||0)+1;}/* #12：宝箱・ノーダメージ */
-  if(e.kind==='boss'){for(let i=0;i<10;i++)addGem(e.x+rand(-30,30),e.y+rand(-20,20),3,true,rand(-68,68),rand(-68,27));R.bossKills++;showBanner('大型の敵をたおした！');SFX.play('boss');
+  if(e.kind==='boss'){for(let i=0;i<10;i++)addGem(e.x+rand(-30,30),e.y+rand(-20,20),3,true,rand(-68,68),rand(-68,27));R.bossKills++;showBanner('大型の敵をたおした');SFX.play('boss');
     addX(e.x,e.y,EXPL.b,0.8);for(let i=0;i<5;i++)addX(e.x+rand(-60,60),e.y+rand(-45,45),EXPL.m,rand(0.4,0.7));}
   else{SFX.play('kill');addGem(e.x,e.y,k.xp*(e.reapNow?1.2:1),k.xp>=3);/* 大鎌で倒すと経験値＋20% */addX(e.x,e.y,k.xp<=1?EXPL.s:EXPL.m,k.xp<=1?0.36:0.5);}
   burst(e.x,e.y,k.burst||8,k.col);
@@ -2548,7 +2702,7 @@ function hurt(d){
   R.hp=Math.max(0,R.hp-d);R.inv=0.55*R.cs.ifr;R.hurtFx=0.18;SFX.play('hurt');burst(R.x,R.y,10,['#ff2d6f','#ffffff']);
   if(R.sh.graze){R.ghost=0.8;R.inv=Math.max(R.inv,0.8);}/* ファントム：被弾すると0.8秒すがたを消す */
   if(R.cs.frost>0)frostNova();
-  if(R.hp<=0&&R.guts){R.guts=false;R.hp=1;R.inv=1.2;showBanner('がんばり！ HP1 でたえた');}
+  if(R.hp<=0&&R.guts){R.guts=false;R.hp=1;R.inv=1.2;showBanner('がんばり：HP1 でたえた');}
   if(R.hp<=0&&R.revLeft>0){R.revLeft--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('復活装置で HP50% にもどった');}
   if(R.hp<=0&&R.labRev>0){R.labRev--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('予備の機体で HP50% にもどった');}/* 研究所 */
   if(R.hp>0&&R.hp<R.maxHp*0.3&&R.ebLeft>0&&R.ebT<=0){R.ebLeft--;R.ebT=3;R.inv=Math.max(R.inv,3);SFX.play('ebar');}/* 緊急バリア */
@@ -2759,10 +2913,10 @@ function fire(dt){fireList(R.mods,dt);if(R.cmods.length)fireList(R.cmods,dt);}
 function fireList(list,dt){
   for(const m of list){
     const ev=R.evo[m.t]&&EFIRE[m.t],f=ev||FIRE[m.t];if(!f)continue;
-    R.fm=R.sh.front&&SLOTS[m.slot].front?R.sh.front:1;HSRC=isMelee(m.t)?1:0;
+    R.fm=R.sh.front&&SLOTS[m.slot].front?R.sh.front:1;HSRC=isMelee(m.t)?1:0;ATK++;
     const st=stat(m.t);
     if(m.bq>0&&!ev){m.bt-=dt;if(m.bt<=0){m.bq--;m.bt=st.gap;const [bx,by]=modPos(m),ba=dirAngle(m.d);BURST[m.t](m,st,bx,by,Math.cos(ba),Math.sin(ba));}}
-    m.cd-=dt;if(m.cd>0)continue;
+    m.cd-=dt;if(m.cd>0)continue;ATK++;
     const [ox,oy]=modPos(m),a=dirAngle(m.d);
     const ok=f(m,st,ox,oy,Math.cos(a),Math.sin(a))!==false;m.cd=ok?st.cd:0.15;if(ok)SFX.shot(ev?EVO[m.t].id:m.t);
   }
@@ -3032,7 +3186,7 @@ function reviveFx(){for(const b of R.EB){const dx=b.x-R.x,dy=b.y-R.y;if(dx*dx+dy
 
 /* 進化した武器の撃ち方（false＝撃たない：永久ノコと小さな太陽は evo10() で動く） */
 const EFIRE={
-  laser(m,st,ox,oy,ux,uy){m.bm=R.t;for(let k=0;k<st.n;k++){const off=(k-(st.n-1)/2)*(st.w+4),sx=ox+ux*14-uy*off,sy=oy+uy*14+ux*off;
+  laser(m,st,ox,oy,ux,uy){m.bm=R.t;for(let k=0;k<st.n;k++){ATK++;const off=(k-(st.n-1)/2)*(st.w+4),sx=ox+ux*14-uy*off,sy=oy+uy*14+ux*off;
     for(const e of R.E){if(e.dead)continue;const dx=e.x-sx,dy=e.y-sy,pr=dx*ux+dy*uy;if(pr<-e.r||pr>st.len)continue;if(Math.abs(dx*uy-dy*ux)<=st.w/2+e.r)hit(e,st.dmg,ux*6,uy*6);}}},
   gatling(m,st,ox,oy,ux,uy){const base=Math.atan2(uy,ux);for(let k=0;k<st.n;k++){const a=base+rand(-st.spread,st.spread),off=(k-(st.n-1)/2)*7;
     R.B.push(mkB(ox+ux*14-uy*off,oy+uy*14+ux*off,Math.cos(a)*st.spd,Math.sin(a)*st.spd,st.dmg,st.pierce,16,{kb:0.08}));}},
@@ -3391,7 +3545,7 @@ function ebClear(x,y,rad,c,small){for(const b of R.EB){if(b.dead||(small&&b.big)
 /* 四すみのかっこ（ねらいの印） */
 function bracket(g,x,y,r,c){g.fillStyle=c;x=Math.round(x);y=Math.round(y);r=Math.round(r);
   for(let i=0;i<4;i++){const sx=i&1?1:-1,sy=i&2?1:-1,cx=x+sx*r,cy=y+sy*r;g.fillRect(sx>0?cx-6:cx,sy>0?cy-1:cy,6,2);g.fillRect(sx>0?cx-1:cx,sy>0?cy-6:cy,2,6);}}
-function snipe(L){if(!L)return;let n=0;for(const e of L){if(e.dead)continue;n++;
+function snipe(L){if(!L)return;let n=0;ATK++;/* 1回の狙撃で1つの番号（#15 の点検） */for(const e of L){if(e.dead)continue;n++;
     R.TR.push({x0:R.x,y0:R.y-34,x1:e.x,y1:e.y,t:0,dur:0.35,c:'#bfe9ff',w:3,dead:false});hit(e,spDmg(120),0,-40*U);addX(e.x,e.y,EXPL.m,0.4);}
   if(n)SFX.play('spsnipe');}
 function escort(a,dt){
@@ -3401,7 +3555,7 @@ function escort(a,dt){
 const SPECIAL={
   /* 全方位レーザー：16本の光線。まわり320の敵に2回 */
   standard:{dur:1.1,start(s){s.n=0;s.a=Math.random()*TAU;},
-    up(s){if(s.n<2&&s.t>=0.15+s.n*0.45){s.n++;for(const e of R.E){if(!onScr(e))continue;const dx=e.x-R.x,dy=e.y-R.y,d=Math.hypot(dx,dy)||1;if(d<=320+e.r)hit(e,spDmg(40),dx/d*140*U,dy/d*140*U);}}},
+    up(s){if(s.n<2&&s.t>=0.15+s.n*0.45){s.n++;ATK++;for(const e of R.E){if(!onScr(e))continue;const dx=e.x-R.x,dy=e.y-R.y,d=Math.hypot(dx,dy)||1;if(d<=320+e.r)hit(e,spDmg(40),dx/d*140*U,dy/d*140*U);}}},
     draw(g,s,px,py){const L=320*Math.min(1,s.t/0.15),k=s.t>0.8?(1.1-s.t)/0.3:1;if(k<=0)return;
       for(let i=0;i<16;i++){g.save();g.translate(px,py);g.rotate(s.a+i*TAU/16+s.t*0.8);
         g.globalAlpha=k*0.35;g.fillStyle='#4588f2';g.fillRect(10,-5,L,10);g.globalAlpha=k*0.85;g.fillStyle='#8cc2ff';g.fillRect(10,-2,L,4);g.globalAlpha=k;g.fillStyle='#ffffff';g.fillRect(10,-1,L,2);g.restore();}
@@ -3431,7 +3585,7 @@ const SPECIAL={
   /* なぎはらい：画面を横切る3本の斬撃（はば±30）。弾も消す */
   blade:{dur:1.25,start(s){s.L=[0,1,2].map(i=>({y:clamp(R.y-50-i*120,30,GH-30),dir:i%2?-1:1,t0:i*0.2,x:null,hits:new Set()}));
       /* 自機が上のほうにいて重なったときは、上から60ずつはなす（#11 の点検） */for(let i=s.L.length-2;i>=0;i--)if(s.L[i].y-s.L[i+1].y<60)s.L[i].y=s.L[i+1].y+60;},
-    up(s){for(const l of s.L){const p=(s.t-l.t0)/0.35;if(p<0||p>1.2)continue;const q=Math.min(1,p),x1=l.dir>0?-40+q*(GW+80):GW+40-q*(GW+80),x0=l.x==null?(l.dir>0?-40:GW+40):l.x;l.x=x1;
+    up(s){for(const l of s.L){ATK++;const p=(s.t-l.t0)/0.35;if(p<0||p>1.2)continue;const q=Math.min(1,p),x1=l.dir>0?-40+q*(GW+80):GW+40-q*(GW+80),x0=l.x==null?(l.dir>0?-40:GW+40):l.x;l.x=x1;
         const lo=Math.min(x0,x1),hi=Math.max(x0,x1);
         for(const e of R.E){if(e.dead||l.hits.has(e.id)||Math.abs(e.y-l.y)>30+e.r||e.x<lo-e.r||e.x>hi+e.r)continue;l.hits.add(e.id);hit(e,spDmg(45),l.dir*120*U,0);}
         for(const b of R.EB)if(!b.dead&&Math.abs(b.y-l.y)<=34&&b.x>=lo-6&&b.x<=hi+6)ebGone(b,'#e6dcff','w');}},
@@ -3474,7 +3628,7 @@ const SPECIAL={
       const k=s.t>3.5?(4-s.t)/0.5:1;g.fillStyle='#e6ff5c';for(let i=0;i<10;i++){const a=R.t*2+i*TAU/10,rr=40+((i*7+(R.t*20|0))%6);g.globalAlpha=0.7*k;px2(g,px+Math.cos(a)*rr,py+Math.sin(a)*rr);}g.globalAlpha=1;}},
   /* 主砲の一撃：0.5秒ためて、画面の敵すべてに大ダメージ＋敵の弾を消す */
   omega:{dur:1.4,start(s){s.f=0;},
-    up(s){if(s.f===0&&s.t>=0.5){s.f=1;for(const e of R.E)if(onScr(e))hit(e,spDmg(90),0,-60*U);for(const b of R.EB)if(!b.dead)ebGone(b,'#ffffff','w');
+    up(s){if(s.f===0&&s.t>=0.5){s.f=1;ATK++;for(const e of R.E)if(onScr(e))hit(e,spDmg(90),0,-60*U);for(const b of R.EB)if(!b.dead)ebGone(b,'#ffffff','w');
         for(let i=0;i<8;i++)addX(rand(30,GW-30),rand(30,GH*0.7),EXPL.m,rand(0.35,0.6));}},
     under(g,s,px,py){if(s.t<0.5){const q=s.t/0.5;for(let i=0;i<24;i++){const a=i*TAU/24+R.t*2,rr=(1-q)*120+6;g.fillStyle=i%2?'#fff6c0':'#ffffff';px3(g,px+Math.cos(a)*rr,py-36+Math.sin(a)*rr);}}},
     top(g,s,px,py){if(s.t<0.5)return;const k=Math.max(0,1-(s.t-0.5)/0.9),w=Math.round(90*k+10),h=Math.max(0,py-30);
@@ -3485,7 +3639,7 @@ const SPECIAL={
 function spStart(){const d=SPECIAL[R.id];R.sp={t:0,dur:d.dur};R.spN++;R.gauge=SPG.max;d.start(R.sp);SFX.play('sp_'+R.id);showBanner(R.sh.sp.name,R.sh.c);}
 function spUpdate(dt){
   if(!R.sp){gaugeAdd(SPG.time*dt);if(R.gauge>=SPG.max)spStart();}
-  else{const s=R.sp,d=SPECIAL[R.id];s.t+=dt;d.up(s,dt);if(s.t>=s.dur){if(d.end)d.end(s);R.sp=null;R.gauge=0;}}
+  else{const s=R.sp,d=SPECIAL[R.id];s.t+=dt;ATK++;d.up(s,dt);if(s.t>=s.dur){if(d.end)d.end(s);R.sp=null;R.gauge=0;}}
   for(const a of R.ES)escort(a,dt);
 }
 /* 必殺技の絵：はじめに画面を少し暗くして機体の色の光（spDark）／機体の下（spUnder）／機体の上（spDraw）／いちばん上（spTop） */
@@ -3550,7 +3704,7 @@ function sup12(dt){
   if(S.thunder>0){R.thT-=dt;if(R.thT<=0){R.thT=SV('thunder','cd');const n=SV('thunder','n'),d=SV('thunder','d')*mul,used=new Set();
     for(let i=0;i<n;i++){const e=randOn(used);if(!e)break;used.add(e.id);const x0=clamp(e.x+rand(-40,40),12,GW-12);
       const pts=[[x0,8]],sn=Math.max(2,Math.round((e.y-8)/46));for(let q=1;q<sn;q++){const f=q/sn;pts.push([x0+(e.x-x0)*f+rand(-16,16),8+(e.y-8)*f]);}pts.push([e.x,e.y]);
-      R.Z.push({poly:jag(pts),t:0,big:1,sky:1,dead:false});R.TC.push({x:x0,t:0,dead:false});hit(e,d,0,0);}
+      R.Z.push({poly:jag(pts),t:0,big:1,sky:1,dead:false});R.TC.push({x:x0,t:0,dead:false});ATK++;hit(e,d,0,0);}/* 雷1本ごとに攻撃の番号（#15 の点検：前の攻撃の番号のままだと、同じダメージの別の攻撃と大蛇で重なって消えた） */
     if(used.size)SFX.play('zap');else R.thT=0.5;}}
   for(const c of R.TC){c.t+=dt;if(c.t>0.45)c.dead=true;}
   if(S.medic>0){const tx=R.x-40,ty=R.y+26+Math.sin(R.t*3)*3,k=Math.min(1,dt*6);if(R.mdx==null){R.mdx=tx;R.mdy=ty;}R.mdx+=(tx-R.mdx)*k;R.mdy+=(ty-R.mdy)*k;
@@ -3927,7 +4081,7 @@ function renderLvUp(fresh){
   lvChoices.forEach(o=>{const b=cardEl(o);o.btn=b;const nb=!!o.evo||o.key==='f';b.disabled=fresh||o.used||(banMode&&nb);if(banMode&&!nb)b.classList.add('banpick');
     b.addEventListener('click',()=>pickChoice(o));wrap.appendChild(b);});
   const lv=R.lv-R.pending+1,used=lvChoices.some(o=>o.used);
-  overlay.append(el('h2',null,'レベルアップ'),el('p','sub',banMode?'除外する強化をえらぶ（この出撃で二度と出ない）':R.pick>1?'Lv '+lv+' ・ 覚醒：2つえらぶ':used?'覚醒：あと1つえらぶ':'Lv '+lv+' ・ 1つえらぶ'),wrap);
+  overlay.append(el('h2',null,'レベルアップ'),el('p','sub',banMode?'この出撃で出なくする強化をえらぶ':R.pick>1?'Lv '+lv+' ・ 覚醒：2つえらぶ':used?'覚醒：あと1つえらぶ':'Lv '+lv+' ・ 1つえらぶ'),wrap);
   const acts=lvActs();if(acts)overlay.appendChild(acts);
   overlay.appendChild(buildSummary());
   overlay.hidden=false;
@@ -3989,7 +4143,8 @@ function endRun(clear,retreat){
   TYPES.forEach(t=>{if(R.tlv[t]>(rc.wmax[t]||0))rc.wmax[t]=R.tlv[t];});
   Object.keys(SUP).forEach(k=>{if(R.sup[k]>=SUP[k].max&&!rc.sup5.includes(k))rc.sup5.push(k);});
   rc.fastBoss+=R.fastBoss;if(R.kills>rc.bestKills)rc.bestKills=R.kills;if(clear&&R.hp>=R.maxHp/2)rc.halfClear++;
-  rc.meleeK+=R.meleeK;rc.evos+=R.evoN;
+  rc.meleeK+=R.meleeK;rc.evos+=R.evoN;if(R.t>=30)rc.runs++;/* 出撃の回数は30秒以上の出撃だけ（すぐ撤退するだけで解放できないように #15 の点検） */
+  if(clear)new Set(R.mods.map(m=>m.t)).forEach(t=>{rc.cw[t]=(rc.cw[t]||0)+1;});/* #15：その品をつけてクリアした回数 */
   /* #12：実績の記録と図鑑（出会った敵・たおした数） */
   rc.kills+=R.kills;rc.bestLv=Math.max(rc.bestLv,R.lv-(R.lab.r_lv||0));/* 先行訓練の分は数えない（#12 の点検） */rc.chests+=R.chestN;rc.spTotal+=R.spN;rc.bestSpc=Math.max(rc.bestSpc,R.spcN);rc.nodmg+=R.nodmg||0;
   for(const k in R.seenE)if(BOOK_E.some(b=>b.k===k))save.book.e[k]=(save.book.e[k]||0)+(R.kE[k]||0);
@@ -4000,7 +4155,7 @@ function endRun(clear,retreat){
   if(opened)save.st=R.stage+1;
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
   if(newly.length){save.seen=(save.seen||[]).concat(newly);}
-  const got=checkAch();
+  const got=checkAch(),newU=syncUnl(),newL=syncLabUnl();/* #15：この出撃で解放された品・11/16：研究所 */
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
   persist();
@@ -4008,27 +4163,33 @@ function endRun(clear,retreat){
   const result=()=>{
   overlay.textContent='';
   overlay.append(el('h2',null,clear?'クリア！':retreat?'撤退':'撃墜…'),
-    el('p','sub',clear?(S.final?'深淵の核をたおした！':'5分 生きのびた！'):retreat?'とちゅうで格納庫にもどったよ':'組みなおして、また出撃しよう'));
-  if(isBest)overlay.appendChild(el('span','tagnew','新記録'));
+    el('p','sub',clear?(S.final?'深淵の核をたおした':'5分 生きのびた'):retreat?'とちゅうで格納庫にもどった':'HPが0になった'));
   if(opened)overlay.appendChild(el('p','sub unl','ステージ'+(R.stage+1)+'「'+STAGES[R.stage].name+'」が解放された'));
-  if(newly.length)overlay.appendChild(el('p','sub unl','新しい機体が解放された！ショップの「機体」で買えるよ：'+newly.map(id=>SHIPS[id].name).join('・')));
+  /* 解放された機体と品（#15・#16）：アイコンと名前を小さく並べる。ショップで買える */
+  /* 11/16：研究所の解放も同じ並びに（画面の高さをふやさない） */
+  if(newly.length||newU.length||newL.length){const box=el('div','unlb'),ul=el('ul','unll');
+    const chip=(src,name,cls)=>{const li=el('li',cls),im=el('img');im.alt='';im.src=src;li.append(im,el('span',null,name));ul.appendChild(li);};
+    newly.forEach(id=>chip(urlOf('s'+id,SHIPSPR[id].img),SHIPS[id].name,'ship'));newU.forEach(t=>chip(ICON[t],MODS[t].name));newL.forEach(id=>chip(LICON[id],LABK[id].name,'lab'));
+    const head=newL.length?[newly.length?'機体':null,newU.length?'品':null,'研究'].filter(Boolean).join('・')+'の解放':(newly.length?'機体と品':'品')+'の解放（ショップで買える）';
+    box.append(el('p',null,head),ul);overlay.appendChild(box);}
   const ul=el('ul','stats');
   const row=(k,v,cls)=>{const li=el('li',cls||null);li.append(el('span',null,k),el('b',null,v));ul.appendChild(li);};
-  row('ステージ',R.stg+' '+S.name);row(S.final&&clear?'クリアの時間':'生きのびた時間',fmt(R.t));row('撃破',R.kills+'体');row('到達レベル','Lv '+R.lv);
+  row('ステージ',R.stg+' '+S.name);row((S.final&&clear?'クリアの時間':'生きのびた時間')+(isBest?'（新記録）':''),fmt(R.t),isBest?'best':null);row('撃破',R.kills+'体');row('到達レベル','Lv '+R.lv);
   row('撃破ボーナス','+'+gk+'G');row('時間ボーナス','+'+gt+'G');
   if(gb)row('大型の敵','+'+gb+'G');if(gm)row('ひろったお金','+'+gm+'G');if(gc)row('クリアボーナス','+'+gc+'G');if(gi)row('収入アップ','+'+gi+'G');
   row('かせいだお金','+'+total+'G','total');
-  let gotl=null;if(got.length){gotl=el('ul','gotl');got.forEach(a=>{const li=el('li');li.append(el('span',null,'実績「'+a.name+'」'),el('b',null,'+'+a.g+'G'));gotl.appendChild(li);});}
-  const btns=el('div','btnrow'),back=el('button','go','格納庫へ'),shop=el('button','btn2','ショップへ');back.type='button';shop.type='button';
-  const toHangar=()=>{cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;layoutEditor();renderAll();};
-  back.addEventListener('click',()=>{toHangar();toast(total+'G かせいだよ');});
+  let gotl=null;if(got.length){gotl=el('ul','gotl');const li=el('li');const ns=el('span',null,'実績');got.forEach(a=>ns.appendChild(el('span',null,'「'+a.name+'」')));li.append(ns,el('b',null,'+'+got.reduce((n,a)=>n+a.g,0)+'G'));gotl.appendChild(li);}/* 実績は1行にまとめる（#16） */
+  const btns=el('div','btnrow end'),back=el('button','go','格納庫へ'),shop=el('button','btn2','ショップへ');back.type='button';shop.type='button';
+  const toHangar=()=>{cancelAnimationFrame(raf);R=null;sortie.hidden=true;hangar.hidden=false;overlay.hidden=true;overlay.classList.remove('over');layoutEditor();renderAll();};
+  back.addEventListener('click',()=>{toHangar();toast(total+'G かせいだ');});
   shop.addEventListener('click',()=>{toHangar();openShop();});
-  btns.append(back,shop);
+  btns.append(shop,back);
   overlay.append(ul);if(gotl)overlay.appendChild(gotl);overlay.append(btns);overlay.hidden=false;
+  overlay.classList.toggle('over',overlay.scrollHeight>overlay.clientHeight+1);/* あふれるときだけ、ボタンを下にのこす */
   };
   if(firstEnd)ending(result);else result();
 }
-/* エンディング（#13）：ステージ5のクリア。スタッフの代わりに「Thanks for playing」と、これまでの記録 → 結果へ */
+/* エンディング（#13）：ステージ5のクリア。「おわり」と、これまでの記録 → 結果へ（#16：英語の一言を日本語に） */
 function ending(next){
   const rc=save.rec,h=Math.floor(rc.time/3600),m=Math.floor(rc.time%3600/60);
   overlay.textContent='';overlay.classList.add('endg');
@@ -4036,7 +4197,7 @@ function ending(next){
   row('出撃した時間',(h?h+'時間':'')+m+'分');row('クリア',rc.clears+'回');row('たおした敵',rc.kills+'体');row('たおした大型の敵',rc.bosses+'体');
   row('いちばん高いレベル','Lv '+rc.bestLv);row('実績',ACH.filter(a=>save.ach[a.id]).length+' / '+ACH.length);row('図鑑',bookCount(save)+' / '+BOOK_N());
   const b=el('button','go','結果へ');b.type='button';b.addEventListener('click',()=>{overlay.classList.remove('endg');next();});
-  overlay.append(el('p','endt','Thanks for playing'),el('p','sub','全ステージクリア！'),el('h3','endh','これまでの記録'),ul,b);overlay.hidden=false;
+  overlay.append(el('p','endt','おわり'),el('p','sub','全ステージクリア！'),el('h3','endh','これまでの記録'),ul,b);overlay.hidden=false;
   SFX.play('ending');
 }
 
@@ -4098,7 +4259,7 @@ function showTitle(){
   hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
   titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
 }
-function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
+function toHangarFromTitle(){titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;tutReset();view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
 function renderSnd(){const b=$('sndBtn');b.textContent=save.snd===false?'音 OFF':'音 ON';b.setAttribute('aria-pressed',save.snd===false?'false':'true');}
 $('sndBtn').addEventListener('click',()=>{save.snd=save.snd===false;persist();renderSnd();SFX.unlock();SFX.play('btn');});
 $('startBtn').addEventListener('click',()=>{SFX.play('start');if(!save.howto)openHowto(true);else toHangarFromTitle();});

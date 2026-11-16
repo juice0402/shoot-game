@@ -43,7 +43,7 @@ ALLMAX = r"""
   for(const m of R.mods)R.tlv[m.t]=T.WMAX;for(const k in R.pas)R.pas[k]=T.PAS[k].max||5;for(const k in R.sup)for(let i=0;i<T.SUP[k].max;i++)T.supUp(k);
   for(const k of T.SPC_IDS)R.spc[k]=1;T.calcCS();let steps=0;
   for(let i=0;i<60*(n===5?420:300)*2&&steps<60*(n===5?420:300)+30&&R.state!=='over';i++){if(R.state!=='play'){window.__ui();continue;}T.update(1/60);steps++;if(i%15===0){T.draw();T.hud();}R.hp=Math.max(R.hp,R.maxHp*0.5);}
-  const ov=document.getElementById('overlay');if(/Thanks/.test(ov.textContent))ov.querySelector('.go').click();
+  const ov=document.getElementById('overlay');if(ov.querySelector('.endt'))ov.querySelector('.go').click();
   return {n,id,t:Math.round(R.t),kills:R.kills,lv:R.lv,state:R.state,clear:/クリア！/.test(ov.textContent)};}
 """
 
@@ -108,7 +108,7 @@ REVIEW = r"""
   /* エンディング：はじめてステージ5をクリアした回だけ */
   {const s0=T.freshSave();const R=window.__go(5,'standard',['laser']);T.save.rec.stageMax=5;R.bossAt=[];R.acc=-1e9;R.t=300;const b=T.addBig('core');for(let i=0;i<5;i++)T.update(1/60);T.hit(b,1e9,0,0);
     for(let i=0;i<60*5&&R.state!=='over';i++){if(R.state!=='play'){window.__ui();continue;}T.update(1/60);}
-    const t=document.getElementById('overlay').textContent;ok('2回目のステージ5クリア：エンディングなし・結果',R.state==='over'&&!/Thanks/.test(t)&&/クリア！/.test(t),t.slice(0,30));}
+    const t=document.getElementById('overlay').textContent;ok('2回目のステージ5クリア：エンディングなし・結果',R.state==='over'&&!document.querySelector('#overlay .endt')&&/クリア！/.test(t),t.slice(0,30));}
   return res;}
 """
 
@@ -144,9 +144,17 @@ def flow(pg, errs):
         pg.click('#howNext'); pg.wait_for_timeout(120); n += 1
     ok('出撃の準備（格納庫）', vis('#hangar'))
     pg.click('#slots .slotb.empty'); pg.wait_for_timeout(200)
-    ok('あいた場所をタップ → 装備の一覧（レーザーは全部つけている）', vis('#sheet .irow') and pg.locator('#sheet .irow:not([disabled])').count() == 0)
-    pg.click('#sheet .x'); pg.wait_for_timeout(200)
+    # #15：新しいセーブはレーザー1つ・場所は全部空き → はじめの案内のとおり一覧のレーザーをつける
+    ok('あいた場所をタップ → 装備の一覧（はじめはレーザー1つ）', vis('#sheet .irow') and pg.locator('#sheet .irow:not([disabled])').count() == 1)
+    pg.click('#sheet .irow:not([disabled])'); pg.wait_for_timeout(200)
+    # 11/16：向きのある品は、向きをえらんでからつく
+    ok('一覧のレーザー → 向きをえらぶ板（まだつかない）', vis('#sheet .dirs') and pg.locator('#slots .slotb.full').count() == 0)
+    pg.click('#sheet .dirs button.tut'); pg.wait_for_timeout(200)
     full = pg.locator('#slots .slotb.full').count()
+    ok('向きをえらぶ → レーザーがつく', full == 1 and not vis('#sheetBg'), full)
+    # #17：はじめの案内③の間は出撃しか押せない（案内のテストは unlock15）。ここからは案内を終えた形でタップのひと回り
+    ok('はじめの案内③：出撃だけ明るい', vis('#tutDim') and pg.evaluate("()=>{const r=document.querySelector('#slots .slotb.full').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&e.className==='blk'}"))
+    pg.evaluate("()=>{window.__T.save.tut=1;}"); pg.wait_for_timeout(100)
     pg.click('#slots .slotb.full'); pg.wait_for_timeout(200)
     ok('つけた装備をタップ → 向き', vis('#sheet .dirs'), full)
     pg.locator('#sheet .dirs button').nth(2).click(); pg.wait_for_timeout(100)
@@ -155,7 +163,8 @@ def flow(pg, errs):
     ok('向きをかえる → 外す', pressed == 1 and pg.locator('#slots .slotb.full').count() == full - 1)
     pg.click('#slots .slotb.empty'); pg.wait_for_timeout(200)
     pg.click('#sheet .irow:not([disabled])'); pg.wait_for_timeout(200)
-    ok('あいた場所 → レーザーをつける', pg.locator('#slots .slotb.full').count() == full and not vis('#sheetBg'))
+    pg.locator('#sheet .dirs button').nth(1).click(); pg.wait_for_timeout(200)
+    ok('あいた場所 → レーザー → 向き → つく', pg.locator('#slots .slotb.full').count() == full and not vis('#sheetBg'))
     pg.click('#shopBtn'); pg.wait_for_timeout(200); ok('ショップ', vis('#shopSheet'))
     pg.click('#debugGold'); pg.wait_for_timeout(100)
     g0 = pg.evaluate("()=>window.__T.save.gold")
@@ -261,7 +270,7 @@ def main():
             if r['state'] != 'over' or not r['clear']:
                 fails += 1; print('NG 全部最大で終わらない')
         # 出撃のとちゅうで閉じて開き直す
-        pg.evaluate("()=>{localStorage.clear();const T=window.__T;T.save=T.freshSave();T.save.howto=1;T.save.gold=777;T.persist();}")
+        pg.evaluate("()=>{localStorage.clear();const T=window.__T;T.save=T.freshSave();T.save.howto=1;T.save.tut=1;T.save.gold=777;T.save.ships.standard.eq[0]={t:'laser',d:0};T.persist();}")  # #15：新しいセーブは装備なし → 機首にレーザー
         pg.reload(); pg.wait_for_timeout(400); pg.click('#startBtn'); pg.wait_for_timeout(200); pg.click('#launchBtn'); pg.wait_for_timeout(1500)
         pg.reload(); pg.wait_for_timeout(500)
         g = pg.evaluate("()=>window.__T.save.gold")
