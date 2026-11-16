@@ -12,7 +12,7 @@
 """
 import os, sys, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from harness14 import write_build, open_page
+from harness14 import write_build, open_page, talk_through
 from playwright.sync_api import sync_playwright
 
 GO = r"""
@@ -142,6 +142,7 @@ def flow(pg, errs):
     n = 0
     while vis('#howto') and n < 10:
         pg.click('#howNext'); pg.wait_for_timeout(120); n += 1
+    talk_through(pg)  # 11/17：整備士のあいさつ
     ok('出撃の準備（格納庫）', vis('#hangar'))
     pg.click('#slots .slotb.empty'); pg.wait_for_timeout(200)
     # #15：新しいセーブはレーザー1つ・場所は全部空き → はじめの案内のとおり一覧のレーザーをつける

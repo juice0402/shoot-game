@@ -23,7 +23,7 @@ import harness14
 from harness14 import write_build, open_page, ROOT
 from playwright.sync_api import sync_playwright
 
-harness14.EXPOSE = harness14.EXPOSE.replace("keys,", "keys,isUnl,syncUnl,modProg,tutStep,upPool,chestPicks,sup12,snipe,SPECIAL,spDmg,dmgMul,contact,get ATK(){return ATK},set ATK(v){ATK=v},")
+harness14.EXPOSE = harness14.EXPOSE.replace("keys,", "keys,isUnl,syncUnl,modProg,tutStep,COMM,TALK,upPool,chestPicks,sup12,snipe,SPECIAL,spDmg,dmgMul,contact,get ATK(){return ATK},set ATK(v){ATK=v},")
 SHOTS = os.path.join(ROOT, 'docs', 'shots')
 TMP = os.environ.get('OUT', '/tmp')
 BASE8 = ['laser', 'gatling', 'shotgun', 'sword', 'armor', 'shield', 'magnet', 'booster']
@@ -53,13 +53,23 @@ def tutorial(pg):
     ok('新しいセーブ：レーザー1つ・ほかは0・枠は全部空・300G', s['laser'] == 1 and s['other'] == 0 and s['eq'] == 0 and s['gold'] == 300 and not s['tut'], s)
     lb = pg.evaluate("()=>{const b=document.getElementById('launchBtn');return [b.textContent,b.disabled]}")
     ok('何もつけていないときの出撃ボタン：「＋に装備をつける」', lb == ['＋に装備をつける', True], lb)
+    # 11/17：①の前に整備士のあいさつ（通信）。タップで次へ・そのあいだは穴と指なし・ほかは押せない
+    cm = comm(pg)
+    blk = pg.evaluate("()=>{const r=document.querySelector('#slots .slotb').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&e.id}")
+    ok('あいさつ：通信（顔・名前・1つめの文）・タップで次へ・穴と指なし・ほかは押せない', cm['on'] and cm['wait'] and cm['face'] and cm['name'] == '整備士 サラ' and cm['text'] == cm['intro'][0] and not vis(pg, '#tutDim') and blk == 'comm', [cm, blk])
+    pg.click('#comm'); pg.wait_for_timeout(120)
+    cm2 = comm(pg)
+    pg.click('#comm'); pg.wait_for_timeout(150)
+    ok('あいさつ：タップで2つめ → タップで閉じて①へ', cm2['text'] == cm['intro'][1] and comm(pg)['key'] == 't1', [cm2['text'], comm(pg)])
     # ① 機首の＋（#17：押す所だけ明るく・ほかは暗くて押せない・指は押す所に向かって動く）
     g = tut_state(pg, "document.querySelectorAll('#slots .slotb')[0]")
-    ok('① 機首の＋だけ明るい・指はその下・ほかは押せない', g['on'] and g['inHole'] and not g['down'] and g['fTop'] >= g['tBot'] and abs(g['fX'] - g['tX']) < 2 and g['blocked'] == 'blk' and g['anim'] == 'tbob', g)
+    c1 = comm(pg)
+    ok('① 機首の＋だけ明るい・指はその下・ほかは押せない', c1['key'] == 't1' and not c1['wait'] and not c1['over'] and g['on'] and g['inHole'] and not g['down'] and g['fTop'] >= g['tBot'] and abs(g['fX'] - g['tX']) < 2 and g['blocked'] == 'blk' and g['anim'] == 'tbob', g)
     pg.locator('#slots .slotb').first.click(); pg.wait_for_timeout(250)
     rows = pg.evaluate("()=>[...document.querySelectorAll('#sheet .irow')].map(b=>b.querySelector('b').textContent+' '+b.querySelector('em').textContent+(b.classList.contains('tut')?' tut':''))")
     g = tut_state(pg, "document.querySelector('#sheet .irow.tut')")
-    ok('② 一覧はレーザーだけ（のこり 1/1）・その行だけ明るい・指はそのとなり（下に入らなければ上）', rows == ['レーザー のこり 1/1 tut'] and g['on'] and g['inHole'] and (0 <= g['tTop'] - g['fBot'] < 20 if g['down'] else 0 <= g['fTop'] - g['tBot'] < 20) and g['blocked'] == 'blk', [rows, g])
+    c2 = comm(pg)
+    ok('② 一覧はレーザーだけ（のこり 1/1）・その行だけ明るい・指はそのとなり（下に入らなければ上）', c2['key'] == 't2' and not c2['over'] and rows == ['レーザー のこり 1/1 tut'] and g['on'] and g['inHole'] and (0 <= g['tTop'] - g['fBot'] < 20 if g['down'] else 0 <= g['fTop'] - g['tBot'] < 20) and g['blocked'] == 'blk', [rows, g])
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     g = tut_state(pg, "document.querySelectorAll('#slots .slotb')[0]")
     ok('一覧を何もえらばずに閉じる → ①にもどる', g['on'] and g['inHole'] and not vis(pg, '#sheetBg'), g)
@@ -69,23 +79,33 @@ def tutorial(pg):
     eq = pg.evaluate("()=>window.__T.save.ships.standard.eq[0]")
     dirs = pg.evaluate("()=>[...document.querySelectorAll('#sheet .dirs button.tut')].map(b=>b.getAttribute('aria-label'))")
     g = tut_state(pg, "document.querySelector('#sheet .dirs button.tut')")
-    ok('③ 向きの板：まだつかない・前向きの矢印だけ明るい・ほかは押せない', eq is None and dirs == ['上向き'] and g['on'] and g['inHole'] and g['blocked'] == 'blk', [eq, dirs, g])
+    c3 = comm(pg)
+    ok('③ 向きの板：まだつかない・前向きの矢印だけ明るい・ほかは押せない', c3['key'] == 't3' and not c3['over'] and eq is None and dirs == ['上向き'] and g['on'] and g['inHole'] and g['blocked'] == 'blk', [eq, dirs, g])
     pg.click('#sheet .dirs button.tut'); pg.wait_for_timeout(250)
     eq = pg.evaluate("()=>window.__T.save.ships.standard.eq[0]")
     lb = pg.evaluate("()=>{const b=document.getElementById('launchBtn');return [b.textContent,b.disabled]}")
     ok('前向きをえらぶ → レーザーが機首につく', eq == {'t': 'laser', 'd': 0} and lb == ['出撃', False] and not vis(pg, '#sheetBg'), [eq, lb])
     g = tut_state(pg, "document.getElementById('launchBtn')")
     st = pg.evaluate("()=>{const a=document.getElementById('stsel').getBoundingClientRect(),f=document.getElementById('tfinger').getBoundingClientRect();return [f.bottom>a.top,f.top<a.bottom]}")
-    ok('④ 出撃だけ明るい・指はその上（ステージの所に重ねる）・機体の場所は動かない', g['on'] and g['inHole'] and g['down'] and g['fBot'] <= g['tTop'] + 2 and st == [True, True] and g['blocked'] == 'blk', [g, st])
+    c4 = comm(pg)
+    ok('④ 出撃だけ明るい・指はその上（ステージの所に重ねる）・機体の場所は動かない', c4['key'] == 't4' and not c4['over'] and g['on'] and g['inHole'] and g['down'] and g['fBot'] <= g['tTop'] + 2 and st == [True, True] and g['blocked'] == 'blk', [g, st])
     full = pg.evaluate("()=>{const r=document.querySelector('#slots .slotb.full').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&e.className}")
     ok('④ の間、つけた装備や他のボタンは押せない', full == 'blk', full)
     pg.click('#launchBtn'); pg.wait_for_timeout(400)
     tut = pg.evaluate("()=>[window.__T.save.tut,JSON.parse(localStorage.getItem(window.__T.KEY)).tut,!document.getElementById('sortie').hidden]")
-    ok('出撃 → 案内おわり（tut=1 を保存）', tut == [1, 1, True], tut)
+    ok('出撃 → 案内おわり（tut=1 を保存）・通信も閉じる', tut == [1, 1, True] and not comm(pg)['on'], tut)
     pg.evaluate("()=>{window.__HOLD=1;window.__T.endRun(false,true);}"); pg.wait_for_timeout(200)
     pg.click('#overlay .btnrow .go'); pg.wait_for_timeout(250)
     ok('出撃のあとは案内を出さない', not vis(pg, '#tutDim'))
     pg.evaluate("()=>{window.__HOLD=0;}")
+
+
+def comm(pg):
+    """11/17：整備士の通信のようす（over＝押す所の穴に重なっている）"""
+    return pg.evaluate("""()=>{const c=document.getElementById('comm'),T=window.__T;const on=!c.hidden;const w=c.querySelector('.cwin').getBoundingClientRect(),h=document.querySelector('#tutDim .hole').getBoundingClientRect();
+      const cv=document.getElementById('cfaceCv');const face=cv.width>0&&cv.toDataURL().length>600;
+      return {on,wait:c.classList.contains('wait'),key:T.COMM.key,name:document.getElementById('cname').textContent,text:document.getElementById('ctext').textContent,intro:T.TALK.intro,face,
+        over:on&&!document.getElementById('tutDim').hidden&&!(w.bottom<=h.top||w.top>=h.bottom||w.right<=h.left||w.left>=h.right)}}""")
 
 
 def tut_state(pg, target):
@@ -108,6 +128,7 @@ def old_tut(pg):
                       ('装備なし', {'gold': 500, 'owned': {'laser': 2}, 'ships': {'standard': {'have': True, 'eq': []}}, 'howto': 1})):
         pg.evaluate("(o)=>{localStorage.setItem(window.__T.KEY,JSON.stringify(o));}", raw); pg.reload(); pg.wait_for_timeout(350)
         pg.click('#startBtn'); pg.wait_for_timeout(250)
+        harness14.talk_through(pg)  # 11/17：整備士のあいさつ
         pg.wait_for_timeout(120)
         out[name] = pg.evaluate("()=>{const d=document.getElementById('tutDim'),dn=document.getElementById('tfinger').classList.contains('down'),s=window.__T.save;return [!d.hidden&&!dn,!d.hidden&&dn,s.ships.standard.eq.filter(Boolean).length,s.owned.laser]}")
     ok('前の版のセーブ：装備あり → 外して①から（持ち物はそのまま）・tut=1 → なし（装備もそのまま）・装備なし → ①', out == {'装備あり': [True, False, 0, 2], 'tut=1': [False, False, 1, 2], '装備なし': [True, False, 0, 2]}, out)
@@ -238,6 +259,40 @@ SAVES = r"""
 """
 
 
+def talks(pg):
+    """11/17：整備士の通信（解放のお知らせ・研究所のはじめて）。押せる所はそのまま押せる"""
+    pg.evaluate("()=>{document.getElementById('title').hidden=true;document.getElementById('hangar').hidden=true;document.getElementById('sortie').hidden=false;}")
+    pg.evaluate(RESULT, {'kills': 400, 'lv': 12, 'lv8': True, 't': 40})
+    pend = pg.evaluate("()=>window.__T.COMM.pend")
+    pg.click('#overlay .btnrow .go'); pg.wait_for_timeout(200)
+    cm = comm(pg)
+    hit = pg.evaluate("()=>{const r=document.getElementById('shopBtn').getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e&&(e.id||e.className)}")
+    ok('解放のお知らせ：格納庫にもどると整備士が知らせる（品5つ →「〇〇」ほか4つ・押せる所はそのまま）', cm['on'] and not cm['wait'] and cm['key'] == 'unl' and pend and pend[0].startswith('「') and 'ほか4つ' in pend[0] and cm['text'] == pend[0] and hit == 'shopBtn', [pend, cm, hit])
+    seen = [comm(pg)['text']]
+    for _ in range(len(pend or [])):
+        pg.evaluate("()=>document.body.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}))"); pg.wait_for_timeout(100)
+        if comm(pg)['on']:
+            seen.append(comm(pg)['text'])
+    ok('どこかをタップ → 次の文 → 閉じる（品・研究の2つ）', seen == pend and len(pend) == 2 and pend[1].startswith('研究所に') and not comm(pg)['on'], [seen, pend])
+    nt = pg.evaluate("""()=>{const T=window.__T;window.__HOLD=1;const s=T.freshSave();T.save=s;s.howto=1;s.ships.standard.eq[0]={t:'laser',d:0};T.setShip('standard');
+      document.getElementById('hangar').hidden=true;document.getElementById('sortie').hidden=false;T.startRun();const R=T.R;R.kills=400;R.t=40;T.endRun(false,true);return T.COMM.pend;}""")
+    ok('はじめの案内のとちゅう（tut なし）は知らせない', nt is None, nt)
+    pg.evaluate("()=>{const T=window.__T;document.getElementById('overlay').hidden=true;document.getElementById('sortie').hidden=true;document.getElementById('hangar').hidden=false;T.R=null;T.save.tut=1;T.renderAll();}")
+    pg.evaluate("()=>window.__T.openLab()"); pg.wait_for_timeout(200)
+    cm = comm(pg)
+    sv = pg.evaluate("()=>[window.__T.save.talk.lab,JSON.parse(localStorage.getItem(window.__T.KEY)).talk.lab]")
+    ok('研究所をはじめて開く → 整備士のひとこと（2つ・保存）', cm['on'] and cm['key'] == 'lab' and not cm['wait'] and sv == [1, 1], [cm, sv])
+    pg.evaluate("()=>{document.getElementById('labClose').click();window.__T.openLab();}"); pg.wait_for_timeout(200)
+    ok('閉じると消える・2回目は出ない', not comm(pg)['on'], comm(pg))
+    pg.evaluate("()=>document.getElementById('labClose').click()")
+    old = pg.evaluate("""()=>{const T=window.__T,k=T.KEY;const a=[];
+      localStorage.setItem(k,JSON.stringify({gold:5,tut:1,lab:{r_hp:1}}));a.push(T.loadSave().talk.lab);
+      localStorage.setItem(k,JSON.stringify({gold:5,tut:1}));a.push(T.loadSave().talk.lab);
+      localStorage.setItem(k,JSON.stringify({gold:5,tut:1,talk:{lab:1}}));a.push(T.loadSave().talk.lab);return a;}""")
+    ok('前のセーブ：研究所を使っていればひとこと済み', old == [1, 0, 1], old)
+    pg.evaluate("()=>{window.__HOLD=0;}")
+
+
 def saves(pg):
     s = pg.evaluate(SAVES)
     ok('試作4の形（持ち物の記録なし）：レーザー2つ', s['p4'] == [2, 2], s['p4'])
@@ -350,6 +405,7 @@ def main():
         data(pg)
         shop(pg)
         result(pg)
+        talks(pg)
         saves(pg)
         pg.evaluate(GO)
         snake(pg)
