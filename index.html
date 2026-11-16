@@ -323,6 +323,14 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 @keyframes fxRing{0%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.1,1.5)}}
 .bay.fxshake{animation:fxShake .16s steps(4,end) both}
 @keyframes fxShake{0%{transform:translate(2px,1px)}25%{transform:translate(-2px,0)}50%{transform:translate(1px,-1px)}75%{transform:translate(-1px,1px)}100%{transform:none}}
+/* 板は横からスッと入る（下から出る動きは入れない）・タイルは左上から敷く（行＋列の順） */
+.sheetbg{overflow:hidden}
+.sheetbg.fxbg{animation:fxBg .16s ease-out both}
+.sheet.fxside{animation:fxSide .22s cubic-bezier(.2,1.12,.35,1) both}
+.fxtile{animation:fxTile .24s cubic-bezier(.2,1.3,.4,1) both;animation-delay:var(--d,0s)}
+@keyframes fxBg{0%{background-color:transparent}}
+@keyframes fxSide{0%{transform:translateX(105%)}100%{transform:none}}
+@keyframes fxTile{0%{opacity:0;transform:translate(-10px,-10px) scale(.55)}55%{opacity:1}100%{transform:none}}
 #wipe{position:fixed;inset:0;width:100%;height:100%;z-index:9999;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges;display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* ---------- #14 の点検：せまい画面（幅320〜380）で、はみ出す・2行になる・最後の1字だけ下の行に行く、を直す ---------- */
@@ -2138,7 +2146,7 @@ function drawSnap(m,x,y,c){
     ssg.globalAlpha=Math.max(0,1-st/0.24);ssg.fillStyle=q.w?'#ffffff':c;ssg.fillRect(px,py,q.w?2:1,q.w?2:1);});
   ssg.globalAlpha=1;
 }
-const RM=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
+const RM=()=>{if(window.__NOFX)return true;try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
 function renderSlots(){
   const box=$('slots');box.textContent='';
   const own=haveShip(view);
@@ -2218,7 +2226,18 @@ function openSheet(title,sub,c,onClose){
   sheet.textContent='';sheet.style.setProperty('--c',c||'var(--edge)');
   const h=el('h3');h.append(el('span',null,title));if(sub)h.append(el('small',null,sub));
   const x=el('button','x');x.appendChild(pixIcon('x',3));x.type='button';x.setAttribute('aria-label','とじる');x.addEventListener('click',closeSheet);h.appendChild(x);
-  sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;return sheet;
+  const was=!sheetBg.hidden;sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;
+  if(!RM()){fxRestart(sheet,'fxside');if(!was)fxRestart(sheetBg,'fxbg');}/* 11/16 作りこみ：板は横からスッと */
+  return sheet;
+}
+/* 1回の動きをもう一度はじめから（同じ名前の class をつけなおす） */
+function fxRestart(e,c){e.classList.remove(c);void e.offsetWidth;e.classList.add(c);}
+/* 11/16 作りこみ：タイルを左上から敷く。場所の行＋列の順に少しずつ遅らせて、小さい所からぱっと置く。画面の外のものは動かさない・遅れは0.4秒まで */
+function tilesIn(box,sel){
+  if(RM()||!box)return;const items=[...box.querySelectorAll(sel)];if(!items.length)return;
+  const rs=items.map(e=>e.getBoundingClientRect()),tops=[...new Set(rs.map(r=>Math.round(r.top)))].sort((a,b)=>a-b),lefts=[...new Set(rs.map(r=>Math.round(r.left)))].sort((a,b)=>a-b);
+  items.forEach((e,k)=>{const r=rs[k];if(r.height<1||r.top>innerHeight+20)return;
+    e.style.setProperty('--d',Math.min(0.4,(tops.indexOf(Math.round(r.top))+lefts.indexOf(Math.round(r.left)))*0.04)+'s');fxRestart(e,'fxtile');});
 }
 function closeSheet(){if(sheetBg.hidden)return;sheetBg.hidden=true;sheet.textContent='';const f=sheetOn;sheetOn=null;if(f)f();else if(!hangar.hidden)renderSlots();}
 sheetBg.addEventListener('click',e=>{if(e.target===sheetBg)closeSheet();});
@@ -2241,6 +2260,7 @@ function openList(i){
     if(tut&&!tutAt&&!b.disabled){b.classList.add('tut');tutAt=b;}
   });
   const go=el('button','btn3','ショップで装備を買う');go.type='button';go.addEventListener('click',()=>{closeSheet();openShop();});sh.appendChild(go);
+  tilesIn(sh,'.irow');
 }
 /* 一覧で品をえらぶ → 向きのある品は、向きをえらんでからつける（11/16 しょーくん「必ず向き選択を挟む」）。向きに関係のない品はすぐつける */
 function mountAt(j,t){
@@ -2261,7 +2281,7 @@ function openDir(j,t){
     if(prev)b.setAttribute('aria-pressed',prev.d===d?'true':'false');
     if(tut&&d===d0)b.classList.add('tut');/* はじめの案内③：前向きの矢印だけ明るく */
     b.addEventListener('click',()=>putMod(j,t,d));grid.appendChild(b);});
-  sh.appendChild(grid);
+  sh.appendChild(grid);tilesIn(grid,'button,.mid');
   sh.appendChild(el('p','dim','向いた方へ攻撃する'));
   const back=el('button','btn3','装備をえらびなおす');back.type='button';back.addEventListener('click',()=>{sheetOn=null;openList(j);});sh.appendChild(back);
 }
@@ -2274,7 +2294,7 @@ function openAim(i){
     if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[v.t][v.d].url;c.appendChild(im);grid.appendChild(c);return;}
     const b=el('button');b.appendChild(pixIcon('d'+d,4,v.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
     b.addEventListener('click',()=>{const ch=v.d!==d;v.d=d;persist();draw();drawEditor();if(ch)snapAt(i,true);});grid.appendChild(b);});};
-  draw();sh.appendChild(grid);
+  draw();sh.appendChild(grid);tilesIn(grid,'button,.mid');
   sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効く':'向いた方へ攻撃する'));
   const row=el('div','sbtns'),ch=el('button','btn3','装備をかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
   ch.addEventListener('click',()=>{sheetOn=null;openList(i);});
@@ -2312,7 +2332,7 @@ function renderShop(){
   $('goldNum2').textContent=save.gold;$('shopNote').textContent=shopNote;
   const tabs=$('shopTabs');tabs.textContent='';
   SHOP_TABS.forEach(([k,label])=>{const b=el('button',null,label);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',shopCat===k?'true':'false');
-    b.addEventListener('click',()=>{shopCat=k;shopNote='';renderShop();$('shopGrid').scrollTop=0;});tabs.appendChild(b);});
+    b.addEventListener('click',()=>{shopCat=k;shopNote='';renderShop();$('shopGrid').scrollTop=0;tilesIn($('shopGrid'),'.sitem,.soonh,.lockc,.soonn');});tabs.appendChild(b);});
   const grid=$('shopGrid');grid.textContent='';
   const all=shopList(shopCat),isS=shopCat==='ship',lock=isS?[]:all.filter(t=>!isUnl(t));
   all.filter(k=>isS||isUnl(k)).forEach(k=>{
@@ -2369,7 +2389,7 @@ function openDetail(k){
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(it.price-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
 }
-function openShop(k){pixWipe(300);shopNote='';if(k&&tabOf(k))shopCat=tabOf(k);closeSheet();renderShop();$('shopSheet').hidden=false;if(k)openDetail(k);}
+function openShop(k){pixWipe(300);shopNote='';if(k&&tabOf(k))shopCat=tabOf(k);closeSheet();renderShop();$('shopSheet').hidden=false;tilesIn($('shopGrid'),'.sitem,.soonh,.lockc,.soonn');if(k)openDetail(k);}
 function closeShop(){pixWipe(300);closeSheet();$('shopSheet').hidden=true;renderAll();}
 const achText=got=>got.map(a=>'実績「'+a.name+'」 ＋'+a.g+'G').join('・');
 
@@ -2415,7 +2435,7 @@ function openLabDetail(id){
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(pr-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
 }
-function openLab(){pixWipe(300);labNote='';closeSheet();renderLab();$('labSheet').hidden=false;}
+function openLab(){pixWipe(300);labNote='';closeSheet();renderLab();$('labSheet').hidden=false;tilesIn($('labGrid'),'.sitem,.soonh,.lockc,.soonn');}
 function closeLab(){pixWipe(300);closeSheet();$('labSheet').hidden=true;renderAll();}
 
 /* ---------- #12 図鑑（装備・進化・機体・敵。まだのものはシルエット） ---------- */
@@ -2447,7 +2467,7 @@ function openBookItem(o){
   const info=el('div');if(o.found){info.appendChild(el('p',null,o.desc));if(o.extra)info.appendChild(el('p',null,o.extra));}else info.appendChild(el('p',null,o.hint));
   top.append(img,info);s.appendChild(top);
 }
-function openBook(){pixWipe(300);closeSheet();renderBook();$('bookSheet').hidden=false;$('bookBody').scrollTop=0;}
+function openBook(){pixWipe(300);closeSheet();renderBook();$('bookSheet').hidden=false;$('bookBody').scrollTop=0;tilesIn($('bookBody'),'.bgrid>button');}
 function closeBook(){pixWipe(300);closeSheet();$('bookSheet').hidden=true;renderAll();}
 
 /* ---------- #12 実績（24個・決まった G） ---------- */
@@ -2459,7 +2479,7 @@ function renderAch(){
     li.append(img,mid,em);ul.appendChild(li);});
   $('achAll').textContent=done+' / '+ACH.length;body.appendChild(ul);
 }
-function openAch(){pixWipe(300);closeSheet();renderAch();$('achSheet').hidden=false;$('achBody').scrollTop=0;}
+function openAch(){pixWipe(300);closeSheet();renderAch();$('achSheet').hidden=false;$('achBody').scrollTop=0;tilesIn($('achBody'),'.arow');}
 function closeAch(){pixWipe(300);closeSheet();$('achSheet').hidden=true;renderAll();}
 
 $('shopBtn').addEventListener('click',()=>openShop());
@@ -4261,7 +4281,7 @@ function endRun(clear,retreat){
   back.addEventListener('click',()=>{toHangar();toast(total+'G かせいだ');});
   shop.addEventListener('click',()=>{toHangar();openShop();});
   btns.append(shop,back);
-  overlay.append(ul);if(gotl)overlay.appendChild(gotl);overlay.append(btns);overlay.hidden=false;
+  overlay.append(ul);if(gotl)overlay.appendChild(gotl);overlay.append(btns);overlay.hidden=false;tilesIn(overlay,'.unll li,.stats li,.gotl li');/* 11/16 作りこみ：結果の行も左上から */
   overlay.classList.toggle('over',overlay.scrollHeight>overlay.clientHeight+1);/* あふれるときだけ、ボタンを下にのこす */
   };
   if(firstEnd)ending(result);else result();
