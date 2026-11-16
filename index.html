@@ -198,7 +198,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .overlay>:first-child{margin-top:auto}
 .overlay>:last-child{margin-bottom:auto}
 .overlay h2{margin:0;text-align:center;font-weight:400;font-size:26px;letter-spacing:.08em}
-.overlay .sub{margin:0;text-align:center;color:var(--dim);font-size:13px}
+.overlay .sub{margin:0 auto;max-width:460px;text-align:center;color:var(--dim);font-size:13px}
 .overlay .sub.unl{color:var(--go);font-size:14px}
 /* エンディング（#13） */
 .endt{margin:0;text-align:center;font-family:var(--f-num);font-size:clamp(15px,5.2vw,24px);line-height:1.6;color:#fff2a8}
@@ -4075,7 +4075,8 @@ function titleBg(){
   const r=titleEl.getBoundingClientRect(),h=clamp(Math.round(GW*Math.max(1,r.height)/Math.max(1,r.width)),660,1200);
   tCv.width=GW;tCv.height=h;tg.imageSmoothingEnabled=false;
   const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,h),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
-  TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0};
+  const k=Math.max(r.width/GW,r.height/h)||1,vh=Math.min(h,r.height/k);/* 横長の画面（PC）は上下が切れる：見えている所の中に機体を置く（#14） */
+  TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0,sy:(h-vh)/2+vh*(vh<h*0.8?0.5:0.66),sa:vh<h*0.8?8:14};
 }
 function titleFrame(ts){
   if(titleEl.hidden){tRaf=0;return;}
@@ -4084,7 +4085,7 @@ function titleFrame(ts){
   const S=TS,g=tg,h=S.h;S.t+=dt;
   for(const s of S.stars){s.y+=STAR_SP[s.l]*dt*1.6;if(s.y>h){s.y-=h;s.x=rand(0,GW);}}
   S.neb=(S.neb+12*dt)%NEB.height;S.pl.y+=9*dt;if(S.pl.y>h+10){S.pl.i=(S.pl.i+1)%PLANETS.length;S.pl.y=-PLANETS[S.pl.i].height-40;S.pl.x=rand(0,GW-PLANETS[S.pl.i].width);}
-  const px=Math.round(GW/2+Math.sin(S.t*0.9)*70),py=Math.round(h*0.66+Math.sin(S.t*1.7)*14);
+  const px=Math.round(GW/2+Math.sin(S.t*0.9)*70),py=Math.round(S.sy+Math.sin(S.t*1.7)*S.sa);
   S.cd-=dt;if(S.cd<=0){S.cd=0.16;S.shots.push({x:px-14,y:py-20},{x:px+14,y:py-20});}
   for(const b of S.shots)b.y-=600*dt;S.shots=S.shots.filter(b=>b.y>-20);
   const keep=R;R={t:S.t,neb:S.neb,pl:S.pl,stars:S.stars};
