@@ -215,7 +215,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .unll li{display:flex;align-items:center;gap:8px;padding:2px 10px;background:var(--panel);border:2px solid var(--edge);font-size:14px;color:var(--go)}
 .unll img{width:32px;height:32px;image-rendering:pixelated;image-rendering:crisp-edges}
 /* エンディング（#13） */
-.endt{margin:0;text-align:center;font-family:var(--f-num);font-size:clamp(15px,5.2vw,24px);line-height:1.6;color:#fff2a8}
+.endt{margin:0;text-align:center;font-size:clamp(28px,9vw,40px);line-height:1.3;letter-spacing:.3em;text-indent:.3em;color:#fff2a8}
 .endh{margin:8px 0 0;text-align:center;font-weight:400;font-size:16px}
 .overlay.endg .go{flex:none;max-width:320px;margin-inline:auto}
 .cards{display:flex;flex-direction:column;gap:10px;max-width:420px;width:100%;margin:0 auto}
@@ -458,32 +458,33 @@ const dirAngle=d=>-Math.PI/2+d*Math.PI/4;
 const angToDir=a=>((Math.round((a+Math.PI/2)/(Math.PI/4))%8)+8)%8;
 
 const CATS={atk:'攻撃',def:'防御',sup:'補助'};
-/* rate = [威力, 連射, 射程] 1〜5 / eff = 補助・防御の効き目 */
+/* rate = [威力, 連射, 射程] 1〜5 / eff = 補助・防御の効き目
+   はじめの12種とシールド・反射板の gt：レベルアップの文に出す％だけの表（強さは stat0 の式。gt はその式から出した数字で、強さには使わない #16） */
 const MODS={
   laser:{name:'レーザー',cat:'atk',c:'#4cc9ff',price:200,rate:[2,4,4],desc:'向いた方へビームを連射する',
-    up:{2:'威力と連射がアップ',3:'ビームが2本になる',4:'弾が2体まで当たる',5:'威力と連射がアップ',6:'ビームが3本になる',7:'弾が3体まで当たる',8:'威力が大きくアップ'}},
+    up:{3:'ビームが2本になる',4:'弾が2体まで当たる',6:'ビームが3本になる',7:'弾が3体まで当たる'},gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:44},r:{2:11,5:11,8:11}}},
   gatling:{name:'ガトリング',cat:'atk',c:'#7d9cff',price:250,rate:[1,5,3],desc:'小さな弾をばらまくように高速で連射する',
-    up:{2:'威力アップ',3:'連射アップ',4:'威力アップ',5:'2列で撃つ',6:'連射アップ',7:'威力アップ',8:'弾が2体まで当たる'}},
+    up:{5:'2列で撃つ',8:'弾が2体まで当たる'},gt:{d:{2:23,3:19,4:16,5:14,6:12,7:11,8:10},r:{2:4,3:18,4:4,6:18,7:4}}},
   mine:{name:'機雷',cat:'atk',c:'#8ea0c8',price:280,rate:[4,1,2],desc:'向いた方へ機雷をまく。敵が近づくと爆発する',
-    up:{2:'威力と速さがアップ',3:'2個ずつまく',4:'威力アップ',5:'爆発が大きくなる',6:'威力と速さがアップ',7:'3個ずつまく',8:'威力が大きくアップ'}},
-  shotgun:{name:'散弾砲',cat:'atk',c:'#e8c07a',price:300,rate:[4,2,1],desc:'近くの敵に散弾をまとめて撃ちこむ。よくはじき飛ばす',
-    up:{2:'威力と連射がアップ',3:'弾が7発になる',4:'届く距離がのびる',5:'威力と連射がアップ',6:'弾が9発になる',7:'届く距離がさらにのびる',8:'弾が2体まで当たる'}},
+    up:{3:'2個ずつまく',5:'爆発が大きくなる',7:'3個ずつまく'},rl:'まく速さ',gt:{d:{2:35,3:26,4:20,5:17,6:15,7:13,8:30},r:{2:9,4:9,6:9,8:9}}},
+  shotgun:{name:'散弾砲',cat:'atk',c:'#e8c07a',price:300,rate:[4,2,1],desc:'近くの敵に散弾を撃ちこみ、はじき飛ばす',
+    up:{3:'弾が7発になる',4:'届く距離がのびる',6:'弾が9発になる',7:'届く距離がさらにのびる',8:'弾が2体まで当たる'},gt:{d:{2:28,3:22,4:18,5:15,6:13,7:12,8:10},r:{2:8,5:8}}},
   freeze:{name:'冷凍砲',cat:'atk',c:'#bfe9ff',price:320,rate:[2,3,4],desc:'当たった敵をこおらせて、動きを遅くする',
-    up:{2:'威力と連射がアップ',3:'こおる時間がのびる',4:'2発ずつ撃つ',5:'もっと遅くする',6:'威力と連射がアップ',7:'弾が2体まで当たる',8:'威力が大きくアップ'}},
+    up:{3:'こおる時間がのびる',4:'2発ずつ撃つ',5:'もっと遅くする',7:'弾が2体まで当たる'},gt:{d:{2:38,3:27,4:21,5:18,6:15,7:13,8:58},r:{2:9,6:9,8:9}}},
   missile:{name:'追撃ミサイル',cat:'atk',c:'#ffd23f',price:350,rate:[3,2,5],desc:'近くの敵を追いかけて爆発する',
-    up:{2:'威力と発射の速さがアップ',3:'2発ずつ撃つ',4:'爆発が大きくなる',5:'3発ずつ撃つ',6:'威力と発射の速さがアップ',7:'爆発がさらに大きくなる',8:'4発ずつ撃つ'}},
+    up:{3:'2発ずつ撃つ',4:'爆発が大きくなる',5:'3発ずつ撃つ',7:'爆発がさらに大きくなる',8:'4発ずつ撃つ'},gt:{d:{2:38,3:27,4:21,5:18,6:15,7:13,8:12},r:{2:9,6:9}}},
   flame:{name:'火炎放射',cat:'atk',c:'#6af0ff',price:380,rate:[3,5,1],desc:'青い炎をふき出して、近くの敵をまとめて焼く',
-    up:{2:'威力アップ',3:'炎が長くなる',4:'威力アップ',5:'炎が広がる',6:'威力アップ',7:'炎がさらに長くなる',8:'威力が大きくアップ'}},
+    up:{3:'炎が長くなる',5:'炎が広がる',7:'炎がさらに長くなる'},gt:{d:{2:28,3:22,4:18,5:15,6:13,7:12,8:38}}},
   sword:{name:'近接の剣',cat:'atk',c:'#b48cff',price:400,rate:[5,2,1],desc:'向いた方を大きく斬りはらう',
-    up:{2:'威力と振る速さがアップ',3:'届く距離がのびる',4:'威力アップ',5:'ひと振りが大きくなる',6:'振る速さがアップ',7:'届く距離がさらにのびる',8:'2回つづけて斬る'}},
-  saw:{name:'回転ノコ',cat:'atk',c:'#c9d1e8',price:420,rate:[3,2,3],desc:'回るノコギリを投げる。行って帰ってくる間ずっと切る',
-    up:{2:'威力と速さがアップ',3:'威力アップ',4:'2枚投げる',5:'刃が大きくなる',6:'威力と速さがアップ',7:'3枚投げる',8:'威力が大きくアップ'}},
-  thunder:{name:'雷撃コイル',cat:'atk',c:'#e6ff5c',price:450,rate:[3,2,4],desc:'向いた側の敵にいなずまを落とし、近くの敵へつながる',
-    up:{2:'威力と速さがアップ',3:'つながる敵が1体ふえる',4:'届く距離がのびる',5:'威力と速さがアップ',6:'つながる敵が1体ふえる',7:'威力アップ',8:'つながる敵が2体ふえる'}},
+    up:{3:'届く距離がのびる',5:'ひと振りが大きくなる',7:'届く距離がさらにのびる',8:'2回つづけて斬る'},rl:'振る速さ',gt:{d:{2:41,3:29,4:23,5:18,6:16,7:13,8:12},r:{2:9,4:9,6:9}}},
+  saw:{name:'回転ノコ',cat:'atk',c:'#c9d1e8',price:420,rate:[3,2,3],desc:'回るノコギリを投げる。行きも帰りも切る',
+    up:{4:'2枚投げる',5:'刃が大きくなる',7:'3枚投げる'},rl:'投げる速さ',gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:41},r:{2:9,3:9,6:9,8:9}}},
+  thunder:{name:'雷撃コイル',cat:'atk',c:'#e6ff5c',price:450,rate:[3,2,4],desc:'向いた側の敵に雷を落とし、近くの敵へつなぐ',
+    up:{3:'つながる敵が1体ふえる',4:'届く距離がのびる',6:'つながる敵が1体ふえる',8:'つながる敵が2体ふえる'},gt:{d:{2:36,3:26,4:21,5:17,6:15,7:13,8:11},r:{2:9,5:9,7:9}}},
   gravity:{name:'重力弾',cat:'atk',c:'#7a5cff',price:480,rate:[2,1,3],desc:'ゆっくり進む玉が、まわりの敵を吸いこんで削る',
-    up:{2:'威力と速さがアップ',3:'吸いこむ範囲が広がる',4:'長く残る',5:'威力と速さがアップ',6:'吸いこむ範囲がさらに広がる',7:'威力アップ',8:'最後に大爆発する'}},
-  cannon:{name:'ビーム砲',cat:'atk',c:'#5cffef',price:520,rate:[5,1,5],desc:'力をためて、太いビームで一直線にまとめて撃ちぬく',
-    up:{2:'威力アップ',3:'ビームが太くなる',4:'ためる時間が短くなる',5:'威力アップ',6:'ビームがさらに太くなる',7:'ためる時間が短くなる',8:'威力が大きくアップ'}},
+    up:{3:'吸いこむ範囲が広がる',4:'長く残る',6:'吸いこむ範囲がさらに広がる',8:'最後に大爆発する'},gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:11},r:{2:9,5:9,7:9}}},
+  cannon:{name:'ビーム砲',cat:'atk',c:'#5cffef',price:520,rate:[5,1,5],desc:'ためてから、太いビームで一直線に撃ちぬく',
+    up:{3:'ビームが太くなる',6:'ビームがさらに太くなる'},gt:{d:{2:30,3:23,4:19,5:16,6:14,7:12,8:38},r:{2:5,4:20,5:5,7:20,8:5}}},
   /* 試作6で足した攻撃30種（docs/design/parts.md）。g＝レベルごとの強さの表（d 威力・r 連射 の％）。
      レベルアップの文は up の文に g の数字をつないで作る（下の「レベルアップの文」）。stat() も同じ g を使うので、文と強さがずれない */
   /* 射撃 */
@@ -554,9 +555,9 @@ const MODS={
     g:{d:{3:30,5:30,6:30,8:50}},up:{2:'とどく広さ ＋15%',3:'止める時間が1.3秒に',4:'5秒ごとに出す',5:'とどく広さ ＋15%',6:'止める時間が1.6秒に',7:'4秒ごとに出す'}},
   armor:{name:'装甲板',cat:'def',c:'#8d93c9',price:150,passive:true,eff:'最大HP ＋15',desc:'機体をかたくする。いくつでも重ねてつけられる'},
   shield:{name:'シールド',cat:'def',c:'#5dffb0',price:300,eff:'向いた側の弾を消す・敵をはじく',desc:'向いた側に盾を張る。弾を消して、敵をはじく',
-    up:{2:'盾が広くなる',3:'はじく威力がアップ',4:'盾がさらに広くなる',5:'盾が大きくなる',6:'はじく回数がふえる',7:'はじく威力がアップ',8:'いちばん大きな盾'}},
-  reflector:{name:'反射板',cat:'def',c:'#e3e5ff',price:350,eff:'敵の弾をはね返して当てる',desc:'向いた側に板を張る。敵の弾をはね返し、さわった敵を押しもどす',
-    up:{2:'板が広くなる',3:'はね返す威力がアップ',4:'はね返す弾が速くなる',5:'板が大きくなる',6:'はね返した弾が2体まで当たる',7:'はね返す威力がアップ',8:'いちばん大きな板'}},
+    up:{2:'盾が広くなる',4:'盾がさらに広くなる',5:'盾が大きくなる',6:'はじく回数がふえる',8:'いちばん大きな盾'},gt:{d:{2:60,3:38,4:27,5:21,6:18,7:15,8:13}}},
+  reflector:{name:'反射板',cat:'def',c:'#e3e5ff',price:350,eff:'敵の弾をはね返して当てる',desc:'向いた側の板で、弾をはね返し敵を押しもどす',
+    up:{2:'板が広くなる',4:'はね返す弾が速くなる',5:'板が大きくなる',6:'はね返す弾が2体まで当たる',8:'いちばん大きな板'},gt:{d:{2:40,3:29,4:22,5:18,6:15,7:33,8:10}}},
   magnet:{name:'吸引装置',cat:'sup',c:'#5aa2ff',price:180,passive:true,eff:'吸いよせる距離 ＋30%',desc:'経験値の結晶を遠くから吸いよせる'},
   booster:{name:'ブースター',cat:'sup',c:'#ff9f43',price:200,passive:true,eff:'動く速さ ＋10%',desc:'機体が速く動けるようになる'},
   coin:{name:'集金装置',cat:'sup',c:'#ffcf5a',price:250,passive:true,eff:'かせぐお金 ＋10%',desc:'出撃でかせぐお金がふえる'},
@@ -613,9 +614,9 @@ const UNLOCK={
 };
 const UNL_ORDER={};Object.keys(UNLOCK).forEach((t,i)=>{const [k,x,n,txt]=UNLOCK[t];MODS[t].unlock={k,t:x||null,n,txt};UNL_ORDER[t]=i;});
 const RATE_NAMES=['威力','連射','射程'];
-/* レベルアップの文：up の文のあとに「威力 ＋30%」「連射 ＋15%」を g からつなぐ */
-for(const t of TYPES){const m=MODS[t];if(!m.g)continue;const u={};
-  for(let L=2;L<=WMAX;L++){const a=[];if(m.up[L])a.push(m.up[L]);if(m.g.d&&m.g.d[L])a.push('威力 ＋'+m.g.d[L]+'%');if(m.g.r&&m.g.r[L])a.push((m.rl||'連射')+' ＋'+m.g.r[L]+'%');u[L]=a.join('・');}
+/* レベルアップの文：up の文のあとに「威力 ＋30%」「連射 ＋15%」を g（はじめの12種などは gt）からつなぐ */
+for(const t of TYPES){const m=MODS[t],G=m.g||m.gt;if(!G)continue;const u={};
+  for(let L=2;L<=WMAX;L++){const a=[];if(m.up[L])a.push(m.up[L]);if(G.d&&G.d[L])a.push('威力 ＋'+G.d[L]+'%');if(G.r&&G.r[L])a.push((m.rl||'連射')+' ＋'+G.r[L]+'%');u[L]=a.join('・');}
   m.up=u;}
 /* g の％をそのレベルまでかけ合わせた倍率（k：'d' 威力・'r' 連射） */
 const GR=(t,k,lv)=>{const o=MODS[t].g&&MODS[t].g[k];let v=1;if(o)for(let L=2;L<=lv;L++)if(o[L])v*=1+o[L]/100;return v;};
@@ -656,20 +657,21 @@ const EVO={
 /* 機体の強化（道中だけ） */
 const PAS={
   magnet:{name:'吸い寄せ',ic:'吸',c:'#5aa2ff',max:5,desc:'経験値を吸い取る距離が40%のびる'},
-  speed:{name:'機体スピード',ic:'速',c:'#7af7d9',max:5,desc:'動く速さが12%アップ'},
+  speed:{name:'機体スピード',ic:'速',c:'#7af7d9',max:5,desc:'動く速さ＋12%'},
   armor:{name:'装甲',ic:'甲',c:'#e3e5ff',max:5,desc:'最大HP＋20、HPも20回復'},
   clock:{name:'オーバークロック',ic:'連',c:'#ff9f43',max:5,desc:'すべての武器の発射が8%速くなる'},
-  power:{name:'火力アップ',ic:'力',c:'#ff9f43',max:5,desc:'すべての攻撃の威力が10%アップ'},
+  power:{name:'火力アップ',ic:'力',c:'#ff9f43',max:5,desc:'すべての攻撃の威力＋10%'},
   regen:{name:'自動修理',ic:'修',c:'#7af7d9',max:5,desc:'HPが少しずつ回復する（1秒に＋0.4）'},
   xp:{name:'経験値アップ',ic:'経',c:'#5aa2ff',max:5,desc:'もらえる経験値が10%ふえる'},
   gold:{name:'収入アップ',ic:'金',c:'#ffd23f',max:5,desc:'この出撃でかせぐお金が15%ふえる'},
 };
 /* 支援（道中だけ） */
 const SUP={
-  wing:{name:'援軍',c:'#5dffb0',max:5,first:'ときどき横から味方の戦闘機が2機飛んできて撃つ',more:'援軍が1機ふえて、来るのが早くなる'},
-  drone:{name:'子機',c:'#5dffb0',max:5,first:'機体のまわりを回って、近くの敵を撃つ',more:'子機が1機ふえる',last:'子機の連射がアップ'},
-  strike:{name:'空爆',ic:'撃',c:'#ffd23f',max:5,first:'敵が集まっている所に、上から光の柱を落とす',more:'威力と範囲がアップ、落ちるのが早くなる'},
-  barrier:{name:'バリア',ic:'障',c:'#c4ffe3',max:3,first:'敵の攻撃を1回ふせぐ。しばらくすると張りなおす',more:'張りなおすのが早くなる'},
+  wing:{name:'援軍',c:'#5dffb0',max:5,first:'ときどき横から味方の戦闘機が2機来て撃つ',more:'援軍が1機ふえて、来るのが早くなる'},
+  drone:{name:'子機',c:'#5dffb0',max:5,first:'機体のまわりを回って、近くの敵を撃つ',more:'子機が1機ふえる',last:'子機の連射＋50%'},
+  strike:{name:'空爆',ic:'撃',c:'#ffd23f',max:5,
+    at:['敵が集まっている所に、上から光の柱を落とす','柱の威力＋50%・間かく7.8秒','柱の威力＋33%・間かく6.6秒','柱の威力＋25%・間かく5.4秒','柱の威力＋20%・間かく4.2秒']},
+  barrier:{name:'バリア',ic:'障',c:'#c4ffe3',max:3,first:'敵の攻撃を1回ふせぐ。少したつと張りなおす',more:'張りなおすのが早くなる'},
 };
 /* ---------- #12 道中の強化（docs/design/upgrades.md）。数字は calcCS と sup12 の1か所 ---------- */
 /* 機体の強化：8 → 20種。desc は次のレベルの文（at があればレベルごと） */
@@ -783,7 +785,7 @@ const stOpen=n=>n<=1||save.rec.stageMax>=n-1;
 const SL=(name,x,y,out,front)=>({name,x,y,out,front:!!front});
 const SHIPS={
   standard:{name:'スタンダード',c:'#4588f2',hp:1,spd:1,mag:1,rate:1,pow:1,gold:1,price:0,
-    desc:'バランス型。こまったときの1台',skill:'がんばり：やられそうなとき1回だけ HP1 でたえる',sp:{name:'全方位レーザー',desc:'360°に光線を出し、まわりの敵を焼く'},
+    desc:'はじめの機体。性能はすべてふつう',skill:'がんばり：やられても1回だけ HP1 で残る',sp:{name:'全方位レーザー',desc:'360°に光線を出し、まわりの敵を焼く'},
     start:[{t:'laser',s:1,d:0},{t:'laser',s:2,d:0}],
     slots:[SL('機首',0,-34,0),SL('左肩',-14,-10,7),SL('右肩',14,-10,1),SL('左翼',-25,8,6),SL('右翼',25,8,2),SL('左尾',-12,25,5),SL('右尾',12,25,3)]},
   rapid:{name:'ラピッド',c:'#ffcd48',hp:0.8,spd:1.05,mag:1,rate:1.25,pow:1,gold:1,price:800,
@@ -799,11 +801,11 @@ const SHIPS={
     start:[{t:'magnet',s:6,d:4}],unlock:{k:'goldTotal',n:5000,txt:'合計5000Gかせぐ'},
     slots:[SL('機首',0,-30,0),SL('左腕',-22,-18,7),SL('右腕',22,-18,1),SL('左翼',-22,12,6),SL('右翼',22,12,2),SL('左尾',-12,25,5),SL('右尾',12,25,3)]},
   blade:{name:'ブレード',c:'#a98bff',hp:0.9,spd:1.2,mag:1,rate:1,pow:1,gold:1,price:1500,blade:1.4,
-    desc:'速い。近くで戦うのが得意',skill:'刃：剣・ノコ・ムチなど近接の武器の威力＋40%',sp:{name:'なぎはらい',desc:'画面を横切る3本の斬撃。弾も消す'},
+    desc:'速い。近くで戦うのが得意',skill:'刃：剣・ノコ・ムチなど近接の威力＋40%',sp:{name:'なぎはらい',desc:'画面を横切る3本の斬撃。弾も消す'},
     start:[{t:'sword',s:1,d:7},{t:'sword',s:2,d:1}],unlock:{k:'wmax',t:['sword','saw'],n:8,txt:'近接の剣か回転ノコをLv8にする'},
     slots:[SL('機首',0,-34,0),SL('左肩',-12,-12,7),SL('右肩',12,-12,1),SL('左刃',-26,-10,7),SL('右刃',26,-10,1),SL('左尾',-12,24,5),SL('右尾',12,24,3)]},
   carrier:{name:'キャリア',c:'#18b0b4',hp:1.1,spd:0.95,mag:1,rate:1,pow:1,gold:1,price:2000,carrier:1,
-    desc:'支援の味方といっしょに戦う',skill:'母艦：はじめから子機つき・レベルアップで支援が出やすい',sp:{name:'艦載機発進',desc:'味方の戦闘機6機が8秒間いっしょに戦う'},
+    desc:'支援の味方といっしょに戦う',skill:'母艦：はじめから子機つき・支援が出やすい',sp:{name:'艦載機発進',desc:'味方の戦闘機6機が8秒間いっしょに戦う'},
     start:[{t:'laser',s:0,d:0}],unlock:{k:'sup5',n:3,txt:'支援を3つ最大レベルにする'},
     slots:[SL('機首',0,-36,0),SL('左肩',-16,-10,7),SL('右肩',16,-10,1),SL('左翼',-28,10,6),SL('右翼',28,10,2),SL('左尾',-17,28,5),SL('右尾',17,28,3)]},
   marksman:{name:'スナイパー',c:'#bfe9ff',hp:0.9,spd:1,mag:1,rate:0.85,pow:1.2,gold:1,range:1.3,focus:1,price:1100,
@@ -2082,7 +2084,7 @@ function renderEquip(){
   const dots=$('dots');dots.textContent='';SHIP_IDS.forEach(id=>dots.appendChild(el('i',id===view?'on':null)));
   const lb=$('lockbox');lb.textContent='';lb.hidden=own;
   if(!own){
-    if(pg.ok){lb.append(el('p',null,'解放できた！ '+sh.price+'G で買える'));const b=el('button','btn3','ショップで見る');b.type='button';b.addEventListener('click',()=>openShop(view));lb.appendChild(b);}
+    if(pg.ok){lb.append(el('p',null,'解放ずみ・'+sh.price+'G で買える'));const b=el('button','btn3','ショップで見る');b.type='button';b.addEventListener('click',()=>openShop(view));lb.appendChild(b);}
     else{lb.append(el('p',null,'解放の条件：'+sh.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);lb.append(pr,el('p','dim num',pg.cur+' / '+pg.n));}
   }
   drawEditor();renderSlots();
@@ -2124,7 +2126,7 @@ function openList(i){
   const s=SLOTS[i],cur=save.load[i],tut=tutStep()===1;let tutAt=null;/* はじめの案内②：一覧の中で、つけられる品（レーザー）を指でさす */
   const sh=openSheet(s.name+'につける装備',cur?'いま：'+MODS[cur.t].name:null);
   const list=TYPES.filter(t=>save.owned[t]>0);
-  if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていないよ。ショップで買ってね'));
+  if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていない。ショップで買える'));
   list.forEach(t=>{
     const m=MODS[t],a=avail(t),isCur=cur&&cur.t===t,b=el('button','irow'+(isCur?' now':''));b.type='button';b.style.setProperty('--c',m.c);
     const im=el('img');im.alt='';im.src=ICON[t];
@@ -2139,24 +2141,24 @@ function openList(i){
 }
 function mountAt(j,t){
   const prev=save.load[j];
-  if(avail(t)<=0&&!(prev&&prev.t===t)){toast(MODS[t].name+'はぜんぶつけているよ');return;}
+  if(avail(t)<=0&&!(prev&&prev.t===t)){toast(MODS[t].name+'はぜんぶつけている');return;}
   save.load[j]={t,d:prev?prev.d:defaultDir(t,j)};
-  persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけたよ');renderEquip();
+  persist();closeSheet();toast(SLOTS[j].name+'に'+MODS[t].name+'をつけた');renderEquip();
 }
 const DIR_GRID=[7,0,1,6,-1,2,5,4,3];
 function openAim(i){
   const v=save.load[i];if(!v)return;
-  const m=MODS[v.t],sh=openSheet(SLOTS[i].name+'：'+m.name,'向きをえらんでね',m.c);
+  const m=MODS[v.t],sh=openSheet(SLOTS[i].name+'：'+m.name,'向きをえらぶ',m.c);
   const grid=el('div','dirs');
   const draw=()=>{grid.textContent='';DIR_GRID.forEach(d=>{
     if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[v.t][v.d].url;c.appendChild(im);grid.appendChild(c);return;}
     const b=el('button');b.appendChild(pixIcon('d'+d,4,v.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
     b.addEventListener('click',()=>{v.d=d;persist();draw();drawEditor();});grid.appendChild(b);});};
   draw();sh.appendChild(grid);
-  sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効くよ':'向いた方へ攻撃するよ'));
+  sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効く':'向いた方へ攻撃する'));
   const row=el('div','sbtns'),ch=el('button','btn3','装備をかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
   ch.addEventListener('click',()=>{sheetOn=null;openList(i);});
-  off.addEventListener('click',()=>{save.load[i]=null;persist();closeSheet();toast(SLOTS[i].name+'の'+m.name+'を外したよ');renderEquip();});
+  off.addEventListener('click',()=>{save.load[i]=null;persist();closeSheet();toast(SLOTS[i].name+'の'+m.name+'を外した');renderEquip();});
   row.append(ch,off);sh.appendChild(row);
 }
 /* 機体の性能の表（ふつうと同じ数字の行は、full でないときは出さない） */
@@ -2230,7 +2232,7 @@ function openDetail(k){
   if(isShip){
     const ul=el('ul','statl'),pc=v=>(v>=1?'+':'')+Math.round((v-1)*100)+'%';
     shipRows(it,false).forEach(([a,b])=>{const li=el('li');li.append(el('span',null,a),el('b','num',b));ul.appendChild(li);});s.appendChild(ul);
-    if(it.unlock){const pg=shipProg(k);s.appendChild(el('p',null,'解放の条件：'+it.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);s.append(pr,el('p','dim num',pg.cur+' / '+pg.n+(pg.ok?'　達成！':'')));}
+    if(it.unlock){const pg=shipProg(k);s.appendChild(el('p',null,'解放の条件：'+it.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);s.append(pr,el('p','dim num',pg.cur+' / '+pg.n+(pg.ok?'　達成':'')));}
   }else if(it.rate){const r=el('div','drate');it.rate.forEach((v,i)=>{const rt=el('div','rt');rt.appendChild(el('span',null,RATE_NAMES[i]));
       const bars=el('span','bars');for(let q=0;q<5;q++)bars.appendChild(el('i',q<v?'on':null));rt.appendChild(bars);r.appendChild(rt);});s.appendChild(r);}
   else{const p=el('p','eff');p.append(el('span',null,'こうか：'),document.createTextNode(it.eff+(it.passive?'（1つにつき）':'')));s.appendChild(p);}
@@ -2244,8 +2246,8 @@ function openDetail(k){
   else if(save.gold>=it.price){buy.append(el('span','num',String(it.price)),document.createTextNode('G で買う'));
     buy.addEventListener('click',()=>{
       SFX.play('buy');
-      if(isShip){if(!buyShip(k))return;shopNote=it.name+'を手に入れた！格納庫で ◀ ▶ をおして切りかえてね';view=k;setShip(k);}
-      else{if(save.gold<it.price)return;save.gold-=it.price;save.owned[k]++;persist();shopNote=it.name+'を買ったよ！格納庫の「＋」をタップしてつけてね';}
+      if(isShip){if(!buyShip(k))return;shopNote=it.name+'を手に入れた。出撃する機体にした';view=k;setShip(k);}
+      else{if(save.gold<it.price)return;save.gold-=it.price;save.owned[k]++;persist();shopNote=it.name+'を買った。格納庫の「＋」からつけられる';}
       const got=checkAch();if(got.length)shopNote+='　'+achText(got);
       closeSheet();renderAll();});}
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(it.price-save.gold)),document.createTextNode('G'));}
@@ -2339,7 +2341,7 @@ $('shopClose').addEventListener('click',closeShop);
 $('labBtn').addEventListener('click',openLab);$('labClose').addEventListener('click',closeLab);
 $('bookBtn').addEventListener('click',openBook);$('bookClose').addEventListener('click',closeBook);
 $('achBtn').addEventListener('click',openAch);$('achClose').addEventListener('click',closeAch);
-$('debugGold').addEventListener('click',()=>{save.gold+=1000;persist();shopNote='試作用に1000Gふやしたよ';renderAll();});
+$('debugGold').addEventListener('click',()=>{save.gold+=1000;persist();shopNote='試作用に1000Gふやした';renderAll();});
 $('debugUnl').addEventListener('click',()=>{save.unl=TYPES.filter(t=>MODS[t].unlock);persist();shopNote='試作用に全部の品を解放した';renderAll();});/* 試作用の2つのボタンは公開の前に消す（docs/design/unlocks.md） */
 $('shipPrev').addEventListener('click',()=>stepShip(-1));$('shipNext').addEventListener('click',()=>stepShip(1));
 $('stPrev').addEventListener('click',()=>stepStage(-1));$('stNext').addEventListener('click',()=>stepStage(1));
@@ -2616,7 +2618,7 @@ function killed(e){
   if(e.kind==='boss'&&R.t-e.born<=30)R.fastBoss++;
   const ak=e.art||e.kind;R.kE[ak]=(R.kE[ak]||0)+1;R.seenE[ak]=1;
   if(e.kind==='boss'){R.CH.push({x:clamp(e.x,30,GW-30),y:e.y,vy:-60,t:0,dead:false,pull:false,sp:70*U});if(R.hurtN===e.hn)R.nodmg=(R.nodmg||0)+1;}/* #12：宝箱・ノーダメージ */
-  if(e.kind==='boss'){for(let i=0;i<10;i++)addGem(e.x+rand(-30,30),e.y+rand(-20,20),3,true,rand(-68,68),rand(-68,27));R.bossKills++;showBanner('大型の敵をたおした！');SFX.play('boss');
+  if(e.kind==='boss'){for(let i=0;i<10;i++)addGem(e.x+rand(-30,30),e.y+rand(-20,20),3,true,rand(-68,68),rand(-68,27));R.bossKills++;showBanner('大型の敵をたおした');SFX.play('boss');
     addX(e.x,e.y,EXPL.b,0.8);for(let i=0;i<5;i++)addX(e.x+rand(-60,60),e.y+rand(-45,45),EXPL.m,rand(0.4,0.7));}
   else{SFX.play('kill');addGem(e.x,e.y,k.xp*(e.reapNow?1.2:1),k.xp>=3);/* 大鎌で倒すと経験値＋20% */addX(e.x,e.y,k.xp<=1?EXPL.s:EXPL.m,k.xp<=1?0.36:0.5);}
   burst(e.x,e.y,k.burst||8,k.col);
@@ -2634,7 +2636,7 @@ function hurt(d){
   R.hp=Math.max(0,R.hp-d);R.inv=0.55*R.cs.ifr;R.hurtFx=0.18;SFX.play('hurt');burst(R.x,R.y,10,['#ff2d6f','#ffffff']);
   if(R.sh.graze){R.ghost=0.8;R.inv=Math.max(R.inv,0.8);}/* ファントム：被弾すると0.8秒すがたを消す */
   if(R.cs.frost>0)frostNova();
-  if(R.hp<=0&&R.guts){R.guts=false;R.hp=1;R.inv=1.2;showBanner('がんばり！ HP1 でたえた');}
+  if(R.hp<=0&&R.guts){R.guts=false;R.hp=1;R.inv=1.2;showBanner('がんばり：HP1 でたえた');}
   if(R.hp<=0&&R.revLeft>0){R.revLeft--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('復活装置で HP50% にもどった');}
   if(R.hp<=0&&R.labRev>0){R.labRev--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('予備の機体で HP50% にもどった');}/* 研究所 */
   if(R.hp>0&&R.hp<R.maxHp*0.3&&R.ebLeft>0&&R.ebT<=0){R.ebLeft--;R.ebT=3;R.inv=Math.max(R.inv,3);SFX.play('ebar');}/* 緊急バリア */
@@ -4013,7 +4015,7 @@ function renderLvUp(fresh){
   lvChoices.forEach(o=>{const b=cardEl(o);o.btn=b;const nb=!!o.evo||o.key==='f';b.disabled=fresh||o.used||(banMode&&nb);if(banMode&&!nb)b.classList.add('banpick');
     b.addEventListener('click',()=>pickChoice(o));wrap.appendChild(b);});
   const lv=R.lv-R.pending+1,used=lvChoices.some(o=>o.used);
-  overlay.append(el('h2',null,'レベルアップ'),el('p','sub',banMode?'除外する強化をえらぶ（この出撃で二度と出ない）':R.pick>1?'Lv '+lv+' ・ 覚醒：2つえらぶ':used?'覚醒：あと1つえらぶ':'Lv '+lv+' ・ 1つえらぶ'),wrap);
+  overlay.append(el('h2',null,'レベルアップ'),el('p','sub',banMode?'この出撃で出なくする強化をえらぶ':R.pick>1?'Lv '+lv+' ・ 覚醒：2つえらぶ':used?'覚醒：あと1つえらぶ':'Lv '+lv+' ・ 1つえらぶ'),wrap);
   const acts=lvActs();if(acts)overlay.appendChild(acts);
   overlay.appendChild(buildSummary());
   overlay.hidden=false;
@@ -4116,7 +4118,7 @@ function endRun(clear,retreat){
   };
   if(firstEnd)ending(result);else result();
 }
-/* エンディング（#13）：ステージ5のクリア。スタッフの代わりに「Thanks for playing」と、これまでの記録 → 結果へ */
+/* エンディング（#13）：ステージ5のクリア。「おわり」と、これまでの記録 → 結果へ（#16：英語の一言を日本語に） */
 function ending(next){
   const rc=save.rec,h=Math.floor(rc.time/3600),m=Math.floor(rc.time%3600/60);
   overlay.textContent='';overlay.classList.add('endg');
@@ -4124,7 +4126,7 @@ function ending(next){
   row('出撃した時間',(h?h+'時間':'')+m+'分');row('クリア',rc.clears+'回');row('たおした敵',rc.kills+'体');row('たおした大型の敵',rc.bosses+'体');
   row('いちばん高いレベル','Lv '+rc.bestLv);row('実績',ACH.filter(a=>save.ach[a.id]).length+' / '+ACH.length);row('図鑑',bookCount(save)+' / '+BOOK_N());
   const b=el('button','go','結果へ');b.type='button';b.addEventListener('click',()=>{overlay.classList.remove('endg');next();});
-  overlay.append(el('p','endt','Thanks for playing'),el('p','sub','全ステージクリア！'),el('h3','endh','これまでの記録'),ul,b);overlay.hidden=false;
+  overlay.append(el('p','endt','おわり'),el('p','sub','全ステージクリア！'),el('h3','endh','これまでの記録'),ul,b);overlay.hidden=false;
   SFX.play('ending');
 }
 
