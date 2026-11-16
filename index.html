@@ -309,6 +309,7 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
   .sheet h3 span{white-space:normal;text-wrap:balance;word-break:auto-phrase}
 }
 @media (max-width:340px){.subrow img{display:none}}
+#sortie .hud{width:100%;max-width:var(--cw,none);margin-inline:auto}
 </style>
 
 <section id="title" hidden>
@@ -734,7 +735,7 @@ const STAGES=[
   {name:'星の海',desc:'青い星雲。はじめのステージ',hp:1,gold:300,big:[[150,'boss'],[270,'boss2']]},
   {name:'小惑星帯',desc:'流れてくる岩はこわすとお金になる',hp:1.4,gold:450,big:[[150,'gnaw'],[270,'gnaw2']]},
   {name:'氷の星雲',desc:'ときどき吹雪。敵も自機も遅くなる',hp:1.9,gold:600,big:[[150,'icebeast'],[270,'icequeen']]},
-  {name:'機械要塞',desc:'予告の線のあとにレーザーの壁',hp:2.5,gold:800,big:[[150,'fort'],[270,'snake']]},
+  {name:'機械要塞',desc:'予告の線のあとにレーザーの壁',hp:2.2,gold:800,big:[[150,'fort'],[270,'snake']]},
   {name:'深淵',desc:'最終ボスをたおすまで終わらない',hp:3.2,gold:1200,big:[[120,'prev1'],[210,'prev2'],[300,'core']],final:1},
 ];
 const stOpen=n=>n<=1||save.rec.stageMax>=n-1;
@@ -1513,18 +1514,19 @@ function bgObjs(n){const B=bgOf(n),o=[];
   if(B.obj==='eye')for(let i=0;i<6;i++)o.push({x:rand(20,GW-40),y:rand(-20,GH),v:rand(3,6),bl:rand(0,6),s:rand(0.5,1)});
   return o;}
 /* 絵は最初に1回だけ作ってキャッシュ（毎フレーム作らない） */
-/* 絵は使うときに作る（#14：起動を軽く）。lazyPut(o,k,fn)：o[k] を最初に読んだときに fn() で作る。
-   起動のあと、出撃していない間に少しずつ作っておき（warmLazy）、出撃の始めに残りを全部作る（flushLazy）ので、出撃中に作ることはない */
-const LAZYQ=[];
-function lazyPut(o,k,fn,noWarm){Object.defineProperty(o,k,{configurable:true,enumerable:true,get(){const v=fn();Object.defineProperty(o,k,{value:v,writable:true,configurable:true,enumerable:true});return v;}});if(!noWarm)LAZYQ.push(()=>o[k]);}
-function flushLazy(){while(LAZYQ.length)LAZYQ.shift()();}
+/* 絵は使うときに作る（#14：起動を軽く）。lazyPut(o,k,fn,q)：o[k] を最初に読んだときに fn() で作る。
+   起動のあと、出撃していない間に少しずつ作っておく（warmLazy）。q='g'（敵・爆発などの大きい絵）は出撃の始めに残りを作る（flushLazy）ので、出撃中に作ることはない。q=1 は作っておかない */
+const LAZYQ=[],LAZYG=[];
+function lazyPut(o,k,fn,q){Object.defineProperty(o,k,{configurable:true,enumerable:true,get(){const v=fn();Object.defineProperty(o,k,{value:v,writable:true,configurable:true,enumerable:true});return v;}});
+  const f=()=>o[k];if(q!==1)LAZYQ.push(f);if(q==='g')LAZYG.push(f);}
+function flushLazy(){while(LAZYG.length)LAZYG.shift()();}
 function warmLazy(){if(R&&R.state!=='over')return setTimeout(warmLazy,500);const t0=performance.now();while(LAZYQ.length&&performance.now()-t0<6)LAZYQ.shift()();if(LAZYQ.length)setTimeout(warmLazy,24);}
 const SHIPSPR={};SHIP_IDS.forEach(k=>{lazyPut(SHIPSPR,k,()=>makeShip(k));});
 const shipSil=k=>{const s=SHIPSPR[k],c=document.createElement('canvas');c.width=s.w;c.height=s.h;const g=c.getContext('2d');g.drawImage(s.img,0,0);g.globalCompositeOperation='source-in';g.fillStyle='#1d2052';g.fillRect(0,0,s.w,s.h);return c;};
-const ESPR={};Object.keys(ENEMY_PARTS).forEach(k=>{const P=ENEMY_PARTS[k];lazyPut(ESPR,k,()=>paint(P.w,P.h,P.parts,{spec:P.spec,flash:1,ice:1}));});
+const ESPR={};Object.keys(ENEMY_PARTS).forEach(k=>{const P=ENEMY_PARTS[k];lazyPut(ESPR,k,()=>paint(P.w,P.h,P.parts,{spec:P.spec,flash:1,ice:1}),'g');});
 /* 向きのある敵（#13）：角突き・盾持ち・大蛇の頭は8方向、砲台の砲身は16方向（0＝右・時計回り。もとの絵は下向き） */
 const rot8=(k,n)=>Array.from({length:n||8},(_,i)=>{const P=ENEMY_PARTS[k];return paint(P.w,P.h,P.parts,{spec:null,flash:1,ice:1,rot:i*TAU/(n||8)-Math.PI/2});});
-const R8={};['charger','guard','snake'].forEach(k=>lazyPut(R8,k,()=>rot8(k)));
+const R8={};['charger','guard','snake'].forEach(k=>lazyPut(R8,k,()=>rot8(k),'g'));
 const dir8=a=>((Math.round(a/(Math.PI/4))%8)+8)%8,dir16=a=>((Math.round(a/(Math.PI/8))%16)+16)%16;
 const TBAR=Array.from({length:16},(_,i)=>paint(40,40,[{m:'erust',r:1.5,p:[[17,18],[22,18],[22,33],[17,33]]},{m:'ecrim',r:1,p:[[16,32],[23,32],[23,38],[16,38]]}],{flash:1,ice:1,rot:i*TAU/16-Math.PI/2}));
 const ROCKS=[11,15,21].map((r,i)=>[0,1].map(v=>paint(r*2+1,r*2+1,rockParts(r,7+i*3+v),{flash:1,ice:1})));
@@ -1676,7 +1678,7 @@ const GSAT=paint(13,13,[{m:'blue',r:1,f:g=>{RC(g,0,4,3,4);RC(g,10,4,3,4);}},{m:'
 const BSHIP=paint(64,20,[{m:'steel',r:2.5,p:[[0,10],[56,10],[63,12],[56,18],[6,18]]},{m:'hull',r:2,p:[[20,4],[34,4],[36,10],[18,10]]},{m:'metal',r:1,f:g=>{RC(g,26,0,3,4);RC(g,8,7,8,3);RC(g,40,7,8,3);RC(g,14,5,10,2);RC(g,46,5,10,2);}},{m:'glass',r:1,f:g=>RC(g,22,6,10,2)}],{spec:[[24,6]]});
 const CLOUD=paint(34,14,[{m:'steel',r:3,f:g=>{E(g,9,8,8,5);E(g,18,6,9,6);E(g,26,8,7,5);E(g,17,10,15,3.5);}}],{});
 const COINURL=MISC.coin.img.toDataURL();
-const EXPL={};[['s',40,3],['m',64,5],['b',180,7]].forEach(([k,s,n])=>lazyPut(EXPL,k,()=>explFrames(s,n)));
+const EXPL={};[['s',40,3],['m',64,5],['b',180,7]].forEach(([k,s,n])=>lazyPut(EXPL,k,()=>explFrames(s,n),'g'));
 const HITF={w:hitFrames('#bfefff'),y:hitFrames('#ffd23f'),g:hitFrames('#5dffb0')};
 const NEB=nebulaTile(480,1024);
 const PLANETS=[planet(56,['#120c2a','#22184a','#3a2a6e','#5a4496','#8a74c4'],5,['#2a2048','#4a3c74','#7a6aa4'],4),
@@ -2273,6 +2275,7 @@ function fitCanvas(){
   const r=stage.getBoundingClientRect();
   scale=Math.max(0.5,Math.min(r.width/GW,(r.height-8)/GH));
   cv.style.width=Math.floor(GW*scale)+'px';cv.style.height=Math.floor(GH*scale)+'px';
+  sortie.style.setProperty('--cw',Math.floor(GW*scale)+'px');/* PC の幅：上の表示を画面（キャンバス）の幅にそろえる（#14） */
 }
 function setupCanvas(){
   const r=stage.getBoundingClientRect();
@@ -2669,14 +2672,14 @@ const BIG={
       else if(e.st===3){fanAt(e.x,e.y+30,5,0.2,92,true,true);for(let i=0;i<3;i++)addEnemy('shard',e.x+(i-1)*50,e.y+40);e.tm=1.4;}
       else e.tm=0.8;}}},
   /* 要塞砲台：左右の砲から3連・まん中の砲から7方向・9秒ごとにレーザーの壁 */
-  fort:{hp:1.15,r:58,init(e){e.lz=6;e.side=1.2;e.bn=0;},ai(e,dt,sf){TX=Math.sin(R.t*0.5)*e.spd*0.9;TY=(GH*0.16-e.y)*0.8;
+  fort:{hp:1,r:58,init(e){e.lz=6;e.side=1.2;e.bn=0;},ai(e,dt,sf){TX=Math.sin(R.t*0.5)*e.spd*0.9;TY=(GH*0.16-e.y)*0.8;
     e.fire-=dt*sf;e.side-=dt*sf;e.lz-=dt*sf;
     if(e.side<=0){e.side=2.1;e.bn=3;e.bt2=0;e.sx=(e.sx||1)*-1;}
     if(e.bn>0){e.bt2-=dt*sf;if(e.bt2<=0){e.bn--;e.bt2=0.15;const x=e.x+e.sx*47,y=e.y+54;ebAt(x,y,aimA(x,y),95,false);}}
     if(e.fire<=0){e.fire=4.2;fanAt(e.x,e.y+60,7,0.2,80,true);}
     if(e.lz<=0&&e.y>0){e.lz=9;const v=Math.random()<0.5;addWall(v,v?clamp(R.x,40,GW-40):clamp(R.y,GH*0.35,GH-40));}}},/* 自機のいる列か行をねらう */
   /* 機械の大蛇：画面をくねくね回る。体のあちこちから弾・頭から5方向 */
-  snake:{hp:1.2,r:34,init(e){e.trail=[];e.hd=Math.PI/2;e.segs=[];
+  snake:{hp:1,r:34,init(e){e.trail=[];e.hd=Math.PI/2;e.segs=[];
       for(let i=10;i>=0;i--){const s=addEnemy('seg',e.x,e.y-(i+1)*26);s.link=e;s.id=e.id;s.sp=i===10?ESPR.segt:null;if(i===10)s.r=14;e.segs[i]=s;}/* しっぽから先に描く */
       R.E.splice(R.E.indexOf(e),1);R.E.push(e);e.fire=2;e.q=4;},
     ai(e,dt,sf){const px=GW/2+Math.sin(R.t*0.55)*GW*0.36,py=e.y<GH*0.15?GH*0.4:GH*0.36+Math.sin(R.t*0.83+1)*GH*0.24;

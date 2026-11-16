@@ -68,7 +68,7 @@ BOT = r"""
 def worker(jobs):
     from playwright.sync_api import sync_playwright
     errs, out = [], []
-    pp = write_build(seed=True, dbg=bool(os.environ.get('DBG')))
+    pp = write_build(seed=True, dbg=bool(os.environ.get('DBG')), patch=json.loads(os.environ.get('PATCH', '[]')))
     with sync_playwright() as p:
         b = p.chromium.launch()
         pg = open_page(b, pp, 390, 844, errs)
@@ -108,6 +108,37 @@ def table(rows, ships, mode):
     return '\n'.join(L)
 
 
+def summary(rows, modes):
+    L = ['| ステージ | ' + ' | '.join('%s：クリア・平均の生きのびた時間' % ('はじめの装備' if m == 'start' else '強い装備') for m in modes) + ' |', '|---|' + '---|' * len(modes)]
+    for n in range(1, 6):
+        cells = []
+        for m in modes:
+            rs = [r for r in rows if r['n'] == n and r['mode'] == m]
+            if not rs:
+                cells.append('-'); continue
+            t = sum(r['t'] for r in rs) // len(rs)
+            cells.append('%d / %d（%d%%）・%d:%02d' % (sum(r['clear'] for r in rs), len(rs), round(100 * sum(r['clear'] for r in rs) / len(rs)), t // 60, t % 60))
+        L.append('| %d | %s |' % (n, ' | '.join(cells)))
+    return '\n'.join(L)
+
+
+def write_report(rows, ships, modes, seeds):
+    path = os.path.join(ROOT, 'docs', 'test-report-6.md')
+    T = ['# 試作6のボットの結果（issue #14）', '',
+         '- 日付：' + time.strftime('%Y-%m-%d'), '- 作り方：`python3 tools/test/bot14.py --write`（12機 × 5ステージ × 2つの装備 × %d回）' % seeds,
+         '- ボット：指の動きをまねる簡単な動き。この先0.7秒で近くを通る敵の弾・寄ってくる敵・レーザーの壁から離れ、何もなければ宝石と下の真ん中へ。レベルアップは進化 → 武器 → そのほか。HP はそのまま（へらない細工なし）',
+         '- はじめの装備：機体の装備＋はじめから持っているレーザー2つ（あいている場所に）',
+         '- 強い装備：あいている場所を強い武器（レーザー・ミサイル・ガトリング・雷撃・剣・シールド・機雷・プラズマ・ノコ・ビーム砲）でうめ、研究所の補強・火力・連射を最大',
+         '- ステージ5は最終ボスをたおすまで（9:00 で打ち切り）', '',
+         '## ステージごと', '', summary(rows, modes), '']
+    for m in modes:
+        T += ['## %s' % ('はじめの装備' if m == 'start' else '強い装備'), '',
+              '◯＝全部クリア・△＝一部・✕＝クリアなし。時間＝クリアできなかったときの平均の生きのびた時間。HP＝残りHP（平均）・体＝倒した数・G＝かせいだお金・Lv＝最後のレベル', '',
+              table(rows, ships, m), '']
+    open(path, 'w', encoding='utf-8').write('\n'.join(T))
+    print('書いた', path)
+
+
 def main():
     seeds = int(os.environ.get('SEEDS', '2'))
     jobsn = int(os.environ.get('JOBS', '2'))
@@ -132,6 +163,8 @@ def main():
     for m in modes:
         print('\n' + m); print(table(rows, ships, m))
     json.dump(rows, open(os.path.join(os.environ.get('OUT', '/tmp'), 'bot14.json'), 'w'), ensure_ascii=False)
+    if '--write' in sys.argv:
+        write_report(rows, ships, modes, seeds)
     bad = [r for r in rows if r['timeout'] or r['gold'] < 0]
     for r in bad:
         print('NG 終わらない・結果なし', r)

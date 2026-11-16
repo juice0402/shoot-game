@@ -19,8 +19,11 @@ SEED = ("<script>(()=>{let s=1;const r=()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imu
         "window.__seed=n=>{s=(n*2654435761)|0;Math.random=r;};})();</script>")
 
 
-def build(src=SRC, seed=False, dbg=False):
+def build(src=SRC, seed=False, dbg=False, patch=None):
     h = open(src, encoding='utf-8').read()
+    for a, b in (patch or []):  # ためしに数字を変える（バランスを見るとき）
+        assert h.count(a) == 1, a
+        h = h.replace(a, b)
 
     def rp(a, b):
         nonlocal h
@@ -36,10 +39,10 @@ def build(src=SRC, seed=False, dbg=False):
     return head + (SEED if seed else '') + h + '</body></html>'
 
 
-def write_build(src=SRC, seed=False, dbg=False):
+def write_build(src=SRC, seed=False, dbg=False, patch=None):
     tmp = tempfile.mkdtemp()
     pp = os.path.join(tmp, 't.html')
-    open(pp, 'w', encoding='utf-8').write(build(src, seed, dbg))
+    open(pp, 'w', encoding='utf-8').write(build(src, seed, dbg, patch))
     return pp
 
 
