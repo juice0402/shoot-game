@@ -424,6 +424,16 @@ def fx_check(b, errs, warns, pp):
       T.R.chestQ=1;T.openChest();await w(450);document.querySelector('#overlay .btnrow .go').click();await w(600);
       T.endRun(false,true);await w(100);return [n,gh,left,T.R?T.R.state:'none',document.querySelectorAll('#overlay .stats li.fxtile').length>0];}""")
     ok('fx：レベルアップ（カードが入る3枚・えらんだ1枚が光る・あとで写しは消える）・宝箱・結果の行もタイル', r[0] == 3 and r[1] == 1 and r[2] == 0 and r[4], r)
+    c = ev("""async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));const b=[...document.querySelectorAll('#overlay .stats li b')].map(e=>e.textContent);await w(1500);
+      const a=[...document.querySelectorAll('#overlay .stats li b')].map(e=>e.textContent);return [b.slice(1).some((t,i)=>t!==a[i+1]),a.slice(1).every(t=>/\\d/.test(t)),!!document.querySelector('#overlay li.total.fxpop')];}""")
+    ok('fx：結果の数字はかぞえ上がって、さいごは本当の数・合計がはずむ', c == [True, True, True], c)
+    s2 = ev("""async()=>{const T=window.__T,w=ms=>new Promise(r=>setTimeout(r,ms));document.getElementById('sortie').hidden=true;document.getElementById('overlay').hidden=true;document.getElementById('hangar').hidden=false;
+      T.save.gold=5000;T.openShop('gatling');await w(450);const g0=T.save.gold;document.querySelector('#sheet .buybig').click();await w(30);
+      const card=document.querySelector('#shopGrid [data-k="gatling"]'),gn=+document.getElementById('goldNum2').textContent,ghost=document.querySelectorAll('.sheetbg.fxclose').length;
+      await w(500);const gend=+document.getElementById('goldNum2').textContent;T.closeShop();await w(300);
+      document.getElementById('shipNext').click();await w(20);const sw=getComputedStyle(document.getElementById('editor')).animationName;
+      return [card&&card.classList.contains('fxbuy'),gn>gend,gend===T.save.gold,ghost,sw,document.querySelectorAll('.sheetbg.fxclose').length];}""")
+    ok('fx：買う（カードが光る・お金が前の数から動く）・板を閉じると写しが横へ出て消える・機体の切りかえは押した向きから', s2 == [True, True, True, 1, 'fxInR', 0], s2)
     pg.close()
 
 
