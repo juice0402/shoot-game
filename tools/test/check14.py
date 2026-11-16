@@ -144,9 +144,11 @@ def flow(pg, errs):
         pg.click('#howNext'); pg.wait_for_timeout(120); n += 1
     ok('出撃の準備（格納庫）', vis('#hangar'))
     pg.click('#slots .slotb.empty'); pg.wait_for_timeout(200)
-    ok('あいた場所をタップ → 装備の一覧（レーザーは全部つけている）', vis('#sheet .irow') and pg.locator('#sheet .irow:not([disabled])').count() == 0)
-    pg.click('#sheet .x'); pg.wait_for_timeout(200)
+    # #15：新しいセーブはレーザー1つ・場所は全部空き → はじめの案内のとおり一覧のレーザーをつける
+    ok('あいた場所をタップ → 装備の一覧（はじめはレーザー1つ）', vis('#sheet .irow') and pg.locator('#sheet .irow:not([disabled])').count() == 1)
+    pg.click('#sheet .irow:not([disabled])'); pg.wait_for_timeout(200)
     full = pg.locator('#slots .slotb.full').count()
+    ok('一覧のレーザーをつける', full == 1 and not vis('#sheetBg'), full)
     pg.click('#slots .slotb.full'); pg.wait_for_timeout(200)
     ok('つけた装備をタップ → 向き', vis('#sheet .dirs'), full)
     pg.locator('#sheet .dirs button').nth(2).click(); pg.wait_for_timeout(100)
@@ -261,7 +263,7 @@ def main():
             if r['state'] != 'over' or not r['clear']:
                 fails += 1; print('NG 全部最大で終わらない')
         # 出撃のとちゅうで閉じて開き直す
-        pg.evaluate("()=>{localStorage.clear();const T=window.__T;T.save=T.freshSave();T.save.howto=1;T.save.gold=777;T.persist();}")
+        pg.evaluate("()=>{localStorage.clear();const T=window.__T;T.save=T.freshSave();T.save.howto=1;T.save.gold=777;T.save.ships.standard.eq[0]={t:'laser',d:0};T.persist();}")  # #15：新しいセーブは装備なし → 機首にレーザー
         pg.reload(); pg.wait_for_timeout(400); pg.click('#startBtn'); pg.wait_for_timeout(200); pg.click('#launchBtn'); pg.wait_for_timeout(1500)
         pg.reload(); pg.wait_for_timeout(500)
         g = pg.evaluate("()=>window.__T.save.gold")

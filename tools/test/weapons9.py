@@ -76,6 +76,8 @@ def main():
         pg.on('console', lambda m: errs.append('console: ' + m.text) if m.type == 'error' and 'ERR_FAILED' not in m.text else None)
         pg.goto('file://' + page_path)
         pg.wait_for_timeout(500)
+        # #15：新しいセーブは装備なし（出撃できない）→ 機首にレーザーをつけてから
+        pg.evaluate("()=>{const T=window.__T;T.save.ships.standard.eq[0]={t:'laser',d:0};T.setShip('standard');}")
         res = {'text': pg.evaluate(TEXT)}
         # 音：30種の撃つ音を1回ずつ鳴らしてエラーが出ないか
         res['sfx'] = pg.evaluate("()=>{const T=window.__T;T.SFX.unlock();let n=0;for(const t of T.TYPES){const f=window.__SHOT[t];if(f){f();n++;}}return n;}")
