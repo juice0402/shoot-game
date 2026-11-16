@@ -198,7 +198,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .overlay>:first-child{margin-top:auto}
 .overlay>:last-child{margin-bottom:auto}
 .overlay h2{margin:0;text-align:center;font-weight:400;font-size:26px;letter-spacing:.08em}
-.overlay .sub{margin:0;text-align:center;color:var(--dim);font-size:13px}
+.overlay .sub{margin:0 auto;max-width:460px;text-align:center;color:var(--dim);font-size:13px}
 .overlay .sub.unl{color:var(--go);font-size:14px}
 /* エンディング（#13） */
 .endt{margin:0;text-align:center;font-family:var(--f-num);font-size:clamp(15px,5.2vw,24px);line-height:1.6;color:#fff2a8}
@@ -282,6 +282,34 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .gotl li{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;background:var(--panel);border:2px solid #6e5a1c;font-size:14px}
 .gotl li b{font-family:var(--f-num);font-weight:400;font-size:11px;color:var(--go);align-self:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* ---------- #14 の点検：せまい画面（幅320〜380）で、はみ出す・2行になる・最後の1字だけ下の行に行く、を直す ---------- */
+body{text-wrap:pretty}
+small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;word-break:auto-phrase}
+.ttl h1{white-space:nowrap}
+.top h1 small{display:none}
+.shead h2,.subrow button,.sitem span,.irow b,.sheet h3 span{white-space:nowrap}
+.stdesc{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.3}
+.howbox .hrow button:first-child{white-space:nowrap;padding:0 8px}
+#pauseBtn{position:relative;z-index:0;width:44px;height:44px;margin:-5px -1px;background:none;border:0}
+#pauseBtn::before{content:"";position:absolute;z-index:-1;inset:5px 1px;background:var(--panel);border:3px solid var(--edge)}
+@media (max-width:380px){
+  .top{gap:5px}
+  .gold{padding:0 6px;gap:4px}
+  .gold small{display:none}
+  .shopbtn,.labbtn{padding:0 7px;font-size:15px}
+  .subrow{gap:6px}
+  .subrow button{padding:0 5px;gap:3px}
+  .subrow #infoBtn{padding:0 8px}
+  .subrow img{width:16px;height:16px}
+  .shead h2{font-size:20px;letter-spacing:.04em}
+  .sitem span{font-size:14px}
+  .sheet h3{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;row-gap:0;align-items:center}
+  .sheet h3 small{grid-row:2;grid-column:1}
+  .sheet h3 .x{grid-row:1/3;grid-column:2}
+  .sheet h3 span{white-space:normal;text-wrap:balance;word-break:auto-phrase}
+}
+@media (max-width:340px){.subrow img{display:none}}
+#sortie .hud{width:100%;max-width:var(--cw,none);margin-inline:auto}
 </style>
 
 <section id="title" hidden>
@@ -395,6 +423,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 
 <script>
 (()=>{
+if(!document.documentElement.lang)document.documentElement.lang='ja';/* 日本語の改行（文節で折り返す）と字形（#14 の点検） */
 'use strict';
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -706,7 +735,7 @@ const STAGES=[
   {name:'星の海',desc:'青い星雲。はじめのステージ',hp:1,gold:300,big:[[150,'boss'],[270,'boss2']]},
   {name:'小惑星帯',desc:'流れてくる岩はこわすとお金になる',hp:1.4,gold:450,big:[[150,'gnaw'],[270,'gnaw2']]},
   {name:'氷の星雲',desc:'ときどき吹雪。敵も自機も遅くなる',hp:1.9,gold:600,big:[[150,'icebeast'],[270,'icequeen']]},
-  {name:'機械要塞',desc:'予告の線のあとにレーザーの壁',hp:2.5,gold:800,big:[[150,'fort'],[270,'snake']]},
+  {name:'機械要塞',desc:'予告の線のあとにレーザーの壁',hp:2.2,gold:800,big:[[150,'fort'],[270,'snake']]},
   {name:'深淵',desc:'最終ボスをたおすまで終わらない',hp:3.2,gold:1200,big:[[120,'prev1'],[210,'prev2'],[300,'core']],final:1},
 ];
 const stOpen=n=>n<=1||save.rec.stageMax>=n-1;
@@ -1485,12 +1514,19 @@ function bgObjs(n){const B=bgOf(n),o=[];
   if(B.obj==='eye')for(let i=0;i<6;i++)o.push({x:rand(20,GW-40),y:rand(-20,GH),v:rand(3,6),bl:rand(0,6),s:rand(0.5,1)});
   return o;}
 /* 絵は最初に1回だけ作ってキャッシュ（毎フレーム作らない） */
-const SHIPSPR={};SHIP_IDS.forEach(k=>{SHIPSPR[k]=makeShip(k);});
+/* 絵は使うときに作る（#14：起動を軽く）。lazyPut(o,k,fn,q)：o[k] を最初に読んだときに fn() で作る。
+   起動のあと、出撃していない間に少しずつ作っておく（warmLazy）。q='g'（敵・爆発などの大きい絵）は出撃の始めに残りを作る（flushLazy）ので、出撃中に作ることはない。q=1 は作っておかない */
+const LAZYQ=[],LAZYG=[];
+function lazyPut(o,k,fn,q){Object.defineProperty(o,k,{configurable:true,enumerable:true,get(){const v=fn();Object.defineProperty(o,k,{value:v,writable:true,configurable:true,enumerable:true});return v;}});
+  const f=()=>o[k];if(q!==1)LAZYQ.push(f);if(q==='g')LAZYG.push(f);}
+function flushLazy(){while(LAZYG.length)LAZYG.shift()();}
+function warmLazy(){if(R&&R.state!=='over')return setTimeout(warmLazy,500);const t0=performance.now();while(LAZYQ.length&&performance.now()-t0<6)LAZYQ.shift()();if(LAZYQ.length)setTimeout(warmLazy,24);}
+const SHIPSPR={};SHIP_IDS.forEach(k=>{lazyPut(SHIPSPR,k,()=>makeShip(k));});
 const shipSil=k=>{const s=SHIPSPR[k],c=document.createElement('canvas');c.width=s.w;c.height=s.h;const g=c.getContext('2d');g.drawImage(s.img,0,0);g.globalCompositeOperation='source-in';g.fillStyle='#1d2052';g.fillRect(0,0,s.w,s.h);return c;};
-const ESPR={};Object.keys(ENEMY_PARTS).forEach(k=>{const P=ENEMY_PARTS[k];ESPR[k]=paint(P.w,P.h,P.parts,{spec:P.spec,flash:1,ice:1});});
+const ESPR={};Object.keys(ENEMY_PARTS).forEach(k=>{const P=ENEMY_PARTS[k];lazyPut(ESPR,k,()=>paint(P.w,P.h,P.parts,{spec:P.spec,flash:1,ice:1}),'g');});
 /* 向きのある敵（#13）：角突き・盾持ち・大蛇の頭は8方向、砲台の砲身は16方向（0＝右・時計回り。もとの絵は下向き） */
 const rot8=(k,n)=>Array.from({length:n||8},(_,i)=>{const P=ENEMY_PARTS[k];return paint(P.w,P.h,P.parts,{spec:null,flash:1,ice:1,rot:i*TAU/(n||8)-Math.PI/2});});
-const CHG8=rot8('charger'),GRD8=rot8('guard'),SNK8=rot8('snake');
+const R8={};['charger','guard','snake'].forEach(k=>lazyPut(R8,k,()=>rot8(k),'g'));
 const dir8=a=>((Math.round(a/(Math.PI/4))%8)+8)%8,dir16=a=>((Math.round(a/(Math.PI/8))%16)+16)%16;
 const TBAR=Array.from({length:16},(_,i)=>paint(40,40,[{m:'erust',r:1.5,p:[[17,18],[22,18],[22,33],[17,33]]},{m:'ecrim',r:1,p:[[16,32],[23,32],[23,38],[16,38]]}],{flash:1,ice:1,rot:i*TAU/16-Math.PI/2}));
 const ROCKS=[11,15,21].map((r,i)=>[0,1].map(v=>paint(r*2+1,r*2+1,rockParts(r,7+i*3+v),{flash:1,ice:1})));
@@ -1528,8 +1564,8 @@ const SAWS=[9,12].map(r=>{const w=r*2+1,c=r;return [0,Math.PI/6].map(rot=>paint(
 ],{rot}));});
 const MISS=[];for(let i=0;i<16;i++)MISS.push(paint(7,13,MISC_PARTS.missile[2],{rot:i*Math.PI/8+Math.PI/2}));
 const MSPR={};
-TYPES.forEach(t=>{MSPR[t]=[];for(let d=0;d<8;d++){const s=paint(24,24,MODPARTS[t],{rot:d*Math.PI/4});s.url=s.img.toDataURL();MSPR[t].push(s);}});
-const ICON={};TYPES.forEach(t=>{ICON[t]=MSPR[t][0].url;});
+TYPES.forEach(t=>{MSPR[t]=[];for(let d=0;d<8;d++)lazyPut(MSPR[t],d,()=>{const s=paint(24,24,MODPARTS[t],{rot:d*Math.PI/4});lazyPut(s,'url',()=>s.img.toDataURL(),1);return s;});});
+const ICON={};TYPES.forEach(t=>{lazyPut(ICON,t,()=>MSPR[t][0].url);});
 /* 進化した武器の絵（同じ24×24。形を大きく・色を明るく） */
 const EVOPARTS={
   laser:[MB('blue'),{m:'steel',r:2.5,p:[[8,1],[15,1],[15,15],[8,15]]},{m:'glass',r:1,f:g=>{RC(g,4.5,3,2.5,10);RC(g,16.5,3,2.5,10);}},{m:'blue',r:1.5,p:[[6,10],[17,10],[17,13],[6,13]]},{m:'hull',r:1.5,p:[[9,-2],[14,-2],[14,3],[9,3]]}],
@@ -1548,7 +1584,7 @@ const EVOPARTS={
   plasma:[MB('gold'),{m:'metal',r:1,mir:1,p:[[3,15],[2,7],[4,4],[6,7],[5,15]]},{m:'yel',r:4,f:g=>E(g,11.5,7,6)},{m:'gold',r:1,f:g=>{for(let i=0;i<8;i++){const a=i*TAU/8;RC(g,11+Math.cos(a)*7.5,6.5+Math.sin(a)*7.5,1.5,1.5);}}},{m:'hull',r:1,f:g=>E(g,9.8,5.3,1.6)}],
 };
 const MSPRE={},ICONE={};
-for(const t in EVO){MSPRE[t]=[];for(let d=0;d<8;d++)MSPRE[t].push(paint(24,24,EVOPARTS[t],{rot:d*Math.PI/4}));ICONE[t]=MSPRE[t][0].img.toDataURL();}
+for(const t in EVO){MSPRE[t]=[];for(let d=0;d<8;d++)lazyPut(MSPRE[t],d,()=>paint(24,24,EVOPARTS[t],{rot:d*Math.PI/4}));lazyPut(ICONE,t,()=>MSPRE[t][0].img.toDataURL());}
 /* 試作6の武器が出す物（砲台・衛星・小さなミサイル・魚雷・グレネード・子爆弾・プラズマ球） */
 const TURRET=paint(13,13,[{m:'steel',r:2,p:[[1,3],[3,1],[9,1],[11,3],[11,9],[9,11],[3,11],[1,9]]},{m:'blue',r:2.5,f:g=>E(g,6,6,3.2)}],{});
 const SAT=paint(15,9,[{m:'blue',r:1,mir:1,p:[[0,2],[4,2],[4,6],[0,6]]},{m:'hull',r:2,f:g=>E(g,7,4,2.8)},{m:'glass',r:1,f:g=>E(g,7,4,1)}],{});
@@ -1642,7 +1678,7 @@ const GSAT=paint(13,13,[{m:'blue',r:1,f:g=>{RC(g,0,4,3,4);RC(g,10,4,3,4);}},{m:'
 const BSHIP=paint(64,20,[{m:'steel',r:2.5,p:[[0,10],[56,10],[63,12],[56,18],[6,18]]},{m:'hull',r:2,p:[[20,4],[34,4],[36,10],[18,10]]},{m:'metal',r:1,f:g=>{RC(g,26,0,3,4);RC(g,8,7,8,3);RC(g,40,7,8,3);RC(g,14,5,10,2);RC(g,46,5,10,2);}},{m:'glass',r:1,f:g=>RC(g,22,6,10,2)}],{spec:[[24,6]]});
 const CLOUD=paint(34,14,[{m:'steel',r:3,f:g=>{E(g,9,8,8,5);E(g,18,6,9,6);E(g,26,8,7,5);E(g,17,10,15,3.5);}}],{});
 const COINURL=MISC.coin.img.toDataURL();
-const EXPL={s:explFrames(40,3),m:explFrames(64,5),b:explFrames(180,7)};
+const EXPL={};[['s',40,3],['m',64,5],['b',180,7]].forEach(([k,s,n])=>lazyPut(EXPL,k,()=>explFrames(s,n),'g'));
 const HITF={w:hitFrames('#bfefff'),y:hitFrames('#ffd23f'),g:hitFrames('#5dffb0')};
 const NEB=nebulaTile(480,1024);
 const PLANETS=[planet(56,['#120c2a','#22184a','#3a2a6e','#5a4496','#8a74c4'],5,['#2a2048','#4a3c74','#7a6aa4'],4),
@@ -2239,6 +2275,7 @@ function fitCanvas(){
   const r=stage.getBoundingClientRect();
   scale=Math.max(0.5,Math.min(r.width/GW,(r.height-8)/GH));
   cv.style.width=Math.floor(GW*scale)+'px';cv.style.height=Math.floor(GH*scale)+'px';
+  sortie.style.setProperty('--cw',Math.floor(GW*scale)+'px');/* PC の幅：上の表示を画面（キャンバス）の幅にそろえる（#14） */
 }
 function setupCanvas(){
   const r=stage.getBoundingClientRect();
@@ -2292,6 +2329,7 @@ const isMelee=t=>t==='sword'||t==='saw'||!!MODS[t].melee;
 /* #12 狂戦士（近接＋60%・射撃−20%）・一点集中（いちばん高い武器＋40%・ほか−15%） */
 const wMul=t=>{const X=R.spc;let v=1;if(X.fury)v*=isMelee(t)?1.6:MODS[t].cat==='atk'?0.8:1;if(X.one&&R.cs.top&&!MODS[t].passive)v*=t===R.cs.top?1.4:0.85;return v;};
 const BOOM={mine:1,missile:1,grenade:1,cluster:1,torpedo:1,minefield:1,micro:1};
+let LKB=0;/* 弾が1発ずつ当てている間は1（大蛇の同じフレームの印を使わない） */
 let HSRC=0;/* いま当てているのが近接の武器なら1（倒した数を数える） */
 function stat(t){const s=stat0(t);if(s){const k=csk(t);if(k)applyCS(k,s);}return s;}
 function stat0(t){
@@ -2344,7 +2382,7 @@ function startRun(){
   calcCS();
   if(lab.r_lv>0){R.lv=1+lab.r_lv;R.need=xpNeed(R.lv);R.pending=lab.r_lv;}/* 先行訓練：はじめのレベル＋1（すぐにえらぶ） */
   if(lab.r_skill>0)R.gauge=SPG.max/2;/* 予備電池 */
-  prewarm();
+  flushLazy();prewarm();
   sdrag=null;keys.clear();hc={};last=performance.now();
   if(sh.carrier){R.sup.drone=1;}
   $('spbar').style.setProperty('--c',sh.c);
@@ -2372,8 +2410,8 @@ function addEnemy(kind,x,y){
     st:0,tm:0,fa:Math.PI/2,sp:null};
   if(kind!=='boss'&&!k.trap&&!k.part)R.seenE[kind]=1;/* 図鑑（大型の敵は絵が決まってから） */
   if(kind==='hider'){e.shell=1;e.sp=ESPR.hiderS;}
-  else if(kind==='charger')e.sp=CHG8[2];
-  else if(kind==='guard')e.sp=GRD8[2];
+  else if(kind==='charger')e.sp=R8.charger[2];
+  else if(kind==='guard')e.sp=R8.guard[2];
   else if(kind==='warp')e.tm=rand(1.2,2.2);
   else if(kind==='turret')e.fire=rand(1,2);
   if(k.part)e.part=1;
@@ -2424,7 +2462,7 @@ function addWall(v,pos){R.LZ.push({v,p:pos,t:0,on:0,hit:false,dead:false});SFX.p
 function randWall(other){const v=other?!R.LZ.length||!R.LZ[R.LZ.length-1].v:Math.random()<0.5,aim=Math.random()<0.4;
   addWall(v,v?(aim?clamp(R.x,40,GW-40):rand(50,GW-50)):(aim?clamp(R.y,GH*0.3,GH-40):rand(GH*0.3,GH*0.88)));}
 function walls(dt){for(const w of R.LZ){w.t+=dt;if(w.t>=LZW&&!w.on){w.on=1;SFX.play('lzfire');}
-  if(w.on&&!w.hit&&w.t<LZW+LZON&&R.state==='play'){const dd=w.v?Math.abs(R.x-w.p):Math.abs(R.y-w.p);if(dd<LZH+6){w.hit=true;hurt(16);}}
+  if(w.on&&!w.hit&&w.t<LZW+LZON&&R.state==='play'){const dd=w.v?Math.abs(R.x-w.p):Math.abs(R.y-w.p);if(dd<LZH+2){w.hit=true;hurt(16);}}
   if(w.t>LZW+LZON+0.15)w.dead=true;}}
 const ROCKR=[11,15,21];
 function addRock(x,y,sz,a,spd){const e=addEnemy('rock',x,y);e.sz=sz;e.r=ROCKR[sz]*0.85;e.hp*=[1,2,3.4][sz];e.max=e.hp;e.dmg=[10,14,20][sz];
@@ -2464,6 +2502,7 @@ function showBanner(t,c){banner.textContent=t;banner.style.borderColor=c||'';ban
 function hit(e,amt,kx,ky){
   if(e.dead||e.hide)return;/* まぼろしが消えている間は当たらない */
   if(e.link){e.flash=0.07;e=e.link;if(e.dead)return;}/* 大蛇の体：頭の体力がへる */
+  if(e.segs&&!LKB){if(e.lkT===R.t&&e.lkA===amt)return;e.lkT=R.t;e.lkA=amt;}/* 大蛇：同じフレームの同じ攻撃（ビーム・範囲）は1回だけ。体は頭と同じ id なので、当たり済みの印も1つ（#13 の点検） */
   amt*=1+e.vul+(e.son>0?e.sonV:0);/* ニードル砲の「もろさ」・音波砲 */
   if(e.shell)amt*=0.3;/* 岩やどり：岩をかぶっている間は30% */
   if(e.kind==='guard'){const kl=Math.hypot(kx,ky);if(kl>1e-3&&(kx*Math.cos(e.fa)+ky*Math.sin(e.fa))/kl<-0.35){amt*=0.3;/* 盾持ち：前からは30% */
@@ -2513,6 +2552,7 @@ function hurt(d){
   if(R.hp<=0&&R.revLeft>0){R.revLeft--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('復活装置で HP50% にもどった');}
   if(R.hp<=0&&R.labRev>0){R.labRev--;R.hp=Math.round(R.maxHp*0.5);R.inv=2;R.hurtFx=0;reviveFx();showBanner('予備の機体で HP50% にもどった');}/* 研究所 */
   if(R.hp>0&&R.hp<R.maxHp*0.3&&R.ebLeft>0&&R.ebT<=0){R.ebLeft--;R.ebT=3;R.inv=Math.max(R.inv,3);SFX.play('ebar');}/* 緊急バリア */
+  return true;/* 当たった（霜の弾の遅さに使う） */
 }
 function gainXp(v){R.xp+=v*(1+0.1*R.pas.xp)*R.cs.xp*(R.sh.xp||1);while(R.xp>=R.need){R.xp-=R.need;R.lv++;R.need=xpNeed(R.lv);R.pending++;}}
 
@@ -2576,7 +2616,7 @@ const AI={
   /* 角突き：下りる → 0.75秒止まってねらう（さいごの0.25秒は向きを変えない）→ まっすぐ突進 */
   charger(e,dt,sf,dx,dy,d){
     if(e.st===2){TX=e.ax*e.spd*7;TY=e.ay*e.spd*7;}
-    else if(e.st===1){if(e.tm>0.25){e.ax=dx/d;e.ay=dy/d;e.sp=CHG8[dir8(Math.atan2(dy,dx))];}e.tm-=dt*sf;if(e.tm<=0){e.st=2;SFX.play('dash');}}
+    else if(e.st===1){if(e.tm>0.25){e.ax=dx/d;e.ay=dy/d;e.sp=R8.charger[dir8(Math.atan2(dy,dx))];}e.tm-=dt*sf;if(e.tm<=0){e.st=2;SFX.play('dash');}}
     else{TX=dx/d*e.spd*0.3;TY=e.spd*1.5;if(e.y>=e.stopY){e.st=1;e.tm=0.75;}}},
   /* 霜の撃ち手：撃ち手と同じ動きで、遅くなる弾（2:30 から3つ） */
   frost(e,dt,sf){if(e.y<e.stopY)TY=e.spd*1.6;else{TX=Math.sin(R.t*1.1+e.id)*30*U;TY=6*U;}
@@ -2588,7 +2628,7 @@ const AI={
     e.fire-=dt*sf;if(e.fire<=0&&e.y>10&&e.y<GH-40){e.fire=2.8;e.bn=3;e.bt2=0;}
     if(e.bn>0){e.bt2-=dt*sf;if(e.bt2<=0){e.bn--;e.bt2=0.14;if(!ebFull())ebAt(e.x+Math.cos(e.fa)*18,e.y+Math.sin(e.fa)*18,e.fa,88);}}},
   /* 盾持ち：ゆっくり近づき、盾を自機に向ける */
-  guard(e,dt,sf,dx,dy,d){TX=dx/d*e.spd*0.7;TY=dy/d*e.spd*0.7+e.spd*0.25;e.fa+=clamp(angDiff(Math.atan2(dy,dx),e.fa),-1.4*dt*sf,1.4*dt*sf);e.sp=GRD8[dir8(e.fa)];},
+  guard(e,dt,sf,dx,dy,d){TX=dx/d*e.spd*0.7;TY=dy/d*e.spd*0.7+e.spd*0.25;e.fa+=clamp(angDiff(Math.atan2(dy,dx),e.fa),-1.4*dt*sf,1.4*dt*sf);e.sp=R8.guard[dir8(e.fa)];},
   /* まぼろし：近づく → ゆらぐ（0.4秒）→ 消える（0.6秒・出る所に印）→ あらわれて3発 */
   warp(e,dt,sf,dx,dy,d){e.tm-=dt*sf;
     if(e.st===0){TX=dx/d*e.spd*0.6;TY=dy/d*e.spd*0.6;if(e.tm<=0){e.st=1;e.tm=0.4;}}
@@ -2632,18 +2672,18 @@ const BIG={
       else if(e.st===3){fanAt(e.x,e.y+30,5,0.2,92,true,true);for(let i=0;i<3;i++)addEnemy('shard',e.x+(i-1)*50,e.y+40);e.tm=1.4;}
       else e.tm=0.8;}}},
   /* 要塞砲台：左右の砲から3連・まん中の砲から7方向・9秒ごとにレーザーの壁 */
-  fort:{hp:1.15,r:58,init(e){e.lz=6;e.side=1.2;e.bn=0;},ai(e,dt,sf){TX=Math.sin(R.t*0.5)*e.spd*0.9;TY=(GH*0.16-e.y)*0.8;
+  fort:{hp:1,r:58,init(e){e.lz=6;e.side=1.2;e.bn=0;},ai(e,dt,sf){TX=Math.sin(R.t*0.5)*e.spd*0.9;TY=(GH*0.16-e.y)*0.8;
     e.fire-=dt*sf;e.side-=dt*sf;e.lz-=dt*sf;
     if(e.side<=0){e.side=2.1;e.bn=3;e.bt2=0;e.sx=(e.sx||1)*-1;}
     if(e.bn>0){e.bt2-=dt*sf;if(e.bt2<=0){e.bn--;e.bt2=0.15;const x=e.x+e.sx*47,y=e.y+54;ebAt(x,y,aimA(x,y),95,false);}}
     if(e.fire<=0){e.fire=4.2;fanAt(e.x,e.y+60,7,0.2,80,true);}
     if(e.lz<=0&&e.y>0){e.lz=9;const v=Math.random()<0.5;addWall(v,v?clamp(R.x,40,GW-40):clamp(R.y,GH*0.35,GH-40));}}},/* 自機のいる列か行をねらう */
   /* 機械の大蛇：画面をくねくね回る。体のあちこちから弾・頭から5方向 */
-  snake:{hp:1.2,r:34,init(e){e.trail=[];e.hd=Math.PI/2;e.segs=[];
-      for(let i=10;i>=0;i--){const s=addEnemy('seg',e.x,e.y-(i+1)*26);s.link=e;s.sp=i===10?ESPR.segt:null;if(i===10)s.r=14;e.segs[i]=s;}/* しっぽから先に描く */
+  snake:{hp:1,r:34,init(e){e.trail=[];e.hd=Math.PI/2;e.segs=[];
+      for(let i=10;i>=0;i--){const s=addEnemy('seg',e.x,e.y-(i+1)*26);s.link=e;s.id=e.id;s.sp=i===10?ESPR.segt:null;if(i===10)s.r=14;e.segs[i]=s;}/* しっぽから先に描く */
       R.E.splice(R.E.indexOf(e),1);R.E.push(e);e.fire=2;e.q=4;},
     ai(e,dt,sf){const px=GW/2+Math.sin(R.t*0.55)*GW*0.36,py=e.y<GH*0.15?GH*0.4:GH*0.36+Math.sin(R.t*0.83+1)*GH*0.24;
-      e.hd+=clamp(angDiff(Math.atan2(py-e.y,px-e.x),e.hd),-1.8*dt*sf,1.8*dt*sf);const v=e.spd*3;TX=Math.cos(e.hd)*v;TY=Math.sin(e.hd)*v;e.sp=SNK8[dir8(e.hd)];
+      e.hd+=clamp(angDiff(Math.atan2(py-e.y,px-e.x),e.hd),-1.8*dt*sf,1.8*dt*sf);const v=e.spd*3;TX=Math.cos(e.hd)*v;TY=Math.sin(e.hd)*v;e.sp=R8.snake[dir8(e.hd)];
       e.fire-=dt*sf;e.q-=dt*sf;
       if(e.fire<=0){e.fire=2.4;for(let i=0;i<3;i++){const s=e.segs[(Math.random()*e.segs.length)|0];if(s.y>0&&s.y<GH)ebAt(s.x,s.y,aimA(s.x,s.y),80,false);}}
       if(e.q<=0){e.q=5.5;fanAt(e.x+Math.cos(e.hd)*30,e.y+Math.sin(e.hd)*30,5,0.22,95,true);}}},
@@ -2667,7 +2707,7 @@ function separate(){
       if(d2>0.0001&&d2<md*md){const d=Math.sqrt(d2),p=(md-d)*0.35;e.x+=dx/d*p;e.y+=dy/d*p;}});}
 }
 const modPos=m=>[R.x+SLOTS[m.slot].x+(m.cx||0),R.y+SLOTS[m.slot].y+(m.cy||0)];/* cx・cy＝ファントムの分身のずれ */
-function nearest(x,y,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=e;}}return best;}
+function nearest(x,y,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.hide||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=e;}}return best;}
 /* bullet kinds: 0 laser, 1 ally, 2 flame, 3 freeze, 4 reflected, 5 gatling, 6 pellet */
 function mkB(x,y,vx,vy,dmg,pierce,k,extra){const b={x,y,vx,vy,dmg,pierce:pierce||0,hits:pierce>0?new Set():null,k:k||0,dead:false};return extra?Object.assign(b,extra):b;}
 function jag(pts){
@@ -2697,11 +2737,11 @@ const FIRE={
     R.W.push({m,x:ox,y:oy,ux:Math.cos(a),uy:Math.sin(a),t:0,v0:st.v0,r:st.r,big:st.big,dmg:st.dmg,hits:new Map(),dead:false});}},
   thunder(m,st,ox,oy,ux,uy){
     const base=Math.atan2(uy,ux);let best=null,bd=st.range*st.range;
-    for(const e of R.E){if(e.dead||e.y<-4)continue;const dx=e.x-ox,dy=e.y-oy,d=dx*dx+dy*dy;if(d>=bd)continue;if(Math.abs(angDiff(Math.atan2(dy,dx),base))>1.15)continue;bd=d;best=e;}
+    for(const e of R.E){if(e.dead||e.hide||e.y<-4)continue;const dx=e.x-ox,dy=e.y-oy,d=dx*dx+dy*dy;if(d>=bd)continue;if(Math.abs(angDiff(Math.atan2(dy,dx),base))>1.15)continue;bd=d;best=e;}
     if(!best)return false;
     const chain=[best],pts=[[ox,oy],[best.x,best.y]];let cur=best;
     for(let i=0;i<st.chain;i++){let nx=null,nd=108*108;
-      for(const e of R.E){if(e.dead||chain.includes(e))continue;const dx=e.x-cur.x,dy=e.y-cur.y,d=dx*dx+dy*dy;if(d<nd){nd=d;nx=e;}}
+      for(const e of R.E){if(e.dead||e.hide||chain.includes(e))continue;const dx=e.x-cur.x,dy=e.y-cur.y,d=dx*dx+dy*dy;if(d<nd){nd=d;nx=e;}}
       if(!nx)break;chain.push(nx);pts.push([nx.x,nx.y]);cur=nx;}
     chain.forEach(e=>hit(e,st.dmg,0,0));
     R.Z.push({poly:jag(pts),t:0,dead:false});
@@ -2768,15 +2808,15 @@ const STAT6={
   fshield:lv=>({hp:lv>=8?16:lv>=5?12:lv>=3?10:8,R:lv>=4?58:52,half:(lv>=7?80:lv>=2?66:56)*Math.PI/180,regen:lv>=6?4:6,l8:lv>=8}),
 };
 /* 画面の上で、敵の体力が多い順に n 体 */
-function toughest(n){const out=[];for(const e of R.E){if(e.dead||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;
+function toughest(n){const out=[];for(const e of R.E){if(e.dead||e.hide||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;
   let i=out.length;while(i>0&&out[i-1].hp<e.hp)i--;if(i<n){out.splice(i,0,e);if(out.length>n)out.pop();}}return out;}
 /* 近い順に n 体（マイクロミサイルの的を分ける） */
-function closest(x,y,n,maxD){const a=[];for(const e of R.E){if(e.dead||e.y<-6)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<maxD*maxD)a.push([d,e]);}
+function closest(x,y,n,maxD){const a=[];for(const e of R.E){if(e.dead||e.hide||e.y<-6)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<maxD*maxD)a.push([d,e]);}
   a.sort((p,q)=>p[0]-q[0]);return a.slice(0,n).map(p=>p[1]);}
 /* 向いた方（前 ±0.6）でいちばん近い敵：グレネードとクラスターの落ちる所 */
-function ahead(x,y,a,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;
+function ahead(x,y,a,maxD){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.hide||e.y<-6)continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;
   if(d<bd&&Math.abs(angDiff(Math.atan2(dy,dx),a))<0.6){bd=d;best=e;}}return best;}
-function nearestEx(x,y,maxD,skip){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.y<-6||skip.has(e.id))continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<bd){bd=d;best=e;}}return best;}
+function nearestEx(x,y,maxD,skip){let best=null,bd=maxD*maxD;for(const e of R.E){if(e.dead||e.hide||e.y<-6||skip.has(e.id))continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<bd){bd=d;best=e;}}return best;}
 const capPush=(arr,o,cap)=>{if(arr.length>=cap)arr.shift();arr.push(o);};
 function addPD(k,x,y,o){capPush(R.PD,{k:o.k||k,x,y,r:o.r,life:o.life,t:0,dmg:o.tick!=null?o.tick:o.dmg,tk:rand(0,0.12),dead:false},CAP.PD);}
 const ring6=(o)=>{o.hits=new Set();o.dead=false;capPush(R.RG,o,CAP.RG);};
@@ -3003,7 +3043,7 @@ const EFIRE={
     R.S.push({m,k:'st',t:-0.24,dur:st.dur,a,rev:true,sweep:st.sweep,range:st.range,dmg:st.dmg,hits:new Set(),done:false,dead:false});},
   saw(){return false;},
   flame(m,st,ox,oy,ux,uy){return FIRE.flame(m,st,ox,oy,ux,uy);},
-  thunder(m,st){let first=null,bd=1e12;for(const e of R.E){if(e.dead||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;const d=(e.x-R.x)**2+(e.y-R.y)**2;if(d<bd){bd=d;first=e;}}
+  thunder(m,st){let first=null,bd=1e12;for(const e of R.E){if(e.dead||e.hide||e.y<0||e.y>GH||e.x<0||e.x>GW)continue;const d=(e.x-R.x)**2+(e.y-R.y)**2;if(d<bd){bd=d;first=e;}}
     if(!first)return false;const chain=[first],pts=[[first.x,-8],[first.x,first.y]];let cur=first;
     for(let i=0;i<st.chain;i++){let nx=null,nd=st.jump*st.jump;near(cur.x,cur.y,st.jump,e=>{if(chain.includes(e))return;const d=(e.x-cur.x)**2+(e.y-cur.y)**2;if(d<nd){nd=d;nx=e;}});
       if(!nx)break;chain.push(nx);pts.push([nx.x,nx.y]);cur=nx;}
@@ -3240,7 +3280,7 @@ function moveBullets(dt){
         if(b.last===e.id)return;
         const dx=e.x-b.x,dy=e.y-b.y,rr=e.r+(b.k===2||b.k===8?6:3);
         if(dx*dx+dy*dy<=rr*rr){
-          const kb=b.kb!=null?b.kb:0.12;hit(e,b.dmg,b.vx*kb,b.vy*kb);
+          const kb=b.kb!=null?b.kb:0.12;LKB=1;hit(e,b.dmg,b.vx*kb,b.vy*kb);LKB=0;
           if(b.slowT){e.slow=Math.max(e.slow,b.slowT);e.slowF=Math.min(e.slowF,b.slowF);}
           if(b.k!==2)spark(b.x,b.y,SPK[b.k]||'#ffffff',b.k===1?'g':b.k===6?'y':'w');
           if(b.k>=10&&onHit6(b,e))return true;
@@ -3504,7 +3544,7 @@ function support(dt){
   if(rg>0)R.hp=Math.min(R.maxHp,R.hp+rg*dt);
 }
 /* ---------- #12 新しい支援8種（数字は SUP の v・威力は dmgMul がかかる）・回復の玉・宝箱 ---------- */
-function randOn(skip,minY){for(let k=0;k<12&&R.E.length;k++){const c=R.E[(Math.random()*R.E.length)|0];if(!c.dead&&onScr(c)&&c.y>(minY||12)&&!(skip&&skip.has(c.id)))return c;}return null;}
+function randOn(skip,minY){for(let k=0;k<12&&R.E.length;k++){const c=R.E[(Math.random()*R.E.length)|0];if(!c.dead&&!c.hide&&onScr(c)&&c.y>(minY||12)&&!(skip&&skip.has(c.id)))return c;}return null;}
 function sup12(dt){
   const S=R.sup,mul=dmgMul();
   if(S.thunder>0){R.thT-=dt;if(R.thT<=0){R.thT=SV('thunder','cd');const n=SV('thunder','n'),d=SV('thunder','d')*mul,used=new Set();
@@ -3578,7 +3618,7 @@ function moveEB(dt){
   const ek=R.tstop>0?0:dt*R.cs.eSpd*(1-0.25*(R.snow||0));/* 時間停止・時の加速（#12）・吹雪（#13） */
   for(const b of R.EB){if(b.dead)continue;b.x+=b.vx*ek;b.y+=b.vy*ek;
     if(b.x<-18||b.x>GW+18||b.y<-18||b.y>GH+18){b.dead=true;continue;}
-    const dx=b.x-R.x,dy=b.y-R.y,d2=dx*dx+dy*dy;if(d2<=56){b.dead=true;if(b.slow&&R.inv<=0&&R.spInv<=0)R.chill=2.2;hurt(b.dmg);}
+    const dx=b.x-R.x,dy=b.y-R.y,d2=dx*dx+dy*dy;if(d2<=56){b.dead=true;if(hurt(b.dmg)&&b.slow)R.chill=2.2;}/* 霜の弾：当たったときだけ遅くなる（#13 の点検） */
     else if(R.sh.graze&&!b.gz&&d2<=24*24&&R.ghost<=0){b.gz=1;gaugeAdd(SPG.graze);addPart(b.x,b.y,-dx*2,-dy*2,0.25,'#ffc8ff',2);}}/* かすり：弾のすぐ近くを通るとゲージ */
 }
 function contact(){
@@ -3955,6 +3995,7 @@ function endRun(clear,retreat){
   for(const k in R.seenE)if(BOOK_E.some(b=>b.k===k))save.book.e[k]=(save.book.e[k]||0)+(R.kE[k]||0);
   rc.time+=Math.floor(R.t);
   const opened=clear&&R.stage<STAGES.length&&rc.stageMax<R.stage;/* 次のステージが解放された */
+  const firstEnd=clear&&S.final&&rc.stageMax<R.stage;/* エンディングは、はじめてステージ5をクリアした回だけ（#13 の点検） */
   if(clear)rc.stageMax=Math.max(rc.stageMax,R.stage);/* ステージ5をクリアするとオメガの条件・実績「深淵の先へ」 */
   if(opened)save.st=R.stage+1;
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
@@ -3985,7 +4026,7 @@ function endRun(clear,retreat){
   btns.append(back,shop);
   overlay.append(ul);if(gotl)overlay.appendChild(gotl);overlay.append(btns);overlay.hidden=false;
   };
-  if(clear&&S.final)ending(result);else result();
+  if(firstEnd)ending(result);else result();
 }
 /* エンディング（#13）：ステージ5のクリア。スタッフの代わりに「Thanks for playing」と、これまでの記録 → 結果へ */
 function ending(next){
@@ -4034,7 +4075,8 @@ function titleBg(){
   const r=titleEl.getBoundingClientRect(),h=clamp(Math.round(GW*Math.max(1,r.height)/Math.max(1,r.width)),660,1200);
   tCv.width=GW;tCv.height=h;tg.imageSmoothingEnabled=false;
   const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,h),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
-  TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0};
+  const k=Math.max(r.width/GW,r.height/h)||1,vh=Math.min(h,r.height/k);/* 横長の画面（PC）は上下が切れる：見えている所の中に機体を置く（#14） */
+  TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0,sy:(h-vh)/2+vh*(vh<h*0.8?0.5:0.66),sa:vh<h*0.8?8:14};
 }
 function titleFrame(ts){
   if(titleEl.hidden){tRaf=0;return;}
@@ -4043,7 +4085,7 @@ function titleFrame(ts){
   const S=TS,g=tg,h=S.h;S.t+=dt;
   for(const s of S.stars){s.y+=STAR_SP[s.l]*dt*1.6;if(s.y>h){s.y-=h;s.x=rand(0,GW);}}
   S.neb=(S.neb+12*dt)%NEB.height;S.pl.y+=9*dt;if(S.pl.y>h+10){S.pl.i=(S.pl.i+1)%PLANETS.length;S.pl.y=-PLANETS[S.pl.i].height-40;S.pl.x=rand(0,GW-PLANETS[S.pl.i].width);}
-  const px=Math.round(GW/2+Math.sin(S.t*0.9)*70),py=Math.round(h*0.66+Math.sin(S.t*1.7)*14);
+  const px=Math.round(GW/2+Math.sin(S.t*0.9)*70),py=Math.round(S.sy+Math.sin(S.t*1.7)*S.sa);
   S.cd-=dt;if(S.cd<=0){S.cd=0.16;S.shots.push({x:px-14,y:py-20},{x:px+14,y:py-20});}
   for(const b of S.shots)b.y-=600*dt;S.shots=S.shots.filter(b=>b.y>-20);
   const keep=R;R={t:S.t,neb:S.neb,pl:S.pl,stars:S.stars};
@@ -4108,5 +4150,6 @@ document.addEventListener('click',e=>{SFX.unlock();const b=e.target.closest&&e.t
 
 document.querySelectorAll('.gname').forEach(e=>{e.textContent=GAME_NAME;});
 layoutEditor();renderAll();showTitle();
+setTimeout(warmLazy,300);/* 残りの絵は、出撃していない間に少しずつ作る（#14） */
 })();
 </script>
