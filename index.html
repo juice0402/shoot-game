@@ -34,7 +34,9 @@ button:disabled{cursor:not-allowed}
 .logo small{display:block;margin-top:14px;font-family:var(--f-ui);font-size:15px;letter-spacing:.12em;color:#cfeaff;text-shadow:0 2px 0 #060a1c}
 .tbtns{display:flex;flex-direction:column;gap:10px}
 .tbtns .hrow button{flex:1}
-.btn3.sq{width:44px;min-height:44px;padding:0;flex:none}
+.btn3.sq{width:44px;min-height:44px;padding:0;flex:none;display:grid;place-items:center}
+/* ◀ ▶ ✕ と向きの矢印（#16）：文字の記号ではなく、点で描いた小さな絵（pixIcon） */
+.pix{display:block;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
 .howbg{position:fixed;inset:0;z-index:70;background:rgba(5,6,15,.82);display:flex;align-items:center;justify-content:center;padding:16px}
 .howbox{width:100%;max-width:400px;background:var(--panel);border:3px solid var(--go);padding:14px;display:flex;flex-direction:column;gap:12px}
 .howcard{display:flex;flex-direction:column;gap:8px;text-align:center}
@@ -60,22 +62,20 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .gold b{font-size:14px;font-weight:400}
 .gold small{color:var(--dim);font-size:14px}
 .shopbtn{position:relative;flex:none;height:44px;padding:0 14px;background:var(--panel);border:3px solid var(--go);color:var(--go);font-size:16px}
-.badge{position:absolute;top:-7px;right:-7px;width:14px;height:14px;background:var(--hurt);border:2px solid var(--void);border-radius:50%}
 .bay{flex:1;min-height:250px;position:relative;background:var(--deep);border:3px solid var(--edge);overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 #editor{position:absolute;inset:0;width:100%;height:100%;display:block}
 .shipcap{position:absolute;left:52px;right:52px;top:6px;margin:0;text-align:center;pointer-events:none;line-height:1.3}
 .shipcap b{display:block;font-size:20px;font-weight:400;letter-spacing:.06em}
 .shipcap small{display:block;font-size:14px;color:var(--dim)}
-.navb{position:absolute;top:50%;z-index:3;width:44px;height:72px;margin-top:-36px;background:rgba(20,22,58,.88);border:3px solid var(--edge);font-size:18px}
+.navb{position:absolute;top:50%;z-index:3;width:44px;height:72px;margin-top:-36px;background:rgba(20,22,58,.88);border:3px solid var(--edge);display:grid;place-items:center;padding:0}
 #shipPrev{left:4px}#shipNext{right:4px}
 .dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:8px;pointer-events:none}
 .dots i{width:9px;height:9px;background:var(--edge)}
 .dots i.on{background:var(--ink)}
 .slots{position:absolute;inset:0;z-index:2;pointer-events:none}
 .slotb{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:transparent;border:0;pointer-events:auto;padding:0}
-.slotb.empty{border:3px dashed #8fd0ff;background:rgba(10,30,70,.55);color:#cfeaff;font-size:24px;line-height:1;animation:plus 1.2s ease-in-out infinite}
+.slotb.empty{border:3px dashed #8fd0ff;background:rgba(10,30,70,.55);color:#cfeaff;font-size:24px;line-height:1}
 .slotb.full:active{background:rgba(255,255,255,.15)}
-@keyframes plus{50%{box-shadow:0 0 0 4px rgba(90,170,255,.35),0 0 16px 4px rgba(90,170,255,.55);border-color:#ffffff}}
 .lockbox{position:absolute;left:52px;right:52px;bottom:26px;z-index:3;background:var(--scrim);border:3px solid var(--edge);padding:8px 10px;text-align:center;font-size:14px;line-height:1.4}
 .lockbox p{margin:0}
 .prog{height:12px;background:var(--panel);border:2px solid var(--edge);margin:6px 0}
@@ -91,14 +91,12 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .sfinger{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:-8px;pointer-events:none}
 .sfinger img{width:32px;height:40px;image-rendering:pixelated;filter:drop-shadow(0 2px 0 #000)}
 .lfinger b,.sfinger b{font-weight:400;font-size:14px;background:var(--go);color:var(--go-ink);padding:2px 8px;white-space:nowrap}
-.irow.tut{border-top-color:var(--go);border-right-color:var(--go);border-bottom-color:var(--go)}
+.irow.tut{border-color:var(--go)}
 .toast{position:absolute;left:8px;right:8px;bottom:26px;z-index:5;margin:0 auto;width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--scrim);border:2px solid var(--go);color:var(--go);font-size:14px;text-align:center;pointer-events:none}
 .hrow{display:flex;gap:8px}
-/* ステージのえらび方（#13）：出撃の上に1行。左右の矢印は線で描く */
+/* ステージのえらび方（#13）：出撃の上に1行。左右の矢印は点の絵（#16） */
 .stsel{display:flex;align-items:center;gap:6px;min-height:58px;padding:4px;background:var(--panel);border:3px solid var(--edge)}
 .stnav{flex:none;width:44px;height:44px;padding:0;display:grid;place-items:center;background:var(--panel-2);border:3px solid var(--edge)}
-.stnav::before{content:"";width:10px;height:10px;border-left:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:translateX(2px) rotate(45deg)}
-.stnav.next::before{transform:translateX(-2px) rotate(-135deg)}
 .stnav:disabled{opacity:.3}
 .stinfo{flex:1;min-width:0;text-align:center;line-height:1.3}
 .stname{margin:0;display:flex;align-items:baseline;justify-content:center;gap:8px}
@@ -115,14 +113,13 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 /* 下から出る板（装備の一覧・向き・くわしく・ショップのくわしく） */
 .sheetbg{position:fixed;inset:0;z-index:60;background:rgba(5,6,15,.62);display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:460px;max-height:82%;overflow-y:auto;overscroll-behavior:contain;background:var(--panel);border:3px solid var(--c,var(--edge));border-bottom:0;
-  padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:up .16s ease-out}
-@keyframes up{from{transform:translateY(40px);opacity:.4}}
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
 .sheet h3{margin:0;font-weight:400;font-size:18px;display:flex;align-items:center;gap:8px;min-height:44px}
 .sheet h3 small{font-size:14px;color:var(--dim)}
-.sheet .x{margin-left:auto;flex:none;width:44px;height:44px;background:var(--panel-2);border:3px solid var(--edge);font-size:18px}
+.sheet .x{margin-left:auto;flex:none;width:44px;height:44px;padding:0;background:var(--panel-2);border:3px solid var(--edge);display:grid;place-items:center}
 .sheet p{margin:0;font-size:14px;line-height:1.5}
 .sheet .dim{color:var(--dim)}
-.irow{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;min-height:62px;padding:6px 10px;background:var(--panel-2);border:3px solid var(--edge);border-left:8px solid var(--c);text-align:left;width:100%}
+.irow{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;min-height:62px;padding:6px 10px;background:var(--panel-2);border:3px solid var(--edge);text-align:left;width:100%}
 .irow img{width:48px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges}
 .irow b{display:block;font-size:16px;font-weight:400;line-height:1.3}
 .irow small{display:block;font-size:14px;color:var(--dim);line-height:1.35}
@@ -130,8 +127,8 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .irow:disabled{opacity:.45}
 .irow.now{border-color:var(--go)}
 .dirs{display:grid;grid-template-columns:repeat(3,68px);grid-auto-rows:68px;gap:8px;justify-content:center}
-.dirs button{font-size:28px;background:var(--panel-2);border:3px solid var(--edge)}
-.dirs button[aria-pressed="true"]{border-color:var(--go);color:var(--go);background:#2a2a5a}
+.dirs button{padding:0;display:grid;place-items:center;background:var(--panel-2);border:3px solid var(--edge)}
+.dirs button[aria-pressed="true"]{border-color:var(--go);background:#2a2a5a}
 .dirs .mid{display:grid;place-items:center;background:var(--deep);border:3px solid var(--edge)}
 .dirs .mid img{width:56px;height:56px;image-rendering:pixelated;image-rendering:crisp-edges}
 .sbtns{display:flex;gap:8px}
@@ -166,7 +163,6 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .soonn{grid-column:1/-1;margin:0;text-align:center;font-size:14px;color:var(--dim)}
 .dbgrow{display:flex;flex-wrap:wrap;gap:6px}
 .dbgrow .linkbtn{flex:1 1 200px;width:auto}
-.sitem.can::after{content:"";position:absolute;top:6px;left:6px;width:10px;height:10px;background:var(--go);border-radius:50%}
 .dtop{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
 .dtop img{width:76px;height:76px;image-rendering:pixelated;image-rendering:crisp-edges;object-fit:contain;background:var(--deep);border:3px solid var(--c)}
 .dtop b{font-weight:400;font-size:19px;line-height:1.3}
@@ -234,9 +230,8 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .pips{display:flex;align-items:center;gap:3px}
 .pips i{width:12px;height:6px;background:var(--edge)}
 .pips i.on{background:var(--c)}
-.pips i.nx{background:#ffffff;animation:pip .8s steps(2) infinite}
+.pips i.nx{background:#ffffff}
 .pips small{font-family:var(--f-num);font-size:8px;color:var(--dim);margin-left:6px}
-@keyframes pip{50%{background:var(--c)}}
 .card .d{font-size:13px;color:var(--dim);line-height:1.4}
 .card.evo{border-width:4px;background:#1c1838}
 .card .d2{font-size:12px;color:var(--ink);line-height:1.3}
@@ -348,10 +343,10 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
 
 <main id="hangar" hidden>
   <header class="top">
-    <button id="toTitle" class="btn3 sq" type="button" aria-label="タイトルへ">◀</button>
+    <button id="toTitle" class="btn3 sq" type="button" aria-label="タイトルへ"></button>
     <div class="ttl"><h1>格納庫<small>試作6</small></h1></div>
     <div class="gold" aria-label="持っているお金"><img class="coin" alt=""><b id="goldNum" class="num">0</b><small>G</small></div>
-    <button id="shopBtn" class="shopbtn" type="button">ショップ<span id="shopDot" class="badge" hidden></span></button>
+    <button id="shopBtn" class="shopbtn" type="button">ショップ</button>
     <button id="labBtn" class="labbtn" type="button">研究所</button>
   </header>
 
@@ -359,10 +354,10 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
     <canvas id="editor" aria-hidden="true"></canvas>
     <p class="shipcap"><b id="shipName">スタンダード</b><small id="shipSkill"></small></p>
     <div class="slots" id="slots"></div>
-    <button id="shipPrev" class="navb" type="button" aria-label="前の機体">◀</button>
-    <button id="shipNext" class="navb" type="button" aria-label="次の機体">▶</button>
+    <button id="shipPrev" class="navb" type="button" aria-label="前の機体"></button>
+    <button id="shipNext" class="navb" type="button" aria-label="次の機体"></button>
     <div class="lockbox" id="lockbox" hidden></div>
-    <div class="finger" id="finger" hidden><span aria-hidden="true">👆</span><b>ここをタップ</b></div>
+    <div class="finger" id="finger" hidden><span aria-hidden="true"></span><b>ここをタップ</b></div>
     <div class="dots" id="dots"></div>
     <p class="toast" id="note" aria-live="polite" hidden></p>
   </div>
@@ -458,7 +453,6 @@ const fmt=t=>{t=Math.floor(t);return String(Math.floor(t/60)).padStart(2,'0')+':
 const GAME_NAME='SHOOT（仮）';
 const U=1.5,RUN_LEN=300,MAXE=280,GW=480,CELL=48,PADG=150,BASE_HP=70,WMAX=8;
 const DIRV=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
-const ARROW=['↑','↗','→','↘','↓','↙','←','↖'];
 const ARROW_NAME=['上','右上','右','右下','下','左下','左','左上'];
 const dirAngle=d=>-Math.PI/2+d*Math.PI/4;
 const angToDir=a=>((Math.round((a+Math.PI/2)/(Math.PI/4))%8)+8)%8;
@@ -2016,6 +2010,20 @@ const hangar=$('hangar'),sortie=$('sortie'),bay=$('bay'),edCv=$('editor'),ed=edC
 const SS=112,SC=56;
 const ssCv=document.createElement('canvas');ssCv.width=SS;ssCv.height=SS;const ssg=ssCv.getContext('2d');
 const FINGER=paint(16,20,[{m:'yel',r:2,p:[[5,0],[8,0],[8,9],[13,9],[15,12],[15,19],[3,19],[1,13],[3,10],[5,10]]},{m:'gold',r:1,p:[[8,10],[9,10],[9,14],[8,14]]}],{}),FINGERURL=FINGER.img.toDataURL();
+/* ◀ ▶ ✕ と向きの矢印（#16）：文字の記号の代わりに、点で描いた小さな絵。1マスを画面の3〜4px で出す。
+   l＝左（右は左右を反転）・x＝とじる・u＝上・ur＝右上（ほかの向きは90度ずつ回す） */
+const PIXI={l:['...##','..##.','.##..','##...','.##..','..##.','...##'],
+  x:['##...##','###.###','.#####.','..###..','.#####.','###.###','##...##'],
+  u:['...#...','..###..','.#####.','#######','..###..','..###..','..###..'],
+  ur:['..#####','....###','...####','..###.#','.###...','###....','.#.....']};
+const pixRot=r=>r[0].split('').map((_,x)=>r.map((_,y)=>r[r.length-1-y][x]).join(''));/* 90度（時計回り） */
+const PIXC={};
+function pixUrl(key,col){const k=key+col;if(PIXC[k])return PIXC[k];
+  let r=key==='r'?PIXI.l.map(t=>t.split('').reverse().join('')):PIXI[key];
+  if(!r){const d=+key.slice(1);r=PIXI[d%2?'ur':'u'];for(let i=0;i<d>>1;i++)r=pixRot(r);}/* 'd0'〜'd7'：向き（ARROW_NAME の順） */
+  const c=document.createElement('canvas');c.width=r[0].length;c.height=r.length;const g=c.getContext('2d');g.fillStyle=col;
+  r.forEach((t,y)=>{for(let x=0;x<t.length;x++)if(t[x]==='#')g.fillRect(x,y,1,1);});return PIXC[k]=c.toDataURL();}
+function pixIcon(key,k,col){const im=el('img','pix'),r=key==='x'||key[0]==='d'?7:5;im.alt='';im.src=pixUrl(key,col||'#eceaff');im.width=r*k;im.height=7*k;return im;}
 /* かぎの絵（まだのステージ） */
 const LOCKI=paint(14,16,[{m:'metal',r:1,f:g=>{g.beginPath();g.arc(6.5,6.5,5,Math.PI,0);g.lineTo(9.2,6.5);g.arc(6.5,6.5,2.6,0,Math.PI,true);g.closePath();g.fill();}},
   {m:'gold',r:2,p:[[0,7],[13,7],[13,15],[0,15]]},{m:'edark',r:1,flat:'#3a2604',p:[[6,9],[7,9],[7,13],[6,13]]}],{}).img.toDataURL();
@@ -2024,8 +2032,6 @@ const used=t=>save.load.reduce((n,v)=>n+(v&&v.t===t?1:0),0);
 const avail=t=>save.owned[t]-used(t);
 const defaultDir=(t,i)=>(t==='shield'||t==='sword'||t==='reflector'||t==='armor'||MODS[t].melee)?SLOTS[i].out:0;/* 近接は外向きから */
 const haveShip=id=>save.ships[id].have;
-/* 印は「まだ持っていなくて、いま買える物」があるときだけ */
-const affordable=()=>TYPES.some(t=>save.owned[t]===0&&isUnl(t)&&save.gold>=MODS[t].price)||SHIP_IDS.some(id=>!haveShip(id)&&shipProg(id).ok&&save.gold>=SHIPS[id].price);
 
 function toast(msg){const n=$('note');n.textContent=msg;n.hidden=false;clearTimeout(noteT);noteT=setTimeout(()=>{n.hidden=true;},2200);}
 
@@ -2093,7 +2099,7 @@ function stepStage(d){const n=clamp((save.st||1)+d,1,STAGES.length);if(n===(save
 function viewShip(id){view=id;if(haveShip(id)){setShip(id);persist();}closeSheet();renderAll();}
 function stepShip(d){const i=SHIP_IDS.indexOf(view);viewShip(SHIP_IDS[(i+d+SHIP_IDS.length)%SHIP_IDS.length]);}
 function renderAll(){
-  $('goldNum').textContent=save.gold;$('shopDot').hidden=!affordable();
+  $('goldNum').textContent=save.gold;
   $('bookNum').textContent=bookCount(save)+'/'+BOOK_N();$('achNum').textContent=ACH.filter(a=>save.ach[a.id]).length+'/'+ACH.length;
   if(!haveShip(view)&&!SHIPS[view])view=save.cur;
   renderEquip();
@@ -2106,7 +2112,7 @@ const sheetBg=$('sheetBg'),sheet=$('sheet');let sheetOn=null;
 function openSheet(title,sub,c,onClose){
   sheet.textContent='';sheet.style.setProperty('--c',c||'var(--edge)');
   const h=el('h3');h.append(el('span',null,title));if(sub)h.append(el('small',null,sub));
-  const x=el('button','x','✕');x.type='button';x.setAttribute('aria-label','とじる');x.addEventListener('click',closeSheet);h.appendChild(x);
+  const x=el('button','x');x.appendChild(pixIcon('x',3));x.type='button';x.setAttribute('aria-label','とじる');x.addEventListener('click',closeSheet);h.appendChild(x);
   sheet.appendChild(h);sheetBg.hidden=false;sheetOn=onClose||null;$('finger').hidden=true;$('lfinger').style.visibility='hidden';return sheet;
 }
 function closeSheet(){if(sheetBg.hidden)return;sheetBg.hidden=true;sheet.textContent='';const f=sheetOn;sheetOn=null;if(f)f();else if(!hangar.hidden)renderSlots();}
@@ -2144,7 +2150,7 @@ function openAim(i){
   const grid=el('div','dirs');
   const draw=()=>{grid.textContent='';DIR_GRID.forEach(d=>{
     if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[v.t][v.d].url;c.appendChild(im);grid.appendChild(c);return;}
-    const b=el('button',null,ARROW[d]);b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
+    const b=el('button');b.appendChild(pixIcon('d'+d,4,v.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
     b.addEventListener('click',()=>{v.d=d;persist();draw();drawEditor();});grid.appendChild(b);});};
   draw();sh.appendChild(grid);
   sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効くよ':'向いた方へ攻撃するよ'));
@@ -2166,7 +2172,7 @@ function openInfo(){
   const ul=el('ul','statl');
   shipRows(sh,true).concat([['装備の場所',sh.slots.length+'か所']]).forEach(([k,v])=>{const li=el('li');li.append(el('span',null,k),el('b','num',v));ul.appendChild(li);});
   s.appendChild(ul);
-  if(haveShip(view)){const eq=save.ships[view].eq.map((v,i)=>v?sh.slots[i].name+'：'+MODS[v.t].name+' '+ARROW[v.d]:null).filter(Boolean);
+  if(haveShip(view)){const eq=save.ships[view].eq.map((v,i)=>v?sh.slots[i].name+'：'+MODS[v.t].name+'（'+ARROW_NAME[v.d]+'）':null).filter(Boolean);
     s.appendChild(el('p','dim','つけている装備：'+(eq.length?eq.join('　'):'なし')));}
   const b=save.best,r=save.rec;
   s.appendChild(el('p','dim','さいこう記録：'+(b?fmt(b.t)+' 生存・'+b.kills+'体'+(b.clear?'（クリア）':''):'まだなし')+'　クリア '+r.clears+'回・大型の敵 '+r.bosses+'体・かせいだ合計 '+r.goldTotal+'G'));
@@ -2188,7 +2194,6 @@ function renderShop(){
   $('goldNum2').textContent=save.gold;$('shopNote').textContent=shopNote;
   const tabs=$('shopTabs');tabs.textContent='';
   SHOP_TABS.forEach(([k,label])=>{const b=el('button',null,label);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',shopCat===k?'true':'false');
-    if(shopList(k).some(canBuy)){const d=el('span','badge');b.appendChild(d);}
     b.addEventListener('click',()=>{shopCat=k;shopNote='';renderShop();$('shopGrid').scrollTop=0;});tabs.appendChild(b);});
   const grid=$('shopGrid');grid.textContent='';
   const all=shopList(shopCat),isS=shopCat==='ship',lock=isS?[]:all.filter(t=>!isUnl(t));
@@ -2343,6 +2348,7 @@ $('launchBtn').addEventListener('click',()=>{if(!haveShip(view))return;if(!save.
 if(window.ResizeObserver)new ResizeObserver(()=>{layoutEditor();renderSlots();}).observe(bay);
 else window.addEventListener('resize',()=>{layoutEditor();renderSlots();});
 {const im=el('img');im.alt='';im.src=FINGERURL;$('lfinger').appendChild(im);}/* 出撃をさす指（下向き） */
+$('toTitle').appendChild(pixIcon('l',3));$('shipPrev').appendChild(pixIcon('l',3));$('shipNext').appendChild(pixIcon('r',3));$('stPrev').appendChild(pixIcon('l',3));$('stNext').appendChild(pixIcon('r',3));
 document.querySelectorAll('.finger span').forEach(s=>{const im=el('img');im.alt='';im.src=FINGERURL;im.style.cssText='width:32px;height:40px;image-rendering:pixelated';s.replaceWith(im);});
 
 /* ---------- sortie ---------- */
