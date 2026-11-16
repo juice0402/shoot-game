@@ -2109,7 +2109,9 @@ function layoutEditor(){
   EV={dpr,k,W,H,css:k/dpr,ox:Math.round((W-SS*k)/2),oy:Math.round(top+(H-top-bot-SS*k)/2)};
   drawEditor();
 }
-const slotCss=i=>{const s=SHIPS[view].slots[i];return [(EV.ox+(SC+s.x+0.5)*EV.k)/EV.dpr,(EV.oy+(SC+s.y+0.5)*EV.k)/EV.dpr];};
+/* 枠（＋の丸）の場所：装備の絵のまんなかの点（絵の 11 列目＝機体の中心線と同じ列）にそろえる。
+   11/16 しょーくん「船首の設置部分ズレてない？」→ 前は横に +0.5 で、丸が1点ぶん右にずれていた */
+const slotCss=i=>{const s=SHIPS[view].slots[i];return [(EV.ox+(SC+s.x-0.5)*EV.k)/EV.dpr,(EV.oy+(SC+s.y+0.5)*EV.k)/EV.dpr];};
 function drawEditor(){
   const own=haveShip(view),open=own||shipProg(view).ok,sp=SHIPSPR[view];
   ssg.clearRect(0,0,SS,SS);
