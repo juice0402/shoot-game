@@ -287,7 +287,7 @@ def screens(pg):
     for lab, js in (('結果（撃墜）', "R.t=100;T.endRun(false,false)"), ('結果（撤退）', "R.t=40;T.endRun(false,true)"), ('結果（クリア）', "R.t=300;T.endRun(true,false)")):
         o = ev("()=>{const T=window.__T;const R=window.__go(1,'standard',['laser']);document.getElementById('hangar').hidden=true;document.getElementById('sortie').hidden=false;" + js + ";return document.getElementById('overlay').innerText}")
         S.scan(lab)
-    ok('結果の文：撃墜「HPが0になった」・クリア「クリア！」と「5分 生きのびた」', '5分 生きのびた' in o and 'クリア！' in o, o[:30])
+    ok('結果の文：クリア「クリア！」（11/16 総点検：見出しと同じ意味の「5分 生きのびた」などの小さい文はなし）', 'クリア！' in o and '5分 生きのびた' not in o, o[:30])
     pg.click('#overlay .btnrow .go'); pg.wait_for_timeout(150)
     o = S.scan('格納庫（結果のあと）')
     ok('結果のあとのお知らせ：「〇〇G かせいだ」', re.match(r'^\d+G かせいだ$', o['toast'] or ''), o['toast'])

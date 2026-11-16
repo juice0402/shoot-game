@@ -78,6 +78,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .slotb.full:active{background:rgba(255,255,255,.15)}
 .lockbox{position:absolute;left:52px;right:52px;bottom:26px;z-index:3;background:var(--scrim);border:3px solid var(--edge);padding:8px 10px;text-align:center;font-size:14px;line-height:1.4}
 .lockbox p{margin:0}
+.bay:has(#lockbox:not([hidden])) .toast{bottom:auto;top:58px}/* 11/16 総点検：まだの機体の札があるときは、お知らせを上に出して重ねない */
 .prog{height:12px;background:var(--panel);border:2px solid var(--edge);margin:6px 0}
 .prog i{display:block;height:100%;background:var(--go)}
 .lockbox .btn3{margin-top:6px;width:100%}
@@ -118,7 +119,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .sheet .x{margin-left:auto;flex:none;width:44px;height:44px;padding:0;background:var(--panel-2);border:3px solid var(--edge);display:grid;place-items:center}
 .sheet p{margin:0;font-size:14px;line-height:1.5}
 .sheet .dim{color:var(--dim)}
-.irow{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;min-height:62px;padding:6px 10px;background:var(--panel-2);border:3px solid var(--edge);text-align:left;width:100%}
+.irow{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;min-height:76px;padding:6px 10px;background:var(--panel-2);border:3px solid var(--edge);text-align:left;width:100%}
 .irow img{width:48px;height:48px;image-rendering:pixelated;image-rendering:crisp-edges}
 .irow b{display:block;font-size:16px;font-weight:400;line-height:1.3}
 .irow small{display:block;font-size:14px;color:var(--dim);line-height:1.35}
@@ -130,12 +131,14 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .dirs button[aria-pressed="true"]{border-color:var(--go);background:#2a2a5a}
 .dirs .mid{display:grid;place-items:center;background:var(--deep);border:3px solid var(--edge)}
 .dirs .mid img{width:56px;height:56px;image-rendering:pixelated;image-rendering:crisp-edges}
+.dirs.one{grid-template-columns:68px}
 .sbtns{display:flex;gap:8px}
 .sbtns button{flex:1}
 .btn3.warn{border-color:var(--hurt);color:#ffb0c4}
 .statl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .statl li{display:flex;justify-content:space-between;gap:6px;padding:6px 8px;background:var(--panel-2);font-size:14px}
 .statl li b{font-weight:400;color:var(--go)}
+.statl li:last-child:nth-child(odd){grid-column:1/-1}/* 11/16 総点検：数が奇数のとき、さいごのマスを横いっぱいに（右下が空かない） */
 
 /* ---------- shop（2列の大きなカード → タップでくわしく） ---------- */
 .shopx{position:fixed;inset:0;z-index:40;background:var(--void);display:flex;flex-direction:column;gap:8px;
@@ -178,7 +181,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .own b{font-weight:400;color:var(--ink)}
 .buybig{width:100%;min-height:56px;padding:10px 14px;font-size:18px;background:var(--go);color:var(--go-ink);border:0;box-shadow:inset 0 -5px 0 var(--go-sh)}
 .buybig:disabled{background:var(--panel-2);color:var(--dim);box-shadow:none;font-size:16px}
-.snote{margin:0;min-height:1.4em;font-size:14px;color:var(--go);text-align:center}
+.snote{margin:0;min-height:1.4em;font-size:14px;color:var(--go);text-align:center;white-space:pre-line;text-wrap:balance}
 .linkbtn{background:none;border:2px dashed var(--edge);color:var(--dim);min-height:44px;width:100%;font-size:14px}
 .btn2{min-height:48px;padding:12px;background:var(--panel);border:3px solid var(--edge);font-size:15px}
 .btn2.small{min-height:44px;padding:4px 12px;font-size:15px}
@@ -192,7 +195,8 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 #hudLv{font-size:10px}
 .clock{text-align:center;white-space:nowrap}
 .clock b{font-size:14px;font-weight:400}
-.clock small{font-size:8px;color:var(--dim);margin-left:4px}
+.clock small{font-size:10px;color:var(--dim);margin-left:4px}
+#sortie:has(#overlay:not([hidden])) #banner{visibility:hidden}/* 11/16 総点検：レベルアップや宝箱の板の下から、ステージ名の札が透けない */
 .kills{text-align:right;white-space:nowrap}
 .kills b{font-family:var(--f-num);font-size:10px;font-weight:400}
 #pauseBtn{width:42px;height:34px;background:var(--panel);border:3px solid var(--edge);display:flex;gap:4px;align-items:center;justify-content:center}
@@ -204,7 +208,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .spbar i{display:block;height:100%;width:0;background:var(--c,#5aa2ff)}
 #game{display:block;image-rendering:pixelated;image-rendering:crisp-edges;background:var(--deep);box-shadow:0 0 0 3px var(--edge)}
 .banner{position:absolute;left:50%;top:24%;transform:translateX(-50%);padding:8px 14px;background:var(--scrim);border:3px solid var(--hurt);font-size:15px;white-space:nowrap;pointer-events:none}
-.overlay{position:absolute;inset:0;background:var(--scrim);display:flex;flex-direction:column;gap:12px;padding-block:20px;overflow-y:auto}
+.overlay{position:absolute;inset:0;background:var(--scrim);display:flex;flex-direction:column;gap:12px;padding:20px 14px;overflow-y:auto}/* 11/16 総点検：中の板が出撃のわくにくっつかないよう左右に14 */
 .overlay>:first-child{margin-top:auto}
 .overlay>:last-child{margin-bottom:auto}
 .overlay h2{margin:0;text-align:center;font-weight:400;font-size:26px;letter-spacing:.08em}
@@ -219,7 +223,7 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 /* エンディング（#13） */
 .endt{margin:0;text-align:center;font-size:clamp(28px,9vw,40px);line-height:1.3;letter-spacing:.3em;text-indent:.3em;color:#fff2a8}
 .endh{margin:8px 0 0;text-align:center;font-weight:400;font-size:16px}
-.overlay.endg .go{flex:none;max-width:320px;margin-inline:auto}
+.overlay.endg .go{flex:none;max-width:420px;width:100%;margin-inline:auto}
 .cards{display:flex;flex-direction:column;gap:10px;max-width:420px;width:100%;margin:0 auto}
 .card{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;text-align:left;padding:10px 12px;background:var(--panel);border:3px solid var(--c,var(--edge));box-shadow:inset 0 -4px 0 rgba(0,0,0,.35)}
 .card:disabled{opacity:.55;cursor:wait}
@@ -233,23 +237,23 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .pips i{width:12px;height:6px;background:var(--edge)}
 .pips i.on{background:var(--c)}
 .pips i.nx{background:#ffffff}
-.pips small{font-family:var(--f-num);font-size:8px;color:var(--dim);margin-left:6px}
+.pips small{font-family:var(--f-num);font-size:10px;color:var(--dim);margin-left:6px}
 .card .d{font-size:13px;color:var(--dim);line-height:1.4}
 .card.evo{border-width:4px;background:#1c1838}
 .card .d2{font-size:12px;color:var(--ink);line-height:1.3}
 .build{max-width:420px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:6px}
-.build p{margin:0;font-size:12px;color:var(--dim)}
+.build p{margin:0;font-size:13px;color:var(--dim)}
 .build ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px}
 .build li{display:flex;align-items:center;gap:3px;padding:2px 6px 2px 2px;background:var(--panel);border:2px solid var(--edge);border-bottom-color:var(--c,var(--edge))}
 .build li img{width:22px;height:22px;image-rendering:pixelated}
 .build li .ch{width:22px;height:22px;display:grid;place-items:center;font-size:13px;color:var(--c)}
-.build li b{font-family:var(--f-num);font-weight:400;font-size:8px}
-.btnrow{display:flex;flex-direction:column;gap:10px;max-width:320px;width:100%;margin:0 auto}
+.build li b{font-family:var(--f-num);font-weight:400;font-size:10px}
+.btnrow{display:flex;flex-direction:column;gap:10px;max-width:420px;width:100%;margin:0 auto}
 /* 結果の画面のボタン（#16）：横に2つ。中身が多くて画面からあふれるときも、下にのこる */
 .btnrow.end{flex-direction:row;max-width:420px}
 .btnrow.end .btn2{flex:none;width:36%;padding:0 6px;white-space:nowrap}
-.overlay.over .btnrow.end{position:sticky;bottom:0;z-index:1;padding-block:10px 20px;margin-bottom:-20px;background:var(--deep)}
-.stats{list-style:none;margin:0 auto;padding:12px 14px;max-width:320px;width:100%;background:var(--panel);border:3px solid var(--edge);display:flex;flex-direction:column;gap:6px}
+.overlay.over .btnrow.end{position:sticky;bottom:0;z-index:1;padding-block:10px 20px;margin-bottom:-20px;background:var(--deep);box-shadow:-14px 0 0 var(--deep),14px 0 0 var(--deep)}
+.stats{list-style:none;margin:0 auto;padding:12px 14px;max-width:420px;width:100%;background:var(--panel);border:3px solid var(--edge);display:flex;flex-direction:column;gap:6px}
 .stats li{display:flex;justify-content:space-between;gap:10px;font-size:14px}
 .stats li b{font-family:var(--f-num);font-weight:400;font-size:11px;align-self:center;white-space:nowrap}
 .stats li.total{border-top:2px dashed var(--edge);padding-top:8px;color:var(--go)}
@@ -278,9 +282,9 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .bsec h3{margin:0;font-weight:400;font-size:16px;display:flex;justify-content:space-between;align-items:baseline}
 .bsec h3 small{font-family:var(--f-num);font-size:10px;color:var(--dim)}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
-.bgrid button{aspect-ratio:1;display:grid;place-items:center;padding:5px;background:var(--panel);border:2px solid var(--edge)}
+.bgrid button{aspect-ratio:1;position:relative;padding:0;overflow:hidden;background:var(--panel);border:2px solid var(--edge)}
 .bgrid button.no{background:var(--deep)}
-.bgrid img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
+.bgrid img{position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}/* 11/16 総点検：絵の形でマスの高さが変わらないように（どのマスも正方形） */
 .dtop img.big{object-fit:contain;padding:4px}
 .alist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .arow{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:7px 10px;background:var(--panel);border:2px solid var(--edge)}
@@ -295,12 +299,12 @@ h1 small{font-size:14px;color:var(--dim);letter-spacing:.04em;margin-left:6px}
 .card.got{cursor:default}
 .card.got:disabled{opacity:1;cursor:default}
 .card.banpick{border-style:dashed}
-.lvacts{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;max-width:420px;width:100%;margin:0 auto}
-.lvacts button{min-height:44px;padding:0 12px;background:var(--panel);border:3px solid var(--edge);font-size:14px}
-.lvacts button .num{font-size:9px;color:var(--dim);margin-left:6px}
+.lvacts{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;max-width:420px;width:100%;margin:0 auto}/* 11/16 総点検：3つのボタンを同じ幅に */
+.lvacts button{min-height:44px;padding:0 6px;white-space:nowrap;background:var(--panel);border:3px solid var(--edge);font-size:14px}
+.lvacts button .num{font-size:11px;color:var(--dim);margin-left:6px}
 .lvacts button[aria-pressed="true"]{border-color:#ff6a7a;color:#ffb0c4}
 .lvacts button:disabled{opacity:.4}
-.gotl{list-style:none;margin:0 auto;padding:0;max-width:320px;width:100%;display:flex;flex-direction:column;gap:4px}
+.gotl{list-style:none;margin:0 auto;padding:0;max-width:420px;width:100%;display:flex;flex-direction:column;gap:4px}
 .gotl li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 10px;background:var(--panel);border:2px solid #6e5a1c;font-size:14px;line-height:1.4}
 .gotl li b{font-family:var(--f-num);font-weight:400;font-size:11px;color:var(--go);align-self:center}
 /* 11/16 作りこみ（しょーくん「ただのドット絵ゲームではない、高級な作り込み」）：押したときだけの1回の動き。名前は fx ではじめる（copy16 はこの名前だけ許す）。
@@ -457,7 +461,7 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
     <div class="gold"><img class="coin" alt=""><b id="goldNum3" class="num">0</b><small>G</small></div>
     <button id="labClose" class="btn2 small" type="button">とじる</button>
   </header>
-  <p class="xnote">全部の機体に効き、ずっと続く強化</p>
+  <p class="xnote">全部の機体にずっと効く強化</p>
   <div class="sgrid" id="labGrid"></div>
   <p class="snote" id="labNote" aria-live="polite"></p>
 </div>
@@ -542,7 +546,7 @@ const MODS={
     up:{4:'2枚投げる',5:'刃が大きくなる',7:'3枚投げる'},rl:'投げる速さ',gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:41},r:{2:9,3:9,6:9,8:9}}},
   thunder:{name:'雷撃コイル',cat:'atk',c:'#e6ff5c',price:450,rate:[3,2,4],desc:'向いた側の敵に雷を落とし、近くの敵へつなぐ',
     up:{3:'つながる敵が1体ふえる',4:'届く距離がのびる',6:'つながる敵が1体ふえる',8:'つながる敵が2体ふえる'},gt:{d:{2:36,3:26,4:21,5:17,6:15,7:13,8:11},r:{2:9,5:9,7:9}}},
-  gravity:{name:'重力弾',cat:'atk',c:'#7a5cff',price:480,rate:[2,1,3],desc:'ゆっくり進む玉が、まわりの敵を吸いこんで削る',
+  gravity:{name:'重力弾',cat:'atk',c:'#7a5cff',price:480,rate:[2,1,3],desc:'ゆっくり進む玉が、敵を吸いこんで削る',
     up:{3:'吸いこむ範囲が広がる',4:'長く残る',6:'吸いこむ範囲がさらに広がる',8:'最後に大爆発する'},gt:{d:{2:33,3:25,4:20,5:17,6:14,7:13,8:11},r:{2:9,5:9,7:9}}},
   cannon:{name:'ビーム砲',cat:'atk',c:'#5cffef',price:520,rate:[5,1,5],desc:'ためてから、太いビームで一直線に撃ちぬく',
     up:{3:'ビームが太くなる',6:'ビームがさらに太くなる'},gt:{d:{2:30,3:23,4:19,5:16,6:14,7:12,8:38},r:{2:5,4:20,5:5,7:20,8:5}}},
@@ -2238,7 +2242,7 @@ function tutGuide(){
 function tutLoop(){tutGuide();if(!save.tut)requestAnimationFrame(tutLoop);else $('tutDim').hidden=true;}
 function renderEquip(){
   const own=haveShip(view),sh=SHIPS[view],pg=shipProg(view);
-  $('shipName').textContent=sh.name;$('shipName').style.color=own||pg.ok?sh.c:'var(--dim)';$('shipSkill').textContent=own?sh.desc:'まだ持っていない機体';
+  $('shipName').textContent=sh.name;$('shipName').style.color=own||pg.ok?sh.c:'var(--dim)';$('shipSkill').textContent=sh.desc;
   const dots=$('dots');dots.textContent='';SHIP_IDS.forEach(id=>dots.appendChild(el('i',id===view?'on':null)));
   const lb=$('lockbox');lb.textContent='';lb.hidden=own;
   if(!own){
@@ -2312,7 +2316,7 @@ function openList(i){
   const s=SLOTS[i],cur=save.load[i],tut=tutStep()===1;let tutAt=null;/* はじめの案内②：一覧の中で、つけられる品（レーザー）に印（tutGuide がそこだけ明るくする） */
   const sh=openSheet(s.name+'につける装備',cur?'いま：'+MODS[cur.t].name:null);
   const list=TYPES.filter(t=>save.owned[t]>0);
-  if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていない。ショップで買える'));
+  if(!list.length)sh.appendChild(el('p','dim','まだ装備を持っていない'));/* すぐ下が「ショップで装備を買う」 */
   list.forEach(t=>{
     const m=MODS[t],a=avail(t),isCur=cur&&cur.t===t,b=el('button','irow'+(isCur?' now':''));b.type='button';b.style.setProperty('--c',m.c);
     const im=el('img');im.alt='';im.src=ICON[t];
@@ -2337,7 +2341,7 @@ function putMod(j,t,d){save.load[j]={t,d};persist();closeSheet();toast(SLOTS[j].
 /* 向きをえらぶ板（つける前）。矢印をタップでつける。まんなかは品の絵（いまの向き・はじめは前向きか外向き）。✕ でつけずに閉じる */
 function openDir(j,t){
   const prev=save.load[j],m=MODS[t],d0=prev?prev.d:defaultDir(t,j),tut=tutStep()===1;
-  const sh=openSheet(SLOTS[j].name+'：'+m.name,'向きをえらぶ',m.c);
+  const sh=openSheet(SLOTS[j].name+'：'+m.name,null,m.c);
   const grid=el('div','dirs');
   DIR_GRID.forEach(d=>{
     if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[t][d0].url;c.appendChild(im);grid.appendChild(c);return;}
@@ -2352,14 +2356,15 @@ function openDir(j,t){
 const DIR_GRID=[7,0,1,6,-1,2,5,4,3];
 function openAim(i){
   const v=save.load[i];if(!v)return;
-  const m=MODS[v.t],sh=openSheet(SLOTS[i].name+'：'+m.name,'向きをえらぶ',m.c);
-  const grid=el('div','dirs');
+  const m=MODS[v.t],sh=openSheet(SLOTS[i].name+'：'+m.name,null,m.c);
+  const grid=el('div',m.passive?'dirs one':'dirs');/* 11/16 総点検：向きに関係のない品は矢印を出さない（絵だけ） */
   const draw=()=>{grid.textContent='';DIR_GRID.forEach(d=>{
+    if(m.passive&&d>=0)return;
     if(d<0){const c=el('span','mid'),im=el('img');im.alt='';im.src=MSPR[v.t][v.d].url;c.appendChild(im);grid.appendChild(c);return;}
     const b=el('button');b.appendChild(pixIcon('d'+d,4,v.d===d?'#ffd23f':null));b.type='button';b.setAttribute('aria-label',ARROW_NAME[d]+'向き');b.setAttribute('aria-pressed',v.d===d?'true':'false');
     b.addEventListener('click',()=>{const ch=v.d!==d;v.d=d;persist();draw();drawEditor();if(ch)snapAt(i,true);});grid.appendChild(b);});};
   draw();sh.appendChild(grid);tilesIn(grid,'button,.mid');
-  sh.appendChild(el('p','dim',m.passive?'この装備は向きに関係なく効く':'向いた方へ攻撃する'));
+  sh.appendChild(el('p','dim',m.passive?'向きに関係なく効く':'向いた方へ攻撃する'));
   const row=el('div','sbtns'),ch=el('button','btn3','装備をかえる'),off=el('button','btn3 warn','外す');ch.type='button';off.type='button';
   ch.addEventListener('click',()=>{sheetOn=null;openList(i);});
   off.addEventListener('click',()=>{const was=save.load[i];save.load[i]=null;persist();closeSheet();toast(SLOTS[i].name+'の'+m.name+'を外した');renderEquip();popAt(i,was);});
@@ -2372,9 +2377,11 @@ function shipRows(sh,full){
   [['射程',sh.range],['範囲',sh.area],['爆発の威力',sh.boom],['経験値',sh.xp]].forEach(([k,v])=>{if(v)r.push([k,pcv(v)]);});
   if(sh.evade)r.push(['回避',Math.round(sh.evade*100)+'%']);
   return r;}
+/* 11/16 総点検：機体の文は、くわしくとショップで同じ形（「能力：名前。説明」「必殺：名前。説明」・終わりの「。」はつけない） */
+function shipText(sh){return ['能力：'+sh.skill.replace('：','。')+(sh.skill2?'。'+sh.skill2:''),'必殺：'+sh.sp.name+'。'+sh.sp.desc];}
 function openInfo(){
-  const sh=SHIPS[view],s=openSheet(sh.name+'のくわしい性能',null,sh.c);
-  s.append(el('p',null,sh.desc),el('p',null,'能力：'+sh.skill+(sh.skill2?'。'+sh.skill2:'')),el('p',null,'必殺：'+sh.sp.name+'。'+sh.sp.desc));
+  const sh=SHIPS[view],s=openSheet(sh.name+'の性能',null,sh.c);
+  s.append(...shipText(sh).map(t=>el('p',null,t)));/* 機体の説明は格納庫の名前の下と同じなので出さない */
   const ul=el('ul','statl');
   shipRows(sh,true).concat([['装備の場所',sh.slots.length+'か所']]).forEach(([k,v])=>{const li=el('li');li.append(el('span',null,k),el('b','num',v));ul.appendChild(li);});
   s.appendChild(ul);
@@ -2426,12 +2433,12 @@ function openDetail(k){
   const top=el('div','dtop'),img=el('img');img.alt='';
   const info=el('div');
   if(isShip){const pg=shipProg(k);img.src=(haveShip(k)||pg.ok?SHIPSPR[k].img:shipSil(k)).toDataURL();
-    info.append(el('p',null,it.desc+'。'),el('p',null,'能力：'+it.skill+'。'+(it.skill2?it.skill2+'。':'')),el('p',null,'必殺：'+it.sp.name+'。'+it.sp.desc+'。'),el('p',null,'装備の場所 '+it.slots.length+'か所'+(it.price?'・はじめの武器 '+it.start.map(v=>MODS[v.t].name).join('と'):'')));}/* スタンダードは、はじめのレーザー1つを自分でつける（#15） */
+    info.append(el('p',null,it.desc),...shipText(it).map(t=>el('p',null,t)));if(it.price)info.appendChild(el('p',null,'はじめの武器：'+it.start.map(v=>MODS[v.t].name).join('と')));}/* 装備の場所は下の表へ *//* スタンダードは、はじめのレーザー1つを自分でつける（#15） */
   else{img.src=ICON[k];info.append(el('p',null,it.desc));}
   top.append(img,info);s.appendChild(top);
   if(isShip){
     const ul=el('ul','statl'),pc=v=>(v>=1?'+':'')+Math.round((v-1)*100)+'%';
-    shipRows(it,false).forEach(([a,b])=>{const li=el('li');li.append(el('span',null,a),el('b','num',b));ul.appendChild(li);});s.appendChild(ul);
+    shipRows(it,false).concat([['装備の場所',it.slots.length+'か所']]).forEach(([a,b])=>{const li=el('li');li.append(el('span',null,a),el('b','num',b));ul.appendChild(li);});s.appendChild(ul);
     if(it.unlock){const pg=shipProg(k);s.appendChild(el('p',null,'解放の条件：'+it.unlock.txt));const pr=el('div','prog'),bar=el('i');bar.style.width=(pg.cur/pg.n*100)+'%';pr.appendChild(bar);s.append(pr,el('p','dim num',pg.cur+' / '+pg.n+(pg.ok?'　達成':'')));}
   }else if(it.rate){const r=el('div','drate');it.rate.forEach((v,i)=>{const rt=el('div','rt');rt.appendChild(el('span',null,RATE_NAMES[i]));
       const bars=el('span','bars');for(let q=0;q<5;q++)bars.appendChild(el('i',q<v?'on':null));rt.appendChild(bars);r.appendChild(rt);});s.appendChild(r);}
@@ -2448,7 +2455,7 @@ function openDetail(k){
       SFX.play('buy');const g0=save.gold;
       if(isShip){if(!buyShip(k))return;shopNote=it.name+'を手に入れた。出撃する機体にした';view=k;setShip(k);}
       else{if(save.gold<it.price)return;save.gold-=it.price;save.owned[k]++;persist();shopNote=it.name+'を買った。格納庫の「＋」からつけられる';}
-      const got=checkAch();if(got.length)shopNote+='　'+achText(got);
+      const got=checkAch();if(got.length)shopNote+='\n'+achText(got);/* 11/16 総点検：実績は次の行に（とちゅうで折り返さない） */
       closeSheet();renderAll();buyFx($('shopGrid'),k,$('goldNum2'),g0);});}
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(it.price-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
@@ -2498,7 +2505,7 @@ function openLabDetail(id){
   else if(mx){buy.disabled=true;buy.textContent='最大レベル';}
   else if(save.gold>=pr){buy.append(el('span','num',String(pr)),document.createTextNode('G で強化'));
     buy.addEventListener('click',()=>{const g0=save.gold;if(!buyLab(id))return;SFX.play('buy');const got=checkAch();setTimeout(()=>buyFx($('labGrid'),id,$('goldNum3'),g0),0);
-      labNote=o.name+'を Lv'+save.lab[id]+' にした'+(id==='r_slot'?'。格納庫で機体の後ろに場所がふえた':'')+(got.length?'。'+achText(got):'');closeSheet();renderAll();});}
+      labNote=o.name+'を Lv'+save.lab[id]+' にした'+(id==='r_slot'?'。格納庫で機体の後ろに場所がふえた':'')+(got.length?'\n'+achText(got):'');closeSheet();renderAll();});}
   else{buy.disabled=true;buy.append(document.createTextNode('あと '),el('span','num',String(pr-save.gold)),document.createTextNode('G'));}
   s.appendChild(buy);
 }
@@ -4326,15 +4333,15 @@ function endRun(clear,retreat){
   if(!retreat){SFX.play(clear?'clear':'over');if(clear)setTimeout(()=>SFX.play('coin'),900);}
   const result=()=>{
   overlay.textContent='';
-  overlay.append(el('h2',null,clear?'クリア！':retreat?'撤退':'撃墜…'),
-    el('p','sub',clear?(S.final?'深淵の核をたおした':'5分 生きのびた'):retreat?'とちゅうで格納庫にもどった':'HPが0になった'));
+  overlay.append(el('h2',null,clear?'クリア！':retreat?'撤退':'撃墜…'));
+  if(clear&&S.final)overlay.appendChild(el('p','sub','深淵の核をたおした'));/* 11/16 総点検：「5分 生きのびた」「HPが0になった」「とちゅうで格納庫にもどった」は見出しと下の表でわかるので出さない */
   if(opened)overlay.appendChild(el('p','sub unl','ステージ'+(R.stage+1)+'「'+STAGES[R.stage].name+'」が解放された'));
   /* 解放された機体と品（#15・#16）：アイコンと名前を小さく並べる。ショップで買える */
   /* 11/16：研究所の解放も同じ並びに（画面の高さをふやさない） */
   if(newly.length||newU.length||newL.length){const box=el('div','unlb'),ul=el('ul','unll');
     const chip=(src,name,cls)=>{const li=el('li',cls),im=el('img');im.alt='';im.src=src;li.append(im,el('span',null,name));ul.appendChild(li);};
     newly.forEach(id=>chip(urlOf('s'+id,SHIPSPR[id].img),SHIPS[id].name,'ship'));newU.forEach(t=>chip(ICON[t],MODS[t].name));newL.forEach(id=>chip(LICON[id],LABK[id].name,'lab'));
-    const head=newL.length?[newly.length?'機体':null,newU.length?'品':null,'研究'].filter(Boolean).join('・')+'の解放':(newly.length?'機体と品':'品')+'の解放（ショップで買える）';
+    const head=[newly.length?'機体':null,newU.length?'品':null,newL.length?'研究':null].filter(Boolean).join('・')+'の解放';/* 11/16 総点検：見出しの形をそろえる（すぐ下に「ショップへ」があるので「ショップで買える」は出さない） */
     box.append(el('p',null,head),ul);overlay.appendChild(box);}
   const ul=el('ul','stats');
   const row=(k,v,cls)=>{const li=el('li',cls||null);li.append(el('span',null,k),el('b',null,v));ul.appendChild(li);};
@@ -4480,7 +4487,7 @@ function howArt(i){
 function renderHowto(){
   const box=$('howCard'),p=HOWTO[howPage];box.textContent='';
   const art=howArt(howPage);art.className='howart';art.setAttribute('aria-hidden','true');
-  box.append(el('p','howno num',(howPage+1)+' / '+HOWTO.length),art,el('h3',null,p.t));
+  box.append(art,el('h3',null,p.t));/* 11/16 総点検：上の「1 / 4」は下の点と同じなので出さない */
   const dots=el('div','howdots');HOWTO.forEach((_,k)=>dots.appendChild(el('i',k===howPage?'on':null)));box.appendChild(dots);
   $('howPrev').disabled=howPage===0;
   $('howNext').textContent=howPage<HOWTO.length-1?'次へ':howFirst?'はじめる':'とじる';
