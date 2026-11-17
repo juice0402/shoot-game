@@ -23,7 +23,8 @@
 | 945〜1650 | ドット絵：995 paint（描く道具）・1068 MECH（整備士の顔・口2コマ）・その下に絵（機体・装備・敵・アイコン） |
 | 1650〜1870 | ステージの背景 |
 | 1870〜1990 | セーブ：1878 freshSave・1898 ACH（実績）・1927 loadSave（古いセーブの直し）・1973 persist |
-| 1995〜2165 | 効果音 SFX（Web Audio。名前と鳴らし方の表。comm・talk は通信） |
+| 1995〜2175 | 効果音 SFX（Web Audio。名前と鳴らし方の表。comm・talk は通信。ac と comp を BGM と共有） |
+| 2175〜 | BGM（#37）：BGM_STYLE・BGM_VOL・SONGS（`/* SONGS:BEGIN */`〜`END`・曲のデータ）・bgmOn・BGM（play・kick・duck・reset・check・render）。場面ごとの play は showTitle・toHangarFromTitle・startRun・addBig・killed・winStart・endRun・結果の toHangar |
 | 2166〜2550 | 格納庫：2212 drawEditor（機体と装備を描く）・2236 snapAt（装備がはまる動き）・その下に popAt（外す動き）・2296 tutGuide（はじめの案内）・2326 TALK（整備士のセリフ）と通信（commShow・commTip・talkUnl）・2392 renderEquip・2428 openSheet（板・作りこみの道具）・2464 openList・2491 openDir（向きの板）・2506 openAim・2531 openInfo（くわしく） |
 | 2551〜2745 | ショップ（2551 renderShop）・研究所（2621 renderLab）・図鑑・実績 |
 | 2746〜4116 | 出撃：2749 calcCS（共通の数字）・2815 startRun・敵の動き・攻撃の装備・防御と補助と進化・必殺技・支援 |

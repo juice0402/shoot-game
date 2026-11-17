@@ -13,7 +13,7 @@ EXPOSE = ("window.__HURT=0;"
           "openLevelUp,pickChoice,get lvChoices(){return lvChoices},endRun,supUp,stageSetup,stOpen,renderStage,stepStage,renderAll,renderEquip,"
           "get save(){return save},set save(v){save=v},loadSave,persist,freshSave,setShip,shipProg,layoutEditor,ensureSlots,checkAch,bookCount,BOOK_N,"
           "openBook,closeBook,closeSheet,toHangarFromTitle,openPause,resume,startLoad,emptyLoad,openList,openAim,openShop,openDetail,closeShop,openLab,openLabDetail,openAch,openHowto,showTitle,openInfo,openChest,stepShip,"
-          "keys,SHIPS,SHIP_IDS,KIND,MODS,TYPES,EVO,PAS,SUP,SPC_IDS,LAB,ACH,BOOK_E,STAGES,BIG,ESPR,KEY,U,GW,RUN_LEN,WMAX,get GH(){return GH}};\n")
+          "BGM,SONGS,SFX,bgmOn,BGM_VOL,keys,SHIPS,SHIP_IDS,KIND,MODS,TYPES,EVO,PAS,SUP,SPC_IDS,LAB,ACH,BOOK_E,STAGES,BIG,ESPR,KEY,U,GW,RUN_LEN,WMAX,get GH(){return GH}};\n")
 
 SEED = ("<script>(()=>{let s=1;const r=()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};"
         "window.__seed=n=>{s=(n*2654435761)|0;Math.random=r;};})();</script>")
