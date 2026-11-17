@@ -71,5 +71,6 @@
 | clear・over | クリア・撃墜のジングル（そのあと hangar）。撤退は hangar |
 | ending | エンディング（はじめてステージ5をクリアしたとき） |
 
+- 曲は作曲の担当（エージェント）がこのゲームのために書いた。ほかの曲に似せない。点検は node tools/bgm/check_songs.js・聞くページは tools/bgm/jukebox.py
 - ON・OFF は BGM（save.bgm）と効果音（save.snd）べつべつ。タイトルと一時停止のボタン。save.bgm がない前のセーブは「音」と同じ
 - 一時停止の間は小さく。画面が裏に回ると止めて、もどると続きから

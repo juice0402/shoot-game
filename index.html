@@ -2180,9 +2180,324 @@ const SFX=(()=>{
    曲は SONGS（和音1小節に1つ・メロディは1小節16こま）。ベース・分散和音・パッド・打楽器は和音から作る。
    同じ曲を2つの音色で鳴らせる：BGM_STYLE 'chip'＝A ピコピコ・'synth'＝B シンセ */
 const BGM_STYLE='chip';
+const BGM_SG={chip:1,synth:1.7};/* 音色ごとの大きさ（シンセは平均が小さいので少し上げて chip とそろえる） */
 const BGM_VOL=0.04;             /* BGM の大きさはここ1か所（効果音は SFX の VOLUME）。効果音より少し下に */
 /* SONGS:BEGIN */
-const SONGS={};
+const SONGS={
+  // タイトル「ぜんぶのせシップ」のテーマ（D・140）2小節の前奏のあと16小節でくり返す
+  title:{bpm:140, loopFrom:2, chords:'G A D A Bm G Bm G A D G A F#m Bm Em F#m G A', bass:'oct', arp:'up', drums:'four', lead:`
+D5 - - D5 - - D5 - G5 - - - - - - -
+E5 - - E5 - - E5 - A5 - - - G5 - E5 -
+F#5 - - D5 - - A5 - - - - - G5 - F#5 -
+E5 - - C#5 - - A4 - - - B4 - C#5 - E5 -
+F#5 - - D5 - - B5 - - - - - A5 - F#5 -
+G5 - - - - - D5 - - - . . B4 - D5 -
+F#5 - - D5 - - B4 - - - C#5 - D5 - F#5 -
+G5 - - D5 - - B4 - D5 - - - E5 - F#5 -
+A5 - - - G5 - F#5 - E5 - - - C#5 - E5 -
+D5 - - - - - - - - - . A4 B4 - C#5 -
+D5 - - - G5 - - - B5 - - - A5 - G5 -
+A5 - - - - - E5 - - - - - C#5 - E5 -
+A5 - - - - - F#5 - - - - - C#5 - F#5 -
+F#5 - - - - - - - D5 - - - C#5 - D5 -
+E5 - - B4 E5 - G5 - - - F#5 - E5 - D5 -
+F#5 - - C#5 F#5 - A5 - - - G5 - F#5 - E5 -
+G5 - - D5 G5 - B5 - - - A5 - G5 - F#5 -
+A5 - - - - - - - C#5 D5 E5 F#5 G5 - E5 -`, counter:`
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+B4 - - - - - - - D5 - - - - - - -
+C#5 - - - - - - - A4 - - - - - - -
+C#5 - - - - - - - A4 - - - - - - -
+B4 - - - - - - - F#4 - - - - - - -
+G4 - - - - - - - B4 - - - - - - -
+A4 - - - - - - - C#5 - - - - - - -
+B4 - - - - - - - D5 - - - - - - -
+C#5 - - - - - - - E5 - - - - - - -`},
+
+  // 格納庫・ショップ・研究所：ゆったり工房のグルーヴ（G ミクソリディア風・110）
+  hangar:{bpm:110, chords:'G F C G G F Am D C D Bm Em Am F C D', bass:'walk', arp:'updown', drums:'calm', pad:true, gain:0.9, lead:`
+D5 . G4 . B4 - D5 - - - . . E5 - D5 -
+C5 . F4 . A4 - C5 - - - . . D5 - C5 -
+E5 - - - G5 - - - E5 - D5 - C5 - . .
+D5 - - - - - . . B4 . A4 . G4 - - -
+D5 . G4 . B4 - D5 - - - . . E5 - G5 -
+F5 - - - . . C5 - A4 - - - C5 - D5 -
+E5 - - - C5 - - - A4 - - - B4 - C5 -
+D5 - - - - - . . A4 . F#4 . A4 - B4 -
+C5 - - - - - E5 - G5 - - - - - . .
+F#5 - - - - - A5 - - - F#5 - D5 - . .
+D5 - - - - - F#5 - B4 - - - - - . .
+G5 - - - F#5 - E5 - - - - - . . D5 -
+C5 - - - E5 - A5 - - - G5 - E5 - . .
+F5 - - - - - C5 - A4 - - - C5 - D5 -
+E5 - - - G5 - E5 - C5 - - - D5 - E5 -
+F#5 - - - - - . . A4 . B4 . C5 - C#5 -`},
+
+  // ステージ1 星の海（Am・152）見本どおり
+  st1:{bpm:152, shift:{chip:-12,synth:-12}, chords:'Am F G Em Am F G E F G Am Am F G E E', bass:'oct', arp:'up', drums:'drive', lead:`
+E5 - - - A5 - - - G5 - E5 - D5 - E5 -
+C5 - - - F5 - - - E5 - C5 - A4 - C5 -
+D5 - - - G5 - - - F5 - D5 - B4 - D5 -
+E5 - - - - - - - B4 - - - E5 - G5 -
+A5 - - - G5 - E5 - C6 - - - B5 - A5 -
+A5 - - - G5 - F5 - E5 - - - C5 - D5 -
+D5 - E5 - F5 - G5 - B5 - - - A5 - G5 -
+G#5 - - - - - - - E5 - F5 - G#5 - B5 -
+C6 - - - A5 - - - F5 - - - A5 - C6 -
+D6 - - - B5 - - - G5 - - - B5 - D6 -
+E6 - - - - - - - D6 - C6 - B5 - C6 -
+A5 - - - - - - - - - - - E5 - A5 -
+C6 - - - B5 - A5 - G5 - A5 - - - F5 -
+G5 - - - A5 - B5 - D6 - - - C6 - B5 -
+B5 - - - - - - - G#5 - - - - - - -
+E5 - F5 - G#5 - A5 - B5 - C6 - D6 - E6 -`},
+
+  // ステージ2 小惑星帯：連打の動機でせき立てる（Em・160）
+  st2:{bpm:160, chords:'Em C D Em Em C Am B C D B Em Am C B B', bass:'gallop', arp:'down', drums:'drive', lead:`
+E5 E5 . B4 . E5 . G5 - - F#5 - E5 - B4 -
+C5 C5 . G4 . C5 . E5 - - D5 - C5 - G4 -
+D5 D5 . A4 . D5 . F#5 - - E5 - D5 - A4 -
+E5 - - - B5 - - - G5 - - - E5 - . .
+E5 E5 . B4 . E5 . G5 - - B5 - A5 - G5 -
+E5 - - - C5 - E5 - G5 - - - E5 - C5 -
+A4 - - C5 E5 - A5 - - - G5 - F#5 - E5 -
+D#5 - - - F#5 - - - B5 - - - A5 - F#5 -
+G5 - - - - - E5 - C5 - - - E5 - G5 -
+A5 - - - - - F#5 - D5 - - - F#5 - A5 -
+B5 - - - - - A5 - F#5 - - - D#5 - F#5 -
+G5 - - - - - E5 - B4 - - - . . B4 B4
+C5 C5 . A4 . C5 . E5 - - D5 - C5 - B4 -
+C5 C5 . G4 . C5 . E5 - - G5 - E5 - C5 -
+B4 B4 . F#4 . B4 . D#5 - - F#5 - D#5 - B4 -
+F#5 - - - D#5 - - - B4 - C5 - C#5 - D#5 -`},
+
+  // ステージ3 氷の星雲：長い音ときらめく装飾、Cの和音でひんやり（Bm・132）
+  st3:{bpm:132, chords:'Bm G Em F# Bm G C F# G A D Bm Em G F# F#', bass:'eighth', arp:'wide', arpOct:12, drums:'half', pad:true, lead:`
+B4 - - F#5 - - - - - - - - E5 - D5 -
+B4 - - - - - - - . . G4 - B4 - D5 -
+E5 - - B5 - - - - - - - - A5 - G5 -
+F#5 - - - - - - - . . A#4 - C#5 - E5 -
+D5 - - F#5 - - - - - - - - E5 - D5 -
+B4 - - D5 - - G5 - - - - - A5 - F#5 -
+G5 - - - - - E5 - - - - - C5 - E5 -
+F#5 - - - - - - - C#5 - A#4 - C#5 - E5 -
+D5 - - - G5 - - - B5 - - - A5 G5 F#5 G5
+A5 - - - - - E5 - C#5 - - - E5 - A5 -
+F#5 - - - - - D5 - A4 - - - D5 E5 F#5 A5
+B5 - - - - - - - - - - - F#5 - - -
+G5 - - - - - E5 - B4 - - - - - D5 -
+G5 - - - - - D5 - B4 - - - D5 - E5 -
+F#5 - - - E5 - - - C#5 - - - A#4 - - -
+F#4 - - - - - - - A#4 - C#5 - E5 - A#4 -`, counter:`
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+B4 - - - - - - - - - - - - - - -
+C#5 - - - - - - - - - - - - - - -
+A4 - - - - - - - - - - - - - - -
+D5 - - - - - - - - - - - - - - -
+B4 - - - - - - - - - - - - - - -
+D5 - - - - - - - - - - - - - - -
+C#5 - - - - - - - - - - - - - - -
+A#4 - - - - - - - - - - - - - - -`},
+
+  // ステージ4 機械要塞：半音でうなる機械の行進（Cm・144）
+  st4:{bpm:144, chords:'Cm Cm Ab G Cm Cm Db G Fm Fm Cm Cm Ab Bb G G', bass:'pulse', arp:'updown', drums:'march', lead:`
+G4 . G4 G4 Ab4 . F#4 . G4 . . . C5 - D5 -
+Eb5 - - - D5 . Db5 . C5 - - - . . G4 -
+C5 . C5 C5 Db5 . B4 . C5 . . . Eb5 - Ab5 -
+G5 - - - F5 - D5 - B4 - - - C5 - D5 -
+G4 . G4 G4 Ab4 . F#4 . G4 . . . C5 - Eb5 -
+G5 - - - F#5 . F5 . Eb5 - - - D5 - C5 -
+Db5 - - Db5 F5 - - F5 Ab5 - - - G5 - F5 -
+G5 - - - - - - - B4 . C5 . C#5 . D5 .
+F5 - - F5 Ab5 - - - F5 - Eb5 - E5 - F5 -
+C5 - - C5 Eb5 - - - C5 - Bb4 - B4 - C5 -
+Eb5 - - - D5 - Eb5 - G5 - - - F5 - Eb5 -
+C5 - - - - - - - . . G4 . Ab4 . Bb4 .
+C5 - - C5 Eb5 - - Eb5 Ab5 - - - G5 - F5 -
+D5 - - D5 F5 - - F5 Bb5 - - - Ab5 - F5 -
+G5 - - - - - - - D5 - - - B4 - - -
+D5 . D5 D5 B4 . B4 B4 G4 . G4 G4 Ab4 . F#4 .`},
+
+  // ステージ5 深淵：重い半分テンポから16分で高まる、Gbとオーギュメントの影（Fm・126）
+  st5:{bpm:126, chords:'Fm Db Gb C Fm Db Bbm C Db Eb Fm Fm Db Eb C C Bbm Gb Db C', bass:'half', arp:'down', drums:'half', pad:true, lead:`
+C5 - - - - - - - - - . . Db5 - C5 -
+Ab4 - - - - - - - F4 - - - . . Ab4 -
+Bb4 - - - - - - - Db5 - - - Gb5 - F5 -
+E5 - - - - - - - C5 - - - E5 - G5 -
+F5 - - - - - - - - - . . Gb5 - F5 -
+Db5 - - - - - - - Ab4 - - - Bb4 - C5 -
+Db5 - - - - - F5 - - - - - Eb5 - Db5 -
+C5 - - - - - - - G4 - - - E4 - G4 -
+Ab4 Bb4 C5 - Db5 - F5 - Ab5 - - - F5 - Db5 -
+Bb4 C5 D5 - Eb5 - G5 - Bb5 - - - G5 - Eb5 -
+C5 Db5 Eb5 - F5 - Ab5 - C6 - - - Ab5 - F5 -
+Ab5 - - - G5 - F5 - C5 - - - . . Eb5 -
+F5 Eb5 Db5 - Ab4 - Db5 - F5 - - - Eb5 - Db5 -
+Eb5 F5 G5 - Bb5 - G5 - Eb5 - - - G5 - Bb5 -
+C6 - - - - - - - G5 - - - E5 - - -
+G5 - Ab5 - G5 - F5 - E5 - - - Db5 - C5 -
+Db5 - - - - - - - F5 - - - Bb5 - - -
+- - - - - - - - Gb5 - - - Db5 - - -
+F5 - - - - - Ab5 - - - F5 - Db5 - - -
+E5 - - - - - - - G4 - G#4 - A4 - B4 -`, counter:`
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+F4 - - - - - - - - - - - - - - -
+G4 - - - - - - - - - - - - - - -
+Ab4 - - - - - - - - - - - - - - -
+C5 - - - - - - - - - - - - - - -
+Ab4 - - - - - - - - - - - - - - -
+Bb4 - - - - - - - - - - - - - - -
+G4 - - - - - - - - - - - - - - -
+E4 - - - - - - - - - - - - - - -
+F4 - - - - - - - - - - - - - - -
+Gb4 - - - - - - - - - - - - - - -
+F4 - - - - - - - - - - - - - - -
+E4 - - - - - - - - - - - - - - -`},
+
+  // 大型の敵：半音でゆれる警報の動機（F#m・172）
+  boss:{bpm:172, chords:'F#m D E F#m F#m D G C# Bm C# F#m D Bm G C# C#', bass:'oct', arp:'up', drums:'boss', lead:`
+F#5 G5 F#5 G5 F#5 - C#5 - F#5 G5 F#5 G5 F#5 - A5 -
+F#5 G5 F#5 G5 F#5 - D5 - A5 - - - F#5 - E5 -
+G#5 A5 G#5 A5 G#5 - E5 - B5 - - - G#5 - E5 -
+F#5 - - - - - - - C#5 - E5 - F#5 - G#5 -
+A5 G#5 A5 G#5 A5 - E5 - F#5 - - - C#5 - E5 -
+F#5 E5 F#5 E5 F#5 - D5 - A4 - - - D5 - F#5 -
+G5 - D5 - G5 - B5 - D5 - G5 - B5 - G5 -
+G#5 - G#5 - F5 - G#5 - C#5 - - - F5 - G#5 -
+F#5 - - F#5 - - F#5 - B5 - - - A5 - F#5 -
+F5 - - F5 - - F5 - G#5 - - - F5 - C#5 -
+C#5 - - C#5 - - F#5 - A5 - - - G#5 - F#5 -
+A5 - - - F#5 - - - D5 - E5 - F#5 - A5 -
+B5 - A5 - F#5 - D5 - F#5 - A5 - B5 - A5 -
+B5 - G5 - D5 - G5 - B5 - - - G5 - D5 -
+G#5 A5 G#5 A5 G#5 - F5 - G#5 A5 G#5 A5 G#5 - F5 -
+C#5 D5 C#5 D5 C#5 - F5 - G#5 - - - F5 - G#5 -`},
+
+  // 最終ボス「深淵の核」：タイトルの動機を短調で、Ebの和音で最後の山場（Dm・150）
+  final:{bpm:150, chords:'Dm A Bb Gm Bb Gm A Dm Gm C F Bb Gm Eb Bb A Dm A Bb Gm Bb C Eb A', bass:'gallop', arp:'down', drums:'boss', pad:true, lead:`
+F5 - - D5 - - A5 - - - - - G5 - F5 -
+E5 - - C#5 - - A4 - - - Bb4 - C#5 - E5 -
+F5 - - D5 - - Bb5 - - - - - A5 - F5 -
+G5 - - - - - D5 - - - . . Bb4 - D5 -
+F5 - - D5 - - Bb4 - - - C5 - D5 - F5 -
+G5 - - D5 - - Bb4 - D5 - - - F5 - G5 -
+A5 - - - G5 - F5 - E5 - - - C#5 - E5 -
+D5 - - - - - - - - - . D5 E5 - F5 -
+G5 - - - - - - - Bb5 - - - A5 - G5 -
+E5 - - - - - - - G5 - - - F5 - E5 -
+F5 - - - C5 - F5 - A5 - - - G5 - F5 -
+D5 - - - - - - - F5 - G5 - A5 - Bb5 -
+- - - - - - A5 - G5 - - - D5 - F5 -
+G5 - - - - - - - Bb5 - - - G5 - Eb5 -
+F5 - - - D5 - F5 - Bb5 - - - A5 - F5 -
+E5 - - - - - - - C#5 D5 E5 F5 G5 F5 E5 -
+F5 - - D5 - - A5 - - - - - G5 - F5 -
+E5 - - C#5 - - A4 - - - Bb4 - C#5 - E5 -
+F5 - - D5 - - Bb5 - - - - - A5 - Bb5 -
+G5 - - - - - Bb5 - - - - - A5 - G5 -
+F5 - - - - - - - Bb5 - - - - - - -
+G5 - - - - - - - C6 - - - - - - -
+Bb5 - - - - - - - G5 - - - Eb5 - - -
+C#5 - - - E5 - - - A5 - - - G5 - E5 -`, counter:`
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+D5 - - - - - - - - - - - - - - -
+C5 - - - - - - - - - - - - - - -
+C5 - - - - - - - - - - - - - - -
+Bb4 - - - - - - - - - - - - - - -
+D5 - - - - - - - - - - - - - - -
+Eb5 - - - - - - - - - - - - - - -
+D5 - - - - - - - - - - - - - - -
+C#5 - - - - - - - - - - - - - - -
+A4 - - - - - - - - - - - - - - -
+C#5 - - - - - - - - - - - - - - -
+D5 - - - - - - - - - - - - - - -
+D5 - - - - - - - - - - - - - - -
+D5 - - - - - - - - - - - - - - -
+E5 - - - - - - - - - - - - - - -
+Eb5 - - - - - - - - - - - - - - -
+C#5 - - - - - - - - - - - - - - -`},
+
+  // クリア：ファンファーレ、最後はDを長くのばして格納庫へ（D・140）
+  clear:{bpm:140, loop:false, then:'hangar', chords:'G A D', bass:'whole', arp:'off', drums:{k:'x...............', s:'x...............', h:'................'}, fill:false, pad:true, lead:`
+D5 . D5 D5 G5 - - - B4 - - - D5 - G5 -
+E5 . E5 E5 A5 - - - E5 - - - C#5 - - -
+D5 - - - - - - - - - - - - - - -`, counter:`
+B4 . B4 B4 D5 - - - G4 - - - B4 - D5 -
+C#5 . C#5 C#5 E5 - - - C#5 - - - A4 - - -
+F#4 - - - - - - - - - - - - - - -`},
+
+  // 撃墜：おりていく短いフレーズ、Fm→Cで少しだけ前向きに（100）
+  over:{bpm:100, loop:false, then:'hangar', chords:'Fm C', bass:'whole', arp:'off', drums:'none', fill:false, pad:true, gain:0.9, lead:`
+C6 - - Ab5 - - F5 - - - - - Eb5 - D5 -
+C5 - - - - - - - - - - - - - - -`, counter:`
+Ab4 - - - - - - - - - - - - - - -
+G4 - - - - - - - - - - - - - - -`},
+
+  // おわり：タイトルの動機をゆっくり、なつかしく（C・96）
+  ending:{bpm:96, chords:'C G Am F Am F G C F G Em Am Dm Em F G', bass:'half', arp:'wide', drums:'calm', pad:true, gain:0.9, lead:`
+E5 - - C5 - - G5 - - - - - F5 - E5 -
+D5 - - B4 - - G4 - - - - - . . . .
+E5 - - C5 - - A5 - - - - - G5 - E5 -
+F5 - - - - - - - C5 - - - - - . .
+E5 - - C5 - - A4 - - - B4 - C5 - E5 -
+F5 - - C5 - - A4 - C5 - - - D5 - E5 -
+G5 - - - F5 - E5 - D5 - - - B4 - D5 -
+C5 - - - - - - - - - . G4 A4 - B4 -
+C5 - - - F5 - - - A5 - - - G5 - F5 -
+G5 - - - - - D5 - - - - - B4 - D5 -
+G5 - - - - - E5 - - - - - B4 - E5 -
+- - - - - - - - C5 - - - B4 - C5 -
+D5 - - A4 D5 - F5 - - - E5 - D5 - C5 -
+E5 - - B4 E5 - G5 - - - F5 - E5 - D5 -
+F5 - - C5 F5 - A5 - - - G5 - F5 - E5 -
+G5 - - - - - - - D5 - - - F5 - - -`, counter:`
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . .
+A4 - - - - - - - - - - - - - - -
+B4 - - - - - - - - - - - - - - -
+G4 - - - - - - - - - - - - - - -
+A4 - - - - - - - - - - - - - - -
+F4 - - - - - - - - - - - - - - -
+G4 - - - - - - - - - - - - - - -
+A4 - - - - - - - - - - - - - - -
+B4 - - - - - - - - - - - - - - -`},
+};
 /* SONGS:END */
 const bgmOn=()=>save.bgm!==undefined?save.bgm!==false:save.snd!==false;/* まだ決めていないセーブは、前の「音」と同じ */
 const BGM=(()=>{
@@ -2267,7 +2582,7 @@ const BGM=(()=>{
     if(st===0&&(chip?s.pad===true:s.pad!==false))c.t.forEach(x=>{const m=48+c.r+x;voice(S,t,m<55?m+12:m,sd*16,'pad');});
     if(P.arp){const ts=[c.t[0],c.t[1],c.t[2],12,c.t[1]+12,c.t[2]+12],a=P.arp[st%P.arp.length],base=(chip?60+c.r+(c.r<5?12:0):60+c.r-(c.r>=7?12:0))+(s.arpOct||0);
       voice(S,t,base+ts[a],sd,'arp');}
-    const d=P.dr,k=d.k[st],n=d.s[st],h=d.h[st];
+    const d=P.dr,k=(d.k||'')[st],n=(d.s||'')[st],h=(d.h||'')[st];
     if(k==='x'||k==='o')kick(S,t,k==='x'?(chip?0.8:0.9):0.5);
     if(s.fill!==false&&d.s&&bar%4===3&&st>=12)snare(S,t,0.32+0.06*(st-12));
     else if(n==='x'||n==='o')snare(S,t,n==='x'?(chip?0.45:0.4):0.22);
@@ -2281,11 +2596,11 @@ const BGM=(()=>{
     while(!S.done&&S.next<tEnd){if(S.step>=S.P.steps){if(S.s.loop===false){S.done=true;S.end=S.next;break;}S.step=(S.s.loopFrom||0)*16;}
       step(S,S.step,S.next);S.next+=S.sd;S.step++;}}
   /* ---- 場面の曲をかえる ---- */
-  let E=null,cur=null,want=null,tm=0,duckK=1;const pos={};
+  let E=null,cur=null,want=null,tm=0,duckK=1,style=BGM_STYLE;const pos={};
   const on=()=>bgmOn()&&SFX.ac&&SFX.ac.state==='running';
-  function ensure(){if(E)return true;const ac=SFX.ac;if(!ac||!SFX.comp)return false;const o=ac.createGain();o.gain.value=BGM_VOL*duckK;o.connect(SFX.comp);E=env(ac,o,BGM_STYLE);return true;}
+  function ensure(){if(E)return true;const ac=SFX.ac;if(!ac||!SFX.comp)return false;const o=ac.createGain();o.gain.value=BGM_VOL*BGM_SG[style]*duckK;o.connect(SFX.comp);E=env(ac,o,style);return true;}
   function fade(S,sec){const t=S.E.ac.currentTime;if(S.s.loop!==false)pos[S.key]=((S.step/16)|0)%S.P.bars;S.done=true;
-    for(const g of [S.g,S.dl,S.rv])if(g){g.gain.cancelScheduledValues(t);g.gain.setValueAtTime(g.gain.value,t);g.gain.linearRampToValueAtTime(0,t+sec);}
+    for(const g of [S.g,S.dl,S.rv])if(g){const p=g.gain;if(p.cancelAndHoldAtTime)p.cancelAndHoldAtTime(t);else{p.cancelScheduledValues(t);p.setValueAtTime(p.value,t);}p.linearRampToValueAtTime(0,t+sec);}
     setTimeout(()=>{for(const g of [S.g,S.dl,S.rv])if(g)try{g.disconnect();}catch(_){}},(sec+3)*1000);}
   function pump(){if(!cur||!E){clearInterval(tm);tm=0;return;}const ac=E.ac;if(ac.state!=='running')return;
     if(!cur.done)sched(cur,ac.currentTime+0.3);
@@ -2304,15 +2619,17 @@ const BGM=(()=>{
     if(!tm)tm=setInterval(pump,50);pump();}
   /* play(曲の名前)：その場面の曲にする（同じ曲ならそのまま）・play(null)：止める */
   function play(key){want=key||null;kick();}
-  function duck(on){duckK=on?0.35:1;if(E)E.out.gain.setTargetAtTime(BGM_VOL*duckK,E.ac.currentTime,0.08);}
+  function duck(on){duckK=on?0.35:1;if(E)E.out.gain.setTargetAtTime(BGM_VOL*BGM_SG[style]*duckK,E.ac.currentTime,0.08);}
+  /* 音色をかえる（音の一覧のページ用。ゲームは BGM_STYLE のまま） */
+  function setStyle(v){if(v===style||!BGM_SG[v])return;style=v;if(cur&&!cur.done)fade(cur,0.2);cur=null;if(E){const o=E.out;setTimeout(()=>{try{o.disconnect();}catch(_){}},3500);}E=null;kick();}
   function reset(){for(const k in pos)delete pos[k];}
   /* 点検用：曲をすべて読めるか・ずっと鳴らさずに音の大きさを測る */
   function check(){const err=[];for(const k in SONGS){try{const s=SONGS[k];delete s.P;prep(s);if(s.then&&!SONGS[s.then])err.push(k+' then');if((s.loopFrom||0)>=prep(s).bars)err.push(k+' loopFrom');}catch(e){err.push(k+': '+e.message);}}return err;}
-  async function render(key,secs,style){const sr=22050,oc=new OfflineAudioContext(2,Math.ceil(sr*secs),sr),o=oc.createGain();o.gain.value=BGM_VOL;o.connect(oc.destination);
-    const S=inst(env(oc,o,style||BGM_STYLE),key,0.02,0);sched(S,secs);const buf=await oc.startRendering();let pk=0,ss=0,n=0;
+  async function render(key,secs,style){const sr=22050,oc=new OfflineAudioContext(2,Math.ceil(sr*secs),sr),o=oc.createGain(),sv=style||BGM_STYLE;o.gain.value=BGM_VOL*BGM_SG[sv];o.connect(oc.destination);
+    const S=inst(env(oc,o,sv),key,0.02,0);sched(S,secs);const buf=await oc.startRendering();let pk=0,ss=0,n=0;
     for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=d[i]*d[i];n++;}}
     return {peak:+pk.toFixed(4),rms:+Math.sqrt(ss/n).toFixed(5),loop:+(S.P.steps*S.sd).toFixed(1)};}
-  return {play,kick,duck,reset,check,render,get key(){return cur&&!cur.done?cur.key:null},get want(){return want}};
+  return {play,kick,duck,reset,check,render,setStyle,get style(){return style},get ducked(){return duckK<1},get key(){return cur&&!cur.done?cur.key:null},get want(){return want}};
 })();
 
 
@@ -4707,7 +5024,7 @@ function openPause(){
 }
 function endRun(clear,retreat){
   if(!R||R.state==='over')return;
-  R.state='over';sdrag=null;banner.hidden=true;
+  R.state='over';sdrag=null;banner.hidden=true;BGM.duck(false);/* 一時停止から撤退したときも、BGM の大きさをもどす */
   const S=STAGES[R.stg-1],gk=Math.floor(R.kills/2),gt=Math.floor(Math.min(R.t,RUN_LEN)/2),gb=R.bossKills*50,gc=clear?S.gold:0,gm=Math.floor(R.gold),base=gk+gt+gb+gc+gm;/* クリアのお金はステージごと（#13） */
   const gi=Math.floor(base*((1+0.15*R.pas.gold+R.bonus.gold)*R.sh.gold*R.cs.goldM-1)),total=base+gi;/* cs.goldM：研究所の商売・欲ばり（#12） */
   save.gold+=total;
@@ -4733,7 +5050,7 @@ function endRun(clear,retreat){
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
   persist();
-  if(!retreat){if(bgmOn())BGM.play(firstEnd?'ending':clear?'clear':'over');else SFX.play(clear?'clear':'over');if(clear)setTimeout(()=>SFX.play('coin'),900);}else BGM.play('hangar');
+  if(!retreat){if(bgmOn())BGM.play(firstEnd?'ending':clear?'clear':'over');if(!BGM.key)SFX.play(clear?'clear':'over');if(clear)setTimeout(()=>SFX.play('coin'),900);}else BGM.play('hangar');
   const result=()=>{
   overlay.textContent='';
   overlay.append(el('h2',null,clear?'クリア！':retreat?'撤退':'撃墜…'));

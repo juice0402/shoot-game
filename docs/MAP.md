@@ -1,7 +1,7 @@
 # 地図（shoot）
 
 読むときは、この地図 → `grep -n 'ことば' index.html | cut -c1-200` → その前後だけ読む（Read の offset と limit）。直すのは Edit で変わる所だけ。
-行の目安は 2026-11-17（#34 のあと・全部で約4,760行・約420KB）。大きくずれたら直す。
+行の目安は 2026-11-17（#34 のあと・全部で約4,760行・約420KB）。#37 で BGM の約460行が 2179〜2636 に入ったので、それより下の行は約＋470（全部で約5,250行・約460KB）。大きくずれたら直す。
 
 ## ファイル
 | ファイル | 役目 |
@@ -10,6 +10,7 @@
 | tools/test/*.py | テスト（Playwright）。harness14.py がテスト用のコピー（window.__T に中身を出す）を作る。記録は docs/TESTS.md。重さは perf34（全機体の終盤・描く命令の数）・見た目が変わっていないかは same34（前の index.html とドットをくらべる） |
 | tools/art-ref/ | ドット絵の描き方の見本（README.md・ship_v2.py） |
 | docs/design/ | 試作6の設計（parts・ships・upgrades・stages・unlocks） |
+| tools/bgm/ | check_songs.js（曲のデータの点検：16こま・音の名前・和音・音域・長さ）・jukebox.py（音の一覧のページを作る：12曲を A・B で・効果音ぜんぶ。`python3 tools/bgm/jukebox.py 出力.html`） |
 | tools/cover/・docs/kobo/cover.png | ゲーム工房の表紙（800x1200・ゲームのドット絵で描く）。`FONTS=<@fontsource/dotgothic16> python3 tools/cover/cover.py` で作りなおす。タイトルのロゴの形（index.html の LOGO）もここから |
 | docs/ART.md | 絵の作り方 |
 | docs/shots/ | テストのスクショ（自動で作る・読まない） |
@@ -24,7 +25,7 @@
 | 1650〜1870 | ステージの背景 |
 | 1870〜1990 | セーブ：1878 freshSave・1898 ACH（実績）・1927 loadSave（古いセーブの直し）・1973 persist |
 | 1995〜2175 | 効果音 SFX（Web Audio。名前と鳴らし方の表。comm・talk は通信。ac と comp を BGM と共有） |
-| 2175〜 | BGM（#37）：BGM_STYLE・BGM_VOL・SONGS（`/* SONGS:BEGIN */`〜`END`・曲のデータ）・bgmOn・BGM（play・kick・duck・reset・check・render）。場面ごとの play は showTitle・toHangarFromTitle・startRun・addBig・killed・winStart・endRun・結果の toHangar |
+| 2179〜2636 | BGM（#37）：BGM_STYLE・BGM_SG（音色ごとの大きさ）・BGM_VOL・2185〜2501 SONGS（`/* SONGS:BEGIN */`〜`END`・曲のデータ。読まずに node tools/bgm/check_songs.js で点検）・bgmOn・2503 BGM（play・kick・duck・reset・setStyle・check・render）。場面ごとの play は showTitle・toHangarFromTitle・startRun・addBig・killed・winStart・endRun・結果の toHangar |
 | 2166〜2550 | 格納庫：2212 drawEditor（機体と装備を描く）・2236 snapAt（装備がはまる動き）・その下に popAt（外す動き）・2296 tutGuide（はじめの案内）・2326 TALK（整備士のセリフ）と通信（commShow・commTip・talkUnl）・2392 renderEquip・2428 openSheet（板・作りこみの道具）・2464 openList・2491 openDir（向きの板）・2506 openAim・2531 openInfo（くわしく） |
 | 2551〜2745 | ショップ（2551 renderShop）・研究所（2621 renderLab）・図鑑・実績 |
 | 2746〜4116 | 出撃：2749 calcCS（共通の数字）・2815 startRun・敵の動き・攻撃の装備・防御と補助と進化・必殺技・支援 |
@@ -43,4 +44,5 @@
   新しく点をたくさん描く飾りを足すときは dense で囲む。囲みの中でも、ふつうに g.fillStyle・g.globalAlpha・g.drawImage・g.save/translate/restore を使ってよい。色は '#rrggbb'・'#rgb'・'rgb()'・'rgba()'。
   ほかのキャンバス（タイトル・格納庫）には関係しない。重さは perf34、見た目は same34 で確かめる
 - separate（敵どうしの押し合い）は near と同じ順でマスを見る形（敵ごとに関数を作らない）
+- 音（#37）：曲を足す・直すのは SONGS だけ（和音1小節に1つ・メロディ1小節16こま・ベースと分散和音と打楽器は和音から）。場面の曲は BGM.play(名前)。BGM と効果音の ON・OFF はべつべつ（save.bgm・save.snd）。点検は tools/test/bgm37.py
 - 自動で作るファイル：docs/shots/・tools/test/__pycache__（読まない・手で直さない）
