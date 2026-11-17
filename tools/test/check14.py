@@ -5,7 +5,7 @@
 - セーブ：試作5（main）の形・試作4の形・#11 の形・#12 の形を読める／保存 → 読みこみで同じ／こわれたセーブ（14通り）で初めからになり、ページも動く／
   出撃のとちゅうで閉じて開き直す（出撃の分は入らない・止まらない）
 - タップだけのひと回り（本物のクリック）：タイトル → 遊び方 → 格納庫 → 装備をつける → 向き → 外す → ショップで買う → 機体を買って切りかえる →
-  研究所 → 図鑑 → 実績 → ステージえらび → 出撃 → レベルアップ → 一時停止（音 OFF・ON）→ 再開 → 結果 → ショップ
+  研究所 → 図鑑 → 実績 → ステージえらび → 出撃 → レベルアップ → 一時停止（BGM・SE の OFF・ON）→ 再開 → 結果 → ショップ
 - 一時停止の間は時間が進まない・画面がかくれると一時停止。音 OFF のときは音を作らない
 - #13 の点検で直したこと：大蛇の体の当たり・レーザーの壁の幅・エンディングは初回だけ・消えたまぼろしをねらわない・霜の弾
 - コンソールのエラーと警告0
@@ -209,10 +209,13 @@ def flow(pg, errs):
     pg.wait_for_timeout(400); pg.locator('#overlay .card').first.click(); pg.wait_for_timeout(200)
     ok('強化をえらぶ → 出撃にもどる', pg.evaluate("()=>window.__T.R.state==='play'"))
     pg.click('#pauseBtn'); pg.wait_for_timeout(200)
-    pg.locator('#overlay .btnrow .btn2').first.click(); s_off = pg.evaluate("()=>window.__T.save.snd===false")
-    pg.locator('#overlay .btnrow .btn2').first.click(); s_on = pg.evaluate("()=>window.__T.save.snd!==false")
+    sw = pg.locator('#overlay .btnrow .hrow .btn2')
+    sw.nth(1).click(); s_off = pg.evaluate("()=>window.__T.save.snd===false")
+    sw.nth(1).click(); s_on = pg.evaluate("()=>window.__T.save.snd!==false")
+    sw.nth(0).click(); b_off = pg.evaluate("()=>window.__T.save.bgm===false")
+    sw.nth(0).click(); b_on = pg.evaluate("()=>window.__T.save.bgm===true")
     pg.click('#overlay .btnrow .go'); pg.wait_for_timeout(200)
-    ok('一時停止 → 音 OFF・ON → 続ける', s_off and s_on and pg.evaluate("()=>window.__T.R.state==='play'"))
+    ok('一時停止 → BGM・SE の OFF・ON → 続ける', s_off and s_on and b_off and b_on and pg.evaluate("()=>window.__T.R.state==='play'"))
     pg.evaluate("()=>{const R=window.__T.R;R.t=window.__T.RUN_LEN-0.05;}"); pg.wait_for_timeout(600)
     if pg.locator('#overlay .btnrow .go').count() and pg.locator('#overlay h2').first.inner_text() == '宝箱':
         pg.wait_for_timeout(400); pg.click('#overlay .btnrow .go'); pg.wait_for_timeout(300)
