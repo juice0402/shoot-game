@@ -14,6 +14,7 @@
 | tools/cover/・docs/kobo/cover.png | ゲーム工房の表紙（800x1200・ゲームのドット絵で描く）。`FONTS=<@fontsource/dotgothic16> python3 tools/cover/cover.py` で作りなおす。タイトルのロゴの形（index.html の LOGO）もここから |
 | docs/ART.md | 絵の作り方 |
 | docs/shots/ | テストのスクショ（自動で作る・読まない） |
+| RELEASES.md・.github/workflows/release.yml・tools/release/ | 工房に出す版（v1.0〜）。版を足して main にマージすると Actions がタグと Releases を作る（いも工場と同じ形） |
 
 ## index.html の中
 | 行 | 節 |

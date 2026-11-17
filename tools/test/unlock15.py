@@ -197,11 +197,11 @@ def shop(pg):
     ok('まだの品のくわしくは買えない', det == [True, 'まだ解放されていない', True], det)
     bk = pg.evaluate("()=>{const T=window.__T;T.closeShop();T.openBook();const b=[...document.querySelectorAll('#bookBody .bgrid')][0].children;let out=[];for(const [i,t] of [[T.TYPES.indexOf('rail'),'rail'],[T.TYPES.indexOf('gatling'),'gatling']]){b[i].click();out.push(document.getElementById('sheet').textContent);T.closeSheet();}T.closeBook();return out;}")
     ok('図鑑：まだの品のヒントは解放の条件', '解放の条件：ステージ3クリア' in bk[0] and 'ショップで買うと記録される' in bk[1], bk)
-    # 全部解放のボタン
+    # 全部解放（テストの道具）
     pg.click('#shopBtn'); pg.wait_for_timeout(150)
-    pg.click('#debugUnl'); pg.wait_for_timeout(150)
+    pg.evaluate('()=>window.__T.dbgUnl()'); pg.wait_for_timeout(150)
     c = shop_counts(pg)
-    ok('試作用：全部解放 → 69こ全部（攻撃42・防御13・補助14）・もうすぐ解放なし', [c[k]['n'] for k in ('atk', 'def', 'sup')] == [42, 13, 14] and not any(c[k]['soon'] for k in c), [c[k]['n'] for k in c])
+    ok('全部解放（テストの道具）→ 69こ全部（攻撃42・防御13・補助14）・もうすぐ解放なし', [c[k]['n'] for k in ('atk', 'def', 'sup')] == [42, 13, 14] and not any(c[k]['soon'] for k in c), [c[k]['n'] for k in c])
     pg.click('#shopClose'); pg.wait_for_timeout(150)
 
 

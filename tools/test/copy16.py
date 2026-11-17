@@ -258,7 +258,7 @@ def screens(pg):
     ok('機体を買ったとき：「〇〇を手に入れた。出撃する機体にした」（◀ ▶ なし）', note.startswith('ラピッドを手に入れた。出撃する機体にした'), note)
     ev("()=>{const T=window.__T;T.closeSheet();T.openDetail('omega');}"); pg.wait_for_timeout(120); S.scan('ショップ くわしく（まだの機体）')
     ev("()=>window.__T.closeSheet()")
-    pg.click('#debugGold'); pg.wait_for_timeout(100); S.scan('ショップ（試作用）')
+    pg.evaluate('()=>window.__T.dbgGold()'); pg.wait_for_timeout(100); S.scan('ショップ（お金あり）')
     pg.click('#shopClose'); pg.wait_for_timeout(150)
     # 研究所・図鑑・実績
     ev("()=>window.__T.openLab()"); pg.wait_for_timeout(150); S.scan('研究所')

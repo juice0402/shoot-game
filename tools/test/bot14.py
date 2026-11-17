@@ -1,5 +1,5 @@
 """自動で遊ぶボット（issue #14）
-使い方: python3 tools/test/bot14.py [--write]   環境変数 SHIPS=standard,rapid  STAGES=1,5  SEEDS=2  JOBS=2  MODE=start,strong
+使い方: python3 tools/test/bot14.py [--write]   環境変数 SHIPS=standard,rapid  STAGES=1,5  SEEDS=2  JOBS=2  MODE=start,strong,max（max＝研究所を全部最大）
 - 指の動きをまねる：この先0.7秒で近くを通る敵の弾・近い敵・レーザーの壁（予告から）から離れる。
   何もなければ近くの宝石を取りに行き、なければ画面の下の真ん中あたりをゆっくり左右に動く（R.target を毎フレーム決める）
 - レベルアップ：進化 → 武器 → そのほか（特別な強化は少なめ）。宝箱は受け取る
@@ -16,8 +16,8 @@ from harness14 import write_build, open_page, ROOT
 RUN = r"""
 ([id,n,mode,seed])=>{const T=window.__T;window.__HOLD=1;window.__seed(seed);if(window.__HS)for(const k in window.__HS)delete window.__HS[k];
   const s=T.freshSave();T.save=s;s.howto=1;s.tut=1;s.rec.stageMax=n-1;s.st=n;s.ships[id].have=true;
-  const strong=mode==='strong';
-  if(strong){s.lab.r_pow=5;s.lab.r_rate=5;s.lab.r_hp=5;}
+  const strong=mode==='strong'||mode==='max';
+  if(strong){s.lab.r_pow=5;s.lab.r_rate=5;s.lab.r_hp=5;}if(mode==='max')for(const o of T.LAB)s.lab[o.id]=o.max;
   T.ensureSlots(s);T.setShip(id);const L=s.ships[id].eq;const st=T.startLoad(id);for(let i=0;i<L.length;i++)L[i]=st[i]||null;{let n=2-L.filter(v=>v&&v.t==='laser').length;for(let i=0;i<L.length&&n>0;i++)if(!L[i]){L[i]={t:'laser',d:0};n--;}}/* はじめの装備：機体の装備＋はじめから持っているレーザー2つ */
   if(strong){const want=['laser','missile','gatling','thunder','sword','shield','mine','plasma','saw','cannon'];let k=0;
     for(let i=0;i<L.length;i++){if(L[i])continue;while(k<want.length&&L.some(v=>v&&v.t===want[k]))k++;if(k<want.length)L[i]={t:want[k++],d:0};}}
