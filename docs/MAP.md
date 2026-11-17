@@ -10,6 +10,7 @@
 | tools/test/*.py | テスト（Playwright）。harness14.py がテスト用のコピー（window.__T に中身を出す）を作る。記録は docs/TESTS.md。重さは perf34（全機体の終盤・描く命令の数）・見た目が変わっていないかは same34（前の index.html とドットをくらべる） |
 | tools/art-ref/ | ドット絵の描き方の見本（README.md・ship_v2.py） |
 | docs/design/ | 試作6の設計（parts・ships・upgrades・stages・unlocks） |
+| tools/cover/・docs/kobo/cover.png | ゲーム工房の表紙（800x1200・ゲームのドット絵で描く）。`FONTS=<@fontsource/dotgothic16> python3 tools/cover/cover.py` で作りなおす。タイトルのロゴの形（index.html の LOGO）もここから |
 | docs/ART.md | 絵の作り方 |
 | docs/shots/ | テストのスクショ（自動で作る・読まない） |
 
@@ -28,7 +29,7 @@
 | 2746〜4116 | 出撃：2749 calcCS（共通の数字）・2815 startRun・敵の動き・攻撃の装備・防御と補助と進化・必殺技・支援 |
 | 4128〜4410 | 4128 update・4196 PXG（描く回数をへらす包み・#34）・4277 draw・4398 hud・4405 frame（fxHold の間は止める） |
 | 4411〜4690 | レベルアップ：4477 openLevelUp・その下に pickChoice・ghostCards（えらんだあとの動き）・openChest・4558 endRun（結果の画面） |
-| 4692〜 | タイトル・遊び方：4692 pixWipe（画面の切りかえ）・4705 showTitle・その下に toHangarFromTitle |
+| 4692〜 | タイトル・遊び方（いちばん下に LOGO と drawLogo＝タイトルのロゴ「ぜんぶのせシップ」）：4692 pixWipe（画面の切りかえ）・4705 showTitle・その下に toHangarFromTitle |
 
 ## 決まり
 - セーブのキーと形は変えない（古いセーブは loadSave で直す）

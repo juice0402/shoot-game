@@ -1,4 +1,4 @@
-<title>シューティング×ヴァンサヴァ</title>
+<title>ぜんぶのせシップ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +31,8 @@ button:disabled{cursor:not-allowed}
   padding:calc(14vh + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .logo{margin:0;text-align:center;font-family:var(--f-num);font-weight:400;font-size:clamp(30px,10vw,46px);line-height:1.25;letter-spacing:.04em;color:#fff2a8;
   text-shadow:0 3px 0 #b8600e,0 6px 0 #6e3006,0 0 18px rgba(255,205,72,.55)}
+.logo .gname{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}/* 11/17：題名はロゴの絵（logoCv）で見せる。文字は読み上げ用 */
+.logocv{display:block;margin:0 auto;max-width:88vw;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 0 14px rgba(255,205,72,.35))}
 .logo small{display:block;margin-top:14px;font-family:var(--f-ui);font-size:15px;letter-spacing:.12em;color:#cfeaff;text-shadow:0 2px 0 #060a1c}
 .tbtns{display:flex;flex-direction:column;gap:10px}
 .tbtns .hrow button{flex:1}
@@ -412,7 +414,7 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
 <section id="title" hidden>
   <canvas id="titleCv" aria-hidden="true"></canvas>
   <div class="tbox">
-    <h1 class="logo"><span class="gname">SHOOT</span><small>シューティング × サバイバー</small></h1>
+    <h1 class="logo"><canvas id="logoCv" class="logocv" aria-hidden="true"></canvas><span class="gname">ぜんぶのせシップ</span><small>シューティング × サバイバー</small></h1>
     <div class="tbtns">
       <button id="startBtn" class="go" type="button">スタート</button>
       <div class="hrow"><button id="howBtn" class="btn3" type="button">遊び方</button><button id="sndBtn" class="btn3" type="button" aria-pressed="true">音 ON</button></div>
@@ -534,7 +536,7 @@ const fmt=t=>{t=Math.floor(t);return String(Math.floor(t/60)).padStart(2,'0')+':
 /* ---------- data ---------- */
 /* 画面は横480ドット。U＝試作4（横320）からの倍率。距離・速さ・大きさはUをかけて、遊んだ手ごたえを同じに保つ */
 /* ゲームの名前（まだ仮）。ここ1か所で変えられる */
-const GAME_NAME='SHOOT（仮）';
+const GAME_NAME='ぜんぶのせシップ';/* 11/17 しょーくんが決めた */
 const U=1.5,RUN_LEN=300,MAXE=280,GW=480,CELL=48,PADG=150,BASE_HP=70,WMAX=8;
 const DIRV=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
 const ARROW_NAME=['上','右上','右','右下','下','左下','左','左上'];
@@ -4756,6 +4758,22 @@ document.addEventListener('pointerdown',()=>SFX.unlock(),{capture:true});
 document.addEventListener('click',e=>{SFX.unlock();const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='startBtn'||b.id==='sndBtn'||b.classList.contains('buybig'))return;SFX.play('btn');},{capture:true});
 
+/* タイトルのロゴ（11/17・表紙と同じ形）：DotGothic16 の点を太くした形を持っておき、5段の色・ふち・厚みで描く（字の読みこみに頼らない）。
+   形は tools/cover/cover.js の mask() で作った。[1点の大きさ, 行] */
+const LOGO=[[4,['00000000000101100000011100000000000000000000000000000000000000000000000000000000','00011000001010110000011100000000000011110010110000000000000000000001110000111000','00011000001010110000011100000000000000011101011000000111111100000001110000111000','00011000001100000000111000000000000000000000101100011101101111000001110000111000','00011000001100000000111000000000000000000000000000111001110011100001110000111000','11111111111111100001110000000000000001100000000001110001110011101111111111111111','00011000001100000001110000000000000000111000000001110011100001110001110000111000','00011000001100000011011110000111001100001101100011100011100001110001110000111000','00011000001100000011110111000111001100000110110011100011100001110001110000111000','00011000001100000011110111000111011000000110110011100111000001110001110000111000','00011001111000000111100111001110011000000110011011100111000001110001110111110000','00011000000000000111000111001110110000000110011011101110000011100001110000000000','00001100000000001110000111011100110110001100011001101110000011100000111000000000','00000111111110001110000011111000000011111000000000111100001111000000011111111100','00000000000000000000000000000000000000000000000000000001111100000000000000000000']],
+  [6,['00000000000000000000000000000000000000000001110','00111000000000000000000000000000000000000011011','00001110000000000000000000000001111111111111011','00000011000000000000110000000000000000000011110','11100000000011000110011000011000000000000011000','00111000000011000011001100011000000000000011000','00001100000011000001101100011000000000000110000','00000000000110000001100000011000000000000110000','00000000000110000000000000110000000000001100000','00000000001100000000000000110000000000001100000','00000000011000000000000001100000000000011000000','00000001110000000000000011000000000001110000000','00001111000000000000001110000000000111000000000','01111000000000000001111000000000111100000000000']]];
+function drawLogo(){const cv=$('logoCv');if(!cv)return;
+  const P={edge:'#12060a',deep:'#5a2206',side:'#a84c0c',hi:'#ffffff',lo:'#c4600e',face:['#fffbe0','#ffe873','#ffd23f','#f5a623','#e8841a']},D=2,gap=2;
+  const L=LOGO.map(([s,rows])=>({s,rows,w:rows[0].length,h:rows.length,o:Math.max(2,Math.round(s*0.5))}));
+  const W=Math.max(...L.map(l=>l.w*l.s+l.o*2)),H=L.reduce((n,l)=>n+(l.h+D)*l.s+l.o*2,0)+gap*(L.length-1);
+  cv.width=W;cv.height=H;cv.style.width=W+'px';const g=cv.getContext('2d');let top=0;
+  for(const l of L){const {s,rows,w,h,o}=l,ox=Math.round((W-w*s)/2),oy=top+o,on=(x,y)=>y>=0&&y<h&&rows[y][x]==='1';
+    g.fillStyle=P.edge;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(on(x,y))g.fillRect(ox+x*s-o,oy+y*s-o,s+o*2,s+o*2+D*s);
+    for(let d=D;d>=1;d--){g.fillStyle=d===D?P.deep:P.side;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(on(x,y))g.fillRect(ox+x*s,oy+(y+d)*s,s,s);}
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(!on(x,y))continue;g.fillStyle=!on(x,y-1)?P.hi:!on(x,y+1)?P.lo:P.face[Math.min(4,Math.floor(y/h*5))];g.fillRect(ox+x*s,oy+y*s,s,s);}
+    top+=(h+D)*s+o*2+gap;}
+}
+drawLogo();
 document.querySelectorAll('.gname').forEach(e=>{e.textContent=GAME_NAME;});
 layoutEditor();renderAll();showTitle();
 setTimeout(warmLazy,300);/* 残りの絵は、出撃していない間に少しずつ作る（#14） */
