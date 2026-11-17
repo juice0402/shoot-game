@@ -167,7 +167,7 @@ def flow(pg, errs):
     pg.locator('#sheet .dirs button').nth(1).click(); pg.wait_for_timeout(200)
     ok('あいた場所 → レーザー → 向き → つく', pg.locator('#slots .slotb.full').count() == full and not vis('#sheetBg'))
     pg.click('#shopBtn'); pg.wait_for_timeout(200); ok('ショップ', vis('#shopSheet'))
-    pg.click('#debugGold'); pg.wait_for_timeout(100)
+    pg.evaluate('()=>window.__T.dbgGold()'); pg.wait_for_timeout(100)
     g0 = pg.evaluate("()=>window.__T.save.gold")
     pg.locator('#shopGrid .sitem.can').first.click(); pg.wait_for_timeout(200)
     pg.click('#sheet .buybig'); pg.wait_for_timeout(200)
