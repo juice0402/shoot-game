@@ -1,0 +1,124 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ぜんぶのせシップ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap">
+<style>
+/*@@style.css@@*/
+</style>
+
+<section id="title" hidden>
+  <canvas id="titleCv" aria-hidden="true"></canvas>
+  <div class="tbox">
+    <h1 class="logo"><canvas id="logoCv" class="logocv" aria-hidden="true"></canvas><span class="gname">ぜんぶのせシップ</span><small>シューティング × サバイバー</small></h1>
+    <div class="tbtns">
+      <button id="startBtn" class="go" type="button">スタート</button>
+      <div class="hrow"><button id="howBtn" class="btn3" type="button">遊び方</button><button id="bgmBtn" class="btn3" type="button" aria-pressed="true">BGM ON</button><button id="sndBtn" class="btn3" type="button" aria-pressed="true">SE ON</button></div>
+    </div>
+  </div>
+</section>
+
+<div id="howto" class="howbg" hidden><div class="howbox" role="dialog" aria-label="遊び方">
+  <div id="howCard" class="howcard"></div>
+  <div class="hrow"><button id="howPrev" class="btn3" type="button">もどる</button><button id="howNext" class="go" type="button">次へ</button></div>
+</div></div>
+
+<main id="hangar" hidden>
+  <header class="top">
+    <button id="toTitle" class="btn3 sq" type="button" aria-label="タイトルへ"></button>
+    <div class="ttl"><h1>格納庫</h1></div>
+    <div class="gold" aria-label="持っているお金"><img class="coin" alt=""><b id="goldNum" class="num">0</b><small>G</small></div>
+    <button id="shopBtn" class="shopbtn" type="button">ショップ</button>
+    <button id="labBtn" class="labbtn" type="button">研究所</button>
+  </header>
+
+  <div class="bay" id="bay">
+    <canvas id="editor" aria-hidden="true"></canvas>
+    <p class="shipcap"><b id="shipName">スタンダード</b><small id="shipSkill"></small></p>
+    <div class="slots" id="slots"></div>
+    <button id="shipPrev" class="navb" type="button" aria-label="前の機体"></button>
+    <button id="shipNext" class="navb" type="button" aria-label="次の機体"></button>
+    <div class="lockbox" id="lockbox" hidden></div>
+    <div class="dots" id="dots"></div>
+    <p class="toast" id="note" aria-live="polite" hidden></p>
+  </div>
+
+  <div class="hrow subrow">
+    <button id="infoBtn" class="btn3" type="button"><img id="infoIc" alt="">くわしく</button>
+    <button id="bookBtn" class="btn3" type="button"><img id="bookIc" alt="">図鑑</button>
+    <button id="achBtn" class="btn3" type="button"><img id="achIc" alt="">実績</button>
+  </div>
+  <div class="stsel" id="stsel">
+    <button id="stPrev" class="stnav" type="button" aria-label="前のステージ"></button>
+    <div class="stinfo"><p class="stname"><img id="stLock" alt="まだ解放されていない" hidden><small id="stNo">ステージ1</small><b id="stName">星の海</b></p><p class="stdesc" id="stDesc"></p></div>
+    <button id="stNext" class="stnav next" type="button" aria-label="次のステージ"></button>
+  </div>
+  <button id="launchBtn" class="go" type="button">出撃</button>
+</main>
+
+<div id="sheetBg" class="sheetbg" hidden><div id="sheet" class="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="tutDim" class="tutdim" hidden><i class="hole"></i><b class="blk"></b><b class="blk"></b><b class="blk"></b><b class="blk"></b><div class="tfinger" id="tfinger"></div></div>
+<div id="comm" class="comm" hidden><div class="cmwin"><div class="cmface"><canvas id="cfaceCv"></canvas></div><div class="cmbody"><p class="cmname" id="cname"></p><p class="cmtext" id="ctext" aria-live="polite"></p><i class="cmnext" id="cnext"></i></div></div></div>
+
+<div id="shopSheet" class="shopx" role="dialog" aria-label="ショップ" hidden>
+  <header class="shead">
+    <h2>ショップ</h2>
+    <div class="gold"><img class="coin" alt=""><b id="goldNum2" class="num">0</b><small>G</small></div>
+    <button id="shopClose" class="btn2 small" type="button">とじる</button>
+  </header>
+  <nav class="stabs" id="shopTabs" role="tablist"></nav>
+  <div class="sgrid" id="shopGrid"></div>
+  <p class="snote" id="shopNote" aria-live="polite"></p>
+</div>
+
+<div id="labSheet" class="shopx" role="dialog" aria-label="研究所" hidden>
+  <header class="shead">
+    <h2>研究所</h2>
+    <div class="gold"><img class="coin" alt=""><b id="goldNum3" class="num">0</b><small>G</small></div>
+    <button id="labClose" class="btn2 small" type="button">とじる</button>
+  </header>
+  <p class="xnote">全部の機体にずっと効く強化</p>
+  <div class="sgrid" id="labGrid"></div>
+  <p class="snote" id="labNote" aria-live="polite"></p>
+</div>
+
+<div id="bookSheet" class="shopx" role="dialog" aria-label="図鑑" hidden>
+  <header class="shead">
+    <h2>図鑑</h2>
+    <b id="bookAll" class="xcount num"></b>
+    <button id="bookClose" class="btn2 small" type="button">とじる</button>
+  </header>
+  <div class="xbody" id="bookBody"></div>
+</div>
+
+<div id="achSheet" class="shopx" role="dialog" aria-label="実績" hidden>
+  <header class="shead">
+    <h2>実績</h2>
+    <b id="achAll" class="xcount num"></b>
+    <button id="achClose" class="btn2 small" type="button">とじる</button>
+  </header>
+  <div class="xbody" id="achBody"></div>
+</div>
+
+<section id="sortie" hidden>
+  <div class="hud">
+    <div class="xpbar" aria-hidden="true"><i id="xpFill"></i></div>
+    <div class="hudrow">
+      <span id="hudLv" class="num">LV 1</span>
+      <span class="clock"><b id="hudTime" class="num">00:00</b><small class="num">/05:00</small></span>
+      <span class="kills">撃破 <b id="hudKills">0</b></span>
+      <button id="pauseBtn" type="button" aria-label="一時停止"><i></i><i></i></button>
+    </div>
+  </div>
+  <div id="stage"><canvas id="game" aria-label="ゲーム画面"></canvas></div>
+  <div class="spbar" id="spbar" aria-hidden="true"><b>必殺</b><span><i id="spFill"></i></span></div>
+  <div id="banner" class="banner" hidden></div>
+  <div id="overlay" class="overlay" hidden></div>
+</section>
+
+<script>
+/*@@js@@*/
+</script>
