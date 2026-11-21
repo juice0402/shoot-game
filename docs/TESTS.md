@@ -2,6 +2,17 @@
 
 テストは `tools/test/` にある（Playwright の chromium で index.html のテスト用のコピーを開く）。ほかのテストと同時に動かすと重さの数字が大きくなるので、1つずつ動かす。
 
+## 2026-11-22 作りの分割（#26・分割だけ・遊び方は同じ）
+
+index.html（462,475バイト・5,248行）を src/shell.html・style.css・js/*.js（16こ・どれも510行まで）に、中身を1文字も変えずに分けた。tools/build.mjs でつなぎなおす。
+
+| テスト | 何をしたか | 結果 |
+|---|---|---|
+| node tools/build.mjs --check・sha256 | ビルドした index.html と前の index.html | 1バイトも同じ（63e1bed3…ee745） |
+| npm test | build --check ＋ check_songs | OK |
+| check14 | いつもの通し | エラー0・警告0・NG0 |
+| Playwright で index.html を開く（390×660） | コンソールのエラー | 0（スクショ docs/shots/build26.png） |
+
 ## 2026-11-17 v1.0（公開前のお掃除と最終デバッグ）
 
 しょーくん「今日公開まで持って行きたい」→「試作6」の札・試作用ボタン2つを消す（テストは harness14 の __T.dbgGold・__T.dbgUnl に）・index.html の頭に doctype・charset・viewport・ボットでステージ5を確かめる。
