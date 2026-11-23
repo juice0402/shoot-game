@@ -1,0 +1,8 @@
+{
+  "name": "shoot-game",
+  "private": true,
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node tools/build.mjs --check && node tools/bgm/check_songs.js"
+  }
+}
