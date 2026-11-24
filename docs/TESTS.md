@@ -2,6 +2,17 @@
 
 テストは `tools/test/` にある（Playwright の chromium で index.html のテスト用のコピーを開く）。ほかのテストと同時に動かすと重さの数字が大きくなるので、1つずつ動かす。
 
+## 2026-11-24 App Store のスクショの場面（src/js/shots.js）
+
+【ios】の頼み：navigator.webdriver のときだけ location.hash='shot=<名前>'（hashchange でも）で場面を出す。台本は Math.random を種 s=7 で固定してから呼ぶ。
+
+| 確かめたこと | 結果 |
+|---|---|
+| 7場面（title・battle・levelup・boss・hangar・shop・lab）を ios-kobo の shots.py と同じ形（430x932・読みこみ 400ms のあと hash・3秒待つ）で撮る | エラー0・どれも絵が出る |
+| 同じ種で2回撮る（battle・boss・levelup） | ドットまで同じ |
+| navigator.webdriver が false のとき hash を変える | 何も起きない（タイトルのまま） |
+| npm test・check14・copy16・stages13 | NG0 |
+
 ## 2026-11-22 作りの分割（#26・分割だけ・遊び方は同じ）
 
 index.html（462,475バイト・5,248行）を src/shell.html・style.css・js/*.js（16こ・どれも510行まで）に、中身を1文字も変えずに分けた。tools/build.mjs でつなぎなおす。
