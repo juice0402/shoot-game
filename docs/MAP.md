@@ -45,6 +45,7 @@
 | special.js | 必殺技・支援・宝箱を受け取る・はじめに絵を描いておく |
 | loop.js | 背景の星・12 update・描く道具 px2・80 PXG（描く回数をへらす包み・#34。ここだけで1つ）・161 draw・282 hud・289 frame |
 | levelup.js | 65 openLevelUp・98 pickChoice・122 openChest・えらんだあとの動き・146 endRun（結果）・エンディング・出撃の操作 |
+| shots.js | App Store のスクショの場面（11/24）。navigator.webdriver のときだけ、location.hash='shot=<名前>' で title・battle・levelup・boss・hangar・shop・lab を出す（shotSave＝見本のセーブ・shotRun＝出撃を決まったこま数進めて fxHold で止める）。ios-kobo の apps/shoot/app.json の台本から呼ぶ |
 | title.js | 31 pixWipe・44 showTitle・音の ON・OFF・遊び方・104 LOGO と drawLogo・起動（showTitle）・おわりの `})();` |
 
 ## 決まり
