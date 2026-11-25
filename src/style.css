@@ -9,7 +9,7 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{height:100%}
+html,body{height:100%;touch-action:manipulation}
 body{margin:0;background:var(--void);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;overflow:hidden;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   -webkit-tap-highlight-color:transparent}
@@ -44,6 +44,7 @@ button:disabled{cursor:not-allowed}
 .howdots i{width:9px;height:9px;background:var(--edge)}
 .howdots i.on{background:var(--go)}
 .howbox .hrow button:first-child{flex:none;width:30%}
+.resetmsg{margin:0;font-size:15px;line-height:1.7;text-align:center;white-space:pre-line}/* 1行19字まで（360の幅）。行は \n で手で切る */
 
 /* ---------- hangar（スマホ1画面：上＝お金とショップ／まんなか＝大きな機体／下＝出撃） ---------- */
 #hangar{height:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:8px;
