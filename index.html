@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ぜんぶのせシップ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{height:100%}
+html,body{height:100%;touch-action:manipulation}
 body{margin:0;background:var(--void);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;overflow:hidden;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   -webkit-tap-highlight-color:transparent}
@@ -53,6 +53,7 @@ button:disabled{cursor:not-allowed}
 .howdots i{width:9px;height:9px;background:var(--edge)}
 .howdots i.on{background:var(--go)}
 .howbox .hrow button:first-child{flex:none;width:30%}
+.resetmsg{margin:0;font-size:15px;line-height:1.7;text-align:center;white-space:pre-line}/* 1行19字まで（360の幅）。行は \n で手で切る */
 
 /* ---------- hangar（スマホ1画面：上＝お金とショップ／まんなか＝大きな機体／下＝出撃） ---------- */
 #hangar{height:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:8px;
@@ -419,7 +420,8 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
     <h1 class="logo"><canvas id="logoCv" class="logocv" aria-hidden="true"></canvas><span class="gname">ぜんぶのせシップ</span><small>シューティング × サバイバー</small></h1>
     <div class="tbtns">
       <button id="startBtn" class="go" type="button">スタート</button>
-      <div class="hrow"><button id="howBtn" class="btn3" type="button">遊び方</button><button id="bgmBtn" class="btn3" type="button" aria-pressed="true">BGM ON</button><button id="sndBtn" class="btn3" type="button" aria-pressed="true">SE ON</button></div>
+      <div class="hrow"><button id="howBtn" class="btn3" type="button">遊び方</button><button id="resetBtn" class="btn3" type="button">最初から</button></div>
+      <div class="hrow"><button id="bgmBtn" class="btn3" type="button" aria-pressed="true">BGM ON</button><button id="sndBtn" class="btn3" type="button" aria-pressed="true">SE ON</button></div>
     </div>
   </div>
 </section>
@@ -427,6 +429,11 @@ small,.d,.d2,.d3,.sub,.stdesc,.sheet p,.overlay p,.howcard p{text-wrap:balance;w
 <div id="howto" class="howbg" hidden><div class="howbox" role="dialog" aria-label="遊び方">
   <div id="howCard" class="howcard"></div>
   <div class="hrow"><button id="howPrev" class="btn3" type="button">もどる</button><button id="howNext" class="go" type="button">次へ</button></div>
+</div></div>
+
+<div id="resetAsk" class="howbg" hidden><div class="howbox" role="dialog" aria-label="最初から">
+  <p id="resetMsg" class="resetmsg"></p>
+  <div class="hrow"><button id="resetNo" class="btn3" type="button">やめる</button><button id="resetYes" class="go" type="button">消す</button></div>
 </div></div>
 
 <main id="hangar" hidden>
@@ -1975,6 +1982,8 @@ function loadSave(){
   return s;
 }
 function persist(){try{const o=Object.assign({},save);delete o.load;localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
+/* 最初から（11/25 しょーくん・iPad の感想）：新しいセーブに入れかえる。BGM と SE の設定だけ残す。遊び方・はじめの案内・整備士のあいさつも最初から */
+function resetSave(){const bgm=save.bgm,snd=save.snd;save=freshSave();if(bgm!==undefined)save.bgm=bgm;if(snd!==undefined)save.snd=snd;setShip(save.cur);persist();}
 /* 解放の条件と進み */
 /* 条件の「いまの数」（機体と品で共通）。wmax＝武器の最高Lv（t は1つか配列）・sup5＝最大にした支援の数・big＝その大型の敵をたおした数・cw＝その品をつけてクリアした回数 */
 function condCur(u,s){const r=s.rec;
@@ -5174,6 +5183,10 @@ function titleBg(){
   const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,h),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
   const k=Math.max(r.width/GW,r.height/h)||1,vh=Math.min(h,r.height/k);/* 横長の画面（PC）は上下が切れる：見えている所の中に機体を置く（#14） */
   TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0,sy:(h-vh)/2+vh*(vh<h*0.8?0.5:0.66),sa:vh<h*0.8?8:14};
+  /* 11/25 ボタンが1行ふえた：低い画面では、機体と炎がボタンにかからない所まで上げる（高い画面はいままでと同じ） */
+  const bt=titleEl.querySelector('.tbtns').getBoundingClientRect(),sp=SHIPSPR[save.cur];
+  const lim=(bt.top-r.top)/k+(h-vh)/2-12-Math.max(sp.img.height,sp.fl[0].height)+sp.cy-TS.sa;
+  if(bt.height&&TS.sy>lim)TS.sy=lim;
 }
 function titleFrame(ts){
   if(titleEl.hidden){tRaf=0;return;}
@@ -5209,7 +5222,7 @@ function pixWipe(ms){
   step();
 }
 function showTitle(){pixWipe();commHide();BGM.play('title');
-  hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
+  hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;$('resetAsk').hidden=true;titleEl.hidden=false;
   titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
 }
 function toHangarFromTitle(){pixWipe();BGM.play('hangar');titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;tutReset();view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
@@ -5260,6 +5273,16 @@ $('howPrev').addEventListener('click',()=>{if(howPage>0){howPage--;renderHowto()
 $('howNext').addEventListener('click',()=>{
   if(howPage<HOWTO.length-1){howPage++;renderHowto();return;}
   save.howto=1;persist();$('howto').hidden=true;if(howFirst)toHangarFromTitle();
+});
+/* 最初から（11/25）：たしかめてからセーブを消す。消したら同じ窓で知らせて、とじるとタイトルのまま */
+let resetDone=false;
+function openReset(){resetDone=false;$('resetMsg').textContent='セーブを消して、最初から始めます。\nお金も装備も研究所も、すべて消えます。';
+  $('resetNo').hidden=false;$('resetYes').textContent='消す';$('resetAsk').hidden=false;}
+$('resetBtn').addEventListener('click',openReset);
+$('resetNo').addEventListener('click',()=>{$('resetAsk').hidden=true;});
+$('resetYes').addEventListener('click',()=>{
+  if(resetDone){$('resetAsk').hidden=true;return;}
+  resetSave();renderSnd();resetDone=true;$('resetMsg').textContent='セーブを消しました。';$('resetNo').hidden=true;$('resetYes').textContent='とじる';
 });
 /* 最初のタップで音を始める・ボタンの音 */
 document.addEventListener('pointerdown',()=>SFX.unlock(),{capture:true});

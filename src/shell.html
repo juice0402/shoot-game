@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ぜんぶのせシップ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,8 @@
     <h1 class="logo"><canvas id="logoCv" class="logocv" aria-hidden="true"></canvas><span class="gname">ぜんぶのせシップ</span><small>シューティング × サバイバー</small></h1>
     <div class="tbtns">
       <button id="startBtn" class="go" type="button">スタート</button>
-      <div class="hrow"><button id="howBtn" class="btn3" type="button">遊び方</button><button id="bgmBtn" class="btn3" type="button" aria-pressed="true">BGM ON</button><button id="sndBtn" class="btn3" type="button" aria-pressed="true">SE ON</button></div>
+      <div class="hrow"><button id="howBtn" class="btn3" type="button">遊び方</button><button id="resetBtn" class="btn3" type="button">最初から</button></div>
+      <div class="hrow"><button id="bgmBtn" class="btn3" type="button" aria-pressed="true">BGM ON</button><button id="sndBtn" class="btn3" type="button" aria-pressed="true">SE ON</button></div>
     </div>
   </div>
 </section>
@@ -24,6 +25,11 @@
 <div id="howto" class="howbg" hidden><div class="howbox" role="dialog" aria-label="遊び方">
   <div id="howCard" class="howcard"></div>
   <div class="hrow"><button id="howPrev" class="btn3" type="button">もどる</button><button id="howNext" class="go" type="button">次へ</button></div>
+</div></div>
+
+<div id="resetAsk" class="howbg" hidden><div class="howbox" role="dialog" aria-label="最初から">
+  <p id="resetMsg" class="resetmsg"></p>
+  <div class="hrow"><button id="resetNo" class="btn3" type="button">やめる</button><button id="resetYes" class="go" type="button">消す</button></div>
 </div></div>
 
 <main id="hangar" hidden>

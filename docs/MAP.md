@@ -34,7 +34,7 @@
 | art-ships.js | ドット絵の道具：49 paint（描く道具）・125 MECH（整備士の顔）・自機・炎・装備の絵 |
 | art-enemies.js | 敵の絵（ステージ2〜5・大型）・岩・小さい絵・爆発・ヒットの光・星雲と惑星 |
 | art-stage.js | ステージの背景・lazyPut（絵は使うときに作る）・向きのある敵・弾・進化の絵・試作6の絵・アイコン・メダル |
-| save.js | 7 freshSave・27 ACH（実績）・56 loadSave（古いセーブの直し）・102 persist・解放の条件・setShip |
+| save.js | 7 freshSave・27 ACH（実績）・56 loadSave（古いセーブの直し）・102 persist・104 resetSave（最初から：BGM と SE だけ残す）・解放の条件・setShip |
 | sfx.js | 効果音 SFX（Web Audio。ac と comp を BGM と共有） |
 | bgm.js | BGM_STYLE・BGM_SG・BGM_VOL・7〜323 SONGS（`/* SONGS:BEGIN */`〜`END`・読まずに check_songs で点検）・325 BGM（play・kick・duck・reset・setStyle・check・render） |
 | hangar.js | 格納庫：44 drawEditor・68 snapAt・92 popAt・128 tutGuide・159 TALK（整備士のセリフ）・180 commShow・225 renderEquip・261 openSheet・270 fxRestart（countUp・rollNum・tilesIn も下に）・297 openList・324 openDir・339 openAim・364 openInfo・スワイプ |
@@ -46,7 +46,7 @@
 | loop.js | 背景の星・12 update・描く道具 px2・80 PXG（描く回数をへらす包み・#34。ここだけで1つ）・161 draw・282 hud・289 frame |
 | levelup.js | 65 openLevelUp・98 pickChoice・122 openChest・えらんだあとの動き・146 endRun（結果）・エンディング・出撃の操作 |
 | shots.js | App Store のスクショの場面（11/24）。navigator.webdriver のときだけ、location.hash='shot=<名前>' で title・battle・levelup・boss・hangar・shop・lab を出す（shotSave＝見本のセーブ・shotRun＝出撃を決まったこま数進めて fxHold で止める）。ios-kobo の apps/shoot/app.json の台本から呼ぶ |
-| title.js | 31 pixWipe・44 showTitle・音の ON・OFF・遊び方・104 LOGO と drawLogo・起動（showTitle）・おわりの `})();` |
+| title.js | 4 titleBg（機体はボタンにかからない高さに）・35 pixWipe・48 showTitle・音の ON・OFF・遊び方・最初から（resetAsk の窓）・118 LOGO と drawLogo・起動（showTitle）・おわりの `})();` |
 
 ## 決まり
 - セーブのキーと形は変えない（古いセーブは loadSave で直す）

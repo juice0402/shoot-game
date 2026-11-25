@@ -100,6 +100,8 @@ function loadSave(){
   return s;
 }
 function persist(){try{const o=Object.assign({},save);delete o.load;localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
+/* 最初から（11/25 しょーくん・iPad の感想）：新しいセーブに入れかえる。BGM と SE の設定だけ残す。遊び方・はじめの案内・整備士のあいさつも最初から */
+function resetSave(){const bgm=save.bgm,snd=save.snd;save=freshSave();if(bgm!==undefined)save.bgm=bgm;if(snd!==undefined)save.snd=snd;setShip(save.cur);persist();}
 /* 解放の条件と進み */
 /* 条件の「いまの数」（機体と品で共通）。wmax＝武器の最高Lv（t は1つか配列）・sup5＝最大にした支援の数・big＝その大型の敵をたおした数・cw＝その品をつけてクリアした回数 */
 function condCur(u,s){const r=s.rec;

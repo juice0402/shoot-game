@@ -2,6 +2,19 @@
 
 テストは `tools/test/` にある（Playwright の chromium で index.html のテスト用のコピーを開く）。ほかのテストと同時に動かすと重さの数字が大きくなるので、1つずつ動かす。
 
+## 2026-11-25 iPad の感想（ダブルタップのズーム・最初から）
+
+しょーくんが TestFlight 117.1 を iPad で遊んだ感想：ダブルタップでズームする（ホーム画面）・最初からのボタンがない。
+
+| 確かめたこと | 結果 |
+|---|---|
+| html と body に touch-action:manipulation・viewport に maximum-scale=1,user-scalable=no | 計算した値 manipulation（格納庫 .bay は pan-y・出撃は none のまま） |
+| タイトルの「最初から」→ やめる | セーブはそのまま |
+| 「最初から」→ 消す | お金300・遊び方とはじめの案内が最初から・BGM と SE の設定は残る・窓は「セーブを消しました」→ とじる |
+| タイトルの機体（ボタンが1行ふえた） | 360×640 では炎がボタンにかからない所まで上がる。430×900・PC は前と同じ位置 |
+| npm test・check14・copy16・bgm37・shots14（SHOTS=0） | NG0・エラー0 |
+| audit17（320×568） | タイトルは読み上げ用の題名（前から）だけ |
+
 ## 2026-11-24 App Store のスクショの場面（src/js/shots.js）
 
 【ios】の頼み：navigator.webdriver のときだけ location.hash='shot=<名前>'（hashchange でも）で場面を出す。台本は Math.random を種 s=7 で固定してから呼ぶ。

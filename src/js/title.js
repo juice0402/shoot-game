@@ -7,6 +7,10 @@ function titleBg(){
   const stars=[];for(let i=0;i<170;i++)stars.push({x:rand(0,GW),y:rand(0,h),l:i<95?0:i<145?1:2,tw:rand(0,TAU)});
   const k=Math.max(r.width/GW,r.height/h)||1,vh=Math.min(h,r.height/k);/* 横長の画面（PC）は上下が切れる：見えている所の中に機体を置く（#14） */
   TS={t:0,h,neb:rand(0,1024),stars,pl:{i:0,x:GW*0.02,y:h*0.4},shots:[],cd:0,sy:(h-vh)/2+vh*(vh<h*0.8?0.5:0.66),sa:vh<h*0.8?8:14};
+  /* 11/25 ボタンが1行ふえた：低い画面では、機体と炎がボタンにかからない所まで上げる（高い画面はいままでと同じ） */
+  const bt=titleEl.querySelector('.tbtns').getBoundingClientRect(),sp=SHIPSPR[save.cur];
+  const lim=(bt.top-r.top)/k+(h-vh)/2-12-Math.max(sp.img.height,sp.fl[0].height)+sp.cy-TS.sa;
+  if(bt.height&&TS.sy>lim)TS.sy=lim;
 }
 function titleFrame(ts){
   if(titleEl.hidden){tRaf=0;return;}
@@ -42,7 +46,7 @@ function pixWipe(ms){
   step();
 }
 function showTitle(){pixWipe();commHide();BGM.play('title');
-  hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;titleEl.hidden=false;
+  hangar.hidden=true;sortie.hidden=true;$('howto').hidden=true;$('resetAsk').hidden=true;titleEl.hidden=false;
   titleBg();renderSnd();if(!tRaf){tLast=performance.now();tRaf=requestAnimationFrame(titleFrame);}
 }
 function toHangarFromTitle(){pixWipe();BGM.play('hangar');titleEl.hidden=true;$('howto').hidden=true;hangar.hidden=false;tutReset();view=save.cur;layoutEditor();const got=checkAch();renderAll();if(got.length)toast(got.length>2?'実績を'+got.length+'個達成 ＋'+got.reduce((n,x)=>n+x.g,0)+'G':achText(got));}
@@ -93,6 +97,16 @@ $('howPrev').addEventListener('click',()=>{if(howPage>0){howPage--;renderHowto()
 $('howNext').addEventListener('click',()=>{
   if(howPage<HOWTO.length-1){howPage++;renderHowto();return;}
   save.howto=1;persist();$('howto').hidden=true;if(howFirst)toHangarFromTitle();
+});
+/* 最初から（11/25）：たしかめてからセーブを消す。消したら同じ窓で知らせて、とじるとタイトルのまま */
+let resetDone=false;
+function openReset(){resetDone=false;$('resetMsg').textContent='セーブを消して、最初から始めます。\nお金も装備も研究所も、すべて消えます。';
+  $('resetNo').hidden=false;$('resetYes').textContent='消す';$('resetAsk').hidden=false;}
+$('resetBtn').addEventListener('click',openReset);
+$('resetNo').addEventListener('click',()=>{$('resetAsk').hidden=true;});
+$('resetYes').addEventListener('click',()=>{
+  if(resetDone){$('resetAsk').hidden=true;return;}
+  resetSave();renderSnd();resetDone=true;$('resetMsg').textContent='セーブを消しました。';$('resetNo').hidden=true;$('resetYes').textContent='とじる';
 });
 /* 最初のタップで音を始める・ボタンの音 */
 document.addEventListener('pointerdown',()=>SFX.unlock(),{capture:true});
