@@ -51,7 +51,7 @@ const ACH=[
   {id:'gold10k',name:'大金持ち',desc:'出撃で合計10000Gかせぐ',g:300,n:10000,cur:s=>s.rec.goldTotal},
 ];
 /* 条件を満たした実績に G をわたす（1回だけ）。わたした実績を返す */
-function checkAch(){const got=[];for(const a of ACH){if(save.ach[a.id])continue;if(a.cur(save)>=a.n){save.ach[a.id]=1;save.gold+=a.g;got.push(a);}}if(got.length)persist();return got;}
+function checkAch(){const got=[];for(const a of ACH){if(save.ach[a.id])continue;if(a.cur(save)>=a.n){save.ach[a.id]=1;save.gold+=a.g;got.push(a);}}if(got.length){persist();gcAch(got.map(a=>a.id));}return got;}/* 11/26 Game Center にも（gamecenter.js） */
 const cleanLoad=(id,arr)=>SHIPS[id].slots.map((_,i)=>{const v=Array.isArray(arr)?arr[i]:null;return v&&MODS[v.t]&&Number.isInteger(v.d)&&v.d>=0&&v.d<8?{t:v.t,d:v.d}:null;});
 function loadSave(){
   const s=freshSave();

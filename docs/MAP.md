@@ -23,6 +23,7 @@
 | docs/design/ | 試作6の設計（parts・ships・upgrades・stages・unlocks） |
 | tools/bgm/ | check_songs.js（曲のデータの点検：16こま・音の名前・和音・音域・長さ）・jukebox.py（音の一覧のページを作る：12曲を A・B で・効果音ぜんぶ。`python3 tools/bgm/jukebox.py 出力.html`） |
 | tools/cover/・docs/kobo/cover.png | ゲーム工房の表紙（800x1200・ゲームのドット絵で描く）。`FONTS=<@fontsource/dotgothic16> python3 tools/cover/cover.py` で作りなおす。タイトルのロゴの形（src/js/title.js の LOGO）もここから |
+| docs/kobo/gamecenter.json・achievements/・tools/badges/ | App Store の Game Center（11/26・#42）：ランキング shoot_best と実績15こ（アプリの【ios】が読む）。バッジは `python3 tools/badges/badges.py [一覧.png]` でゲームのドット絵から作る（場面は badges.js の SCENE） |
 | docs/ART.md | 絵の作り方 |
 | docs/shots/ | テストのスクショ（自動で作る・読まない） |
 | RELEASES.md・.github/workflows/release.yml・tools/release/ | 工房に出す版（v1.0〜）。版を足して main にマージすると Actions がタグと Releases を作る（いも工場と同じ形） |
@@ -46,6 +47,7 @@
 | loop.js | 背景の星・12 update・描く道具 px2・80 PXG（描く回数をへらす包み・#34。ここだけで1つ）・161 draw・282 hud・289 frame |
 | levelup.js | 65 openLevelUp・98 pickChoice・122 openChest・えらんだあとの動き・146 endRun（結果）・エンディング・出撃の操作 |
 | shots.js | App Store のスクショの場面（11/24）。navigator.webdriver のときだけ、location.hash='shot=<名前>' で title・battle・levelup・boss・hangar・shop・lab を出す（shotSave＝見本のセーブ・shotRun＝出撃を決まったこま数進めて fxHold で止める）。ios-kobo の apps/shoot/app.json の台本から呼ぶ |
+| gamecenter.js | Game Center（11/26）：GC_ACH（ACH のうち15こ・id は shoot_＋小文字）・gcAch・gcScore（rec.bestKills）・gcSync（開いたとき・load・app-gamecenter）。呼ぶ所は checkAch（save.js）・出撃の結果（levelup.js）・起動（title.js） |
 | title.js | 4 titleBg（機体はボタンにかからない高さに）・35 pixWipe・48 showTitle・音の ON・OFF・遊び方・最初から（resetAsk の窓）・118 LOGO と drawLogo・起動（showTitle）・おわりの `})();` |
 
 ## 決まり

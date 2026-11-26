@@ -2,6 +2,16 @@
 
 テストは `tools/test/` にある（Playwright の chromium で index.html のテスト用のコピーを開く）。ほかのテストと同時に動かすと重さの数字が大きくなるので、1つずつ動かす。
 
+## 2026-11-26 Game Center のランキングと実績（#42）
+
+【ios】の頼み（claude/gamecenter-spec.md）：docs/kobo/gamecenter.json・バッジ15枚・ゲームの中の APP_SCORE と APP_ACHIEVE。実績の表はしょーくんが OK（11/26）。
+
+| 確かめたこと | 結果 |
+|---|---|
+| gc42.py（json の形・100点まで・合計670点・id の文字・隠しは深淵の先へだけ・ステージの数を書かない・バッジ 1024×1024 の RGB・GC_ACH と json が同じ15こ） | NG0 |
+| gc42.py（APP_ がないブラウザでエラーなし・開いたときと app-gamecenter で取ってある実績と最高記録を送る・Game Center にない実績は送らない・checkAch で取ったときに送る・記録 0 は送らない） | NG0 |
+| npm test・check14・copy16・shots14（SHOTS=0）・career15（14回の出撃の結果まで） | NG0・エラー0 |
+
 ## 2026-11-25 iPad の感想（ダブルタップのズーム・最初から）
 
 しょーくんが TestFlight 117.1 を iPad で遊んだ感想：ダブルタップでズームする（ホーム画面）・最初からのボタンがない。
