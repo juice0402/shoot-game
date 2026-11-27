@@ -14,7 +14,7 @@ const OUT = path.join(ROOT, 'index.html');
 // つなぐ順（変えると動きが変わる。足すときは docs/MAP.md も）
 export const JS = [
   'data', 'art-ships', 'art-enemies', 'art-stage', 'save', 'sfx', 'bgm',
-  'hangar', 'menus', 'sortie', 'weapons', 'gear', 'special', 'loop', 'levelup', 'shots', 'title',
+  'hangar', 'menus', 'sortie', 'weapons', 'gear', 'special', 'loop', 'levelup', 'shots', 'gamecenter', 'title',
 ];
 
 const read = f => fs.readFileSync(path.join(SRC, f), 'utf8');

@@ -130,6 +130,6 @@ function drawLogo(){const cv=$('logoCv');if(!cv)return;
 }
 drawLogo();
 document.querySelectorAll('.gname').forEach(e=>{e.textContent=GAME_NAME;});
-layoutEditor();renderAll();showTitle();
+layoutEditor();renderAll();showTitle();gcSync();
 setTimeout(warmLazy,300);/* 残りの絵は、出撃していない間に少しずつ作る（#14） */
 })();

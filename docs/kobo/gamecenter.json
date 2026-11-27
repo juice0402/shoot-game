@@ -1,0 +1,255 @@
+{
+  "leaderboard": {
+    "id": "shoot_best",
+    "name": {
+      "ja": "さいこう撃破数",
+      "en-US": "Most Kills"
+    },
+    "suffix": {
+      "ja": "体",
+      "en-US": " kills"
+    }
+  },
+  "achievements": [
+    {
+      "id": "shoot_clear1",
+      "points": 10,
+      "hidden": false,
+      "image": "achievements/shoot_clear1.png",
+      "ja": {
+        "name": "はじめてのクリア",
+        "before": "ステージを1回クリアする",
+        "after": "ステージを1回クリアした"
+      },
+      "en-US": {
+        "name": "First Clear",
+        "before": "Clear a stage",
+        "after": "Cleared a stage"
+      }
+    },
+    {
+      "id": "shoot_boss1",
+      "points": 10,
+      "hidden": false,
+      "image": "achievements/shoot_boss1.png",
+      "ja": {
+        "name": "大物退治",
+        "before": "大型の敵をはじめてたおす",
+        "after": "大型の敵をはじめてたおした"
+      },
+      "en-US": {
+        "name": "Big Game",
+        "before": "Defeat a large enemy",
+        "after": "Defeated a large enemy"
+      }
+    },
+    {
+      "id": "shoot_evo1",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/shoot_evo1.png",
+      "ja": {
+        "name": "はじめての進化",
+        "before": "武器を1回進化させる",
+        "after": "武器を1回進化させた"
+      },
+      "en-US": {
+        "name": "First Evolution",
+        "before": "Evolve a weapon",
+        "after": "Evolved a weapon"
+      }
+    },
+    {
+      "id": "shoot_wmax",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/shoot_wmax.png",
+      "ja": {
+        "name": "極めた武器",
+        "before": "武器をレベル8にする",
+        "after": "武器をレベル8にした"
+      },
+      "en-US": {
+        "name": "Mastered Weapon",
+        "before": "Raise a weapon to level 8",
+        "after": "Raised a weapon to level 8"
+      }
+    },
+    {
+      "id": "shoot_ship3",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/shoot_ship3.png",
+      "ja": {
+        "name": "3機目",
+        "before": "機体を3機手に入れる",
+        "after": "機体を3機手に入れた"
+      },
+      "en-US": {
+        "name": "Third Ship",
+        "before": "Own 3 ships",
+        "after": "Owned 3 ships"
+      }
+    },
+    {
+      "id": "shoot_lab10",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/shoot_lab10.png",
+      "ja": {
+        "name": "研究のはじまり",
+        "before": "研究所で合計10回強化する",
+        "after": "研究所で合計10回強化した"
+      },
+      "en-US": {
+        "name": "Research Begins",
+        "before": "Upgrade 10 times at the lab",
+        "after": "Upgraded 10 times at the lab"
+      }
+    },
+    {
+      "id": "shoot_kill1k",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/shoot_kill1k.png",
+      "ja": {
+        "name": "千体",
+        "before": "敵を合計1000体たおす",
+        "after": "敵を合計1000体たおした"
+      },
+      "en-US": {
+        "name": "A Thousand Down",
+        "before": "Defeat 1,000 enemies in total",
+        "after": "Defeated 1,000 enemies"
+      }
+    },
+    {
+      "id": "shoot_half",
+      "points": 25,
+      "hidden": false,
+      "image": "achievements/shoot_half.png",
+      "ja": {
+        "name": "余裕の帰還",
+        "before": "HPを半分以上のこしてクリアする",
+        "after": "HPを半分以上のこしてクリアした"
+      },
+      "en-US": {
+        "name": "Safe Return",
+        "before": "Clear a stage with at least half your HP",
+        "after": "Cleared a stage with at least half your HP"
+      }
+    },
+    {
+      "id": "shoot_clear10",
+      "points": 50,
+      "hidden": false,
+      "image": "achievements/shoot_clear10.png",
+      "ja": {
+        "name": "歴戦",
+        "before": "合計10回クリアする",
+        "after": "合計10回クリアした"
+      },
+      "en-US": {
+        "name": "Veteran",
+        "before": "Clear 10 times in total",
+        "after": "Cleared 10 times"
+      }
+    },
+    {
+      "id": "shoot_run1k",
+      "points": 50,
+      "hidden": false,
+      "image": "achievements/shoot_run1k.png",
+      "ja": {
+        "name": "嵐の出撃",
+        "before": "1回の出撃で1000体たおす",
+        "after": "1回の出撃で1000体たおした"
+      },
+      "en-US": {
+        "name": "Storm Sortie",
+        "before": "Defeat 1,000 enemies in one sortie",
+        "after": "Defeated 1,000 enemies in one sortie"
+      }
+    },
+    {
+      "id": "shoot_nodmg",
+      "points": 50,
+      "hidden": false,
+      "image": "achievements/shoot_nodmg.png",
+      "ja": {
+        "name": "無傷の勝利",
+        "before": "ノーダメージで大型の敵をたおす",
+        "after": "ノーダメージで大型の敵をたおした"
+      },
+      "en-US": {
+        "name": "Flawless Win",
+        "before": "Defeat a large enemy without taking damage",
+        "after": "Defeated a large enemy without taking damage"
+      }
+    },
+    {
+      "id": "shoot_fast",
+      "points": 50,
+      "hidden": false,
+      "image": "achievements/shoot_fast.png",
+      "ja": {
+        "name": "早業",
+        "before": "大型の敵を、出てから30秒以内にたおす",
+        "after": "大型の敵を、出てから30秒以内にたおした"
+      },
+      "en-US": {
+        "name": "Quick Work",
+        "before": "Defeat a large enemy within 30 seconds",
+        "after": "Defeated a large enemy within 30 seconds"
+      }
+    },
+    {
+      "id": "shoot_kill10k",
+      "points": 100,
+      "hidden": false,
+      "image": "achievements/shoot_kill10k.png",
+      "ja": {
+        "name": "一万体",
+        "before": "敵を合計10000体たおす",
+        "after": "敵を合計10000体たおした"
+      },
+      "en-US": {
+        "name": "Ten Thousand Down",
+        "before": "Defeat 10,000 enemies in total",
+        "after": "Defeated 10,000 enemies"
+      }
+    },
+    {
+      "id": "shoot_stage5",
+      "points": 100,
+      "hidden": true,
+      "image": "achievements/shoot_stage5.png",
+      "ja": {
+        "name": "深淵の先へ",
+        "before": "最後のステージをクリアする",
+        "after": "最後のステージをクリアした"
+      },
+      "en-US": {
+        "name": "Beyond the Abyss",
+        "before": "Clear the final stage",
+        "after": "Cleared the final stage"
+      }
+    },
+    {
+      "id": "shoot_shipall",
+      "points": 100,
+      "hidden": false,
+      "image": "achievements/shoot_shipall.png",
+      "ja": {
+        "name": "全機そろい",
+        "before": "全部の機体を手に入れる",
+        "after": "全部の機体を手に入れた"
+      },
+      "en-US": {
+        "name": "Full Hangar",
+        "before": "Own every ship",
+        "after": "Owned every ship"
+      }
+    }
+  ]
+}

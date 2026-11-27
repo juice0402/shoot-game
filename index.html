@@ -1933,7 +1933,7 @@ const ACH=[
   {id:'gold10k',name:'大金持ち',desc:'出撃で合計10000Gかせぐ',g:300,n:10000,cur:s=>s.rec.goldTotal},
 ];
 /* 条件を満たした実績に G をわたす（1回だけ）。わたした実績を返す */
-function checkAch(){const got=[];for(const a of ACH){if(save.ach[a.id])continue;if(a.cur(save)>=a.n){save.ach[a.id]=1;save.gold+=a.g;got.push(a);}}if(got.length)persist();return got;}
+function checkAch(){const got=[];for(const a of ACH){if(save.ach[a.id])continue;if(a.cur(save)>=a.n){save.ach[a.id]=1;save.gold+=a.g;got.push(a);}}if(got.length){persist();gcAch(got.map(a=>a.id));}return got;}/* 11/26 Game Center にも（gamecenter.js） */
 const cleanLoad=(id,arr)=>SHIPS[id].slots.map((_,i)=>{const v=Array.isArray(arr)?arr[i]:null;return v&&MODS[v.t]&&Number.isInteger(v.d)&&v.d>=0&&v.d<8?{t:v.t,d:v.d}:null;});
 function loadSave(){
   const s=freshSave();
@@ -5053,6 +5053,7 @@ function endRun(clear,retreat){
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
   if(newly.length){save.seen=(save.seen||[]).concat(newly);}
   const got=checkAch(),newU=syncUnl(),newL=syncLabUnl();/* #15：この出撃で解放された品・11/16：研究所 */
+  gcScore();/* 11/26 Game Center のランキング（1回の出撃でたおした数の最高） */
   COMM.pend=save.tut?talkUnl(newly,newU,newL,opened?STAGES[R.stage].name:null):null;/* 11/17：格納庫にもどったら整備士が知らせる */
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
@@ -5174,6 +5175,17 @@ const SHOTS={
 function shotGo(){if(!navigator.webdriver)return;const m=/^#?shot=(\w+)/.exec(location.hash);const f=m&&SHOTS[m[1]];if(!f)return;
   shotReset();f();}
 window.addEventListener('hashchange',shotGo);setTimeout(shotGo,0);/* 読みこんだときの hash は、起動（title.js）のあとで見る */
+/* ---------- Game Center（App Store のアプリだけ・11/26） ----------
+   アプリの shell が window.APP_SCORE・APP_ACHIEVE を出す。工房（ブラウザ）にはないので何もしない。
+   実績：ACH のうち GC_ACH の15こ。Game Center の id は 'shoot_'＋小文字（docs/kobo/gamecenter.json と同じ。一度出したら変えない）
+   ランキング shoot_best：1回の出撃でたおした数の最高（rec.bestKills） */
+const GC_ACH=['clear1','boss1','evo1','wmax','ship3','lab10','kill1k','half','clear10','run1k','nodmg','fast','kill10k','stage5','shipAll'];
+const gcId=id=>'shoot_'+id.toLowerCase();
+function gcAch(ids){if(typeof window.APP_ACHIEVE!=='function')return;for(const id of ids)if(GC_ACH.includes(id)){try{window.APP_ACHIEVE(gcId(id));}catch(e){}}}
+function gcScore(){const n=Math.floor(save.rec.bestKills||0);if(n>0&&typeof window.APP_SCORE==='function'){try{window.APP_SCORE(n);}catch(e){}}}
+/* 取ってある実績と最高記録を全部送りなおす（開いたとき・Game Center にサインインしたとき） */
+function gcSync(){gcAch(Object.keys(save.ach).filter(id=>save.ach[id]));gcScore();}
+window.addEventListener('app-gamecenter',gcSync);window.addEventListener('load',gcSync);
 /* ---------- title・遊び方 ---------- */
 const titleEl=$('title'),tCv=$('titleCv'),tg=tCv.getContext('2d');
 let TS=null,tRaf=0,tLast=0;
@@ -5306,7 +5318,7 @@ function drawLogo(){const cv=$('logoCv');if(!cv)return;
 }
 drawLogo();
 document.querySelectorAll('.gname').forEach(e=>{e.textContent=GAME_NAME;});
-layoutEditor();renderAll();showTitle();
+layoutEditor();renderAll();showTitle();gcSync();
 setTimeout(warmLazy,300);/* 残りの絵は、出撃していない間に少しずつ作る（#14） */
 })();
 </script>

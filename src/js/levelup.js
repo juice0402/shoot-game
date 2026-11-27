@@ -167,6 +167,7 @@ function endRun(clear,retreat){
   const newly=SHIP_IDS.filter(id=>!save.ships[id].have&&shipProg(id).ok&&!(save.seen||[]).includes(id));
   if(newly.length){save.seen=(save.seen||[]).concat(newly);}
   const got=checkAch(),newU=syncUnl(),newL=syncLabUnl();/* #15：この出撃で解放された品・11/16：研究所 */
+  gcScore();/* 11/26 Game Center のランキング（1回の出撃でたおした数の最高） */
   COMM.pend=save.tut?talkUnl(newly,newU,newL,opened?STAGES[R.stage].name:null):null;/* 11/17：格納庫にもどったら整備士が知らせる */
   const rec={t:Math.floor(R.t),kills:R.kills,clear};let isBest=false;
   if(!save.best||rec.t>save.best.t||(rec.t===save.best.t&&rec.kills>save.best.kills)){save.best=rec;isBest=true;}
